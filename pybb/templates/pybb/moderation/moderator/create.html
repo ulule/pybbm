@@ -1,0 +1,33 @@
+{% extends "pybb/base.html" %}
+{% load i18n pybb_tags %}
+
+{% block breadcrumb %}
+    {% include "pybb/breadcrumb.html" with extra_crumb="New moderator" %}
+{% endblock %}
+
+{% block content %}
+    <h2>{% blocktrans with name=forum.name %}Add a new moderator for {{ name }}{% endblocktrans %}</h2>
+
+    <style type="text/css">
+        form#moderator-form label {
+            display: inline-block;
+        }
+
+        ul li {
+            list-style-type: none;
+        }
+    </style>
+
+    <form action="" method="post" id="moderator-form">
+        {% csrf_token %}
+
+        <ul>
+            {% for form in forms  %}
+                {{ form.as_ul }}
+            {% endfor %}
+        </ul>
+
+        <p class="submit">{% include "pybb/_button_submit.html" %}</p>
+    </form>
+{% endblock content %}
+

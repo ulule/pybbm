@@ -1,0 +1,151 @@
+{% load url from future %}
+{% load i18n pybb_tags humanize %}
+
+<h2 style="float: left">
+    <a href="{{ forum.get_absolute_url }}">
+        {{ forum.name }}
+    </a>
+</h2>
+{% if user.is_staff or user.is_superuser %}
+    <ul style="float: right">
+        <li>
+        <a href="{% url 'pybb:forum_update' forum.pk %}">{% trans "edit" %}</a>
+        </li>
+        <li>
+        <a href="{% url 'pybb:moderator_list' forum.pk %}">{% trans "moderators" %}</a>
+        </li>
+        <li>
+        <a href="{% url 'pybb:forum_create' forum.pk %}">{% trans "Add a subforum now" %}</a>
+        </li>
+    </ul>
+{% endif %}
+{% if forum.headline %}
+    <div class="forum-headline alert alert-block">
+        {{ forum.headline|safe }}
+    </div>
+{% endif %}
+{% include "pybb/pagination.html" %}
+
+{% with forums=forum.forums_accessed|pybb_forum_unread:user %}
+    {% if forums %}
+        <table class="table category-table">
+            <thead>
+                <tr class="forum-row head-row">
+                    <th class="forum-name">
+                        {% trans "Forum" %}
+                    </th>
+                    <th class="forum-last-post">
+                        {% trans "Last post" %}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for forum in forums  %}
+                    <tr class="forum-row">
+                        <td class="forum-name {% if forum.unread %} forum-unread{% endif %}">
+                            <div class="state-indicator"></div>
+                            <a href="{{ forum.get_absolute_url }}">{{ forum.name }}</a> {% if forum.hidden %}[{% trans "Hidden" %}]{% endif %}
+                            <div class="forum-description">
+                                {{ forum.description|safe }}
+
+                                <br />
+                                {% blocktrans count forum.topic_count as counter %}{{ counter }} topic{% plural %}{{ counter }} topics{% endblocktrans %}
+                                {% blocktrans count forum.post_count as counter %}{{ counter }} post{% plural %}{{ counter }} posts{% endblocktrans %}
+                            </div>
+                        </td>
+                        <td class="forum-last-post">
+                            <div>
+                                {% if forum.last_post %}
+                                    {% with last_post=forum.last_post %}
+                                        <div class="topic-name">
+                                            {{ last_post.topic.name }}
+                                        </div>
+
+                                        <div class="topic-user">
+                                            {% blocktrans with username=last_post.user %}by {{ username }}{% endblocktrans %}
+                                        </div>
+
+                                        {{ last_post.created|naturaltime }}
+                                    {% endwith %}
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endwith %}
+
+{% if topic_list %}
+    <table class="table topic-list">
+        <thead>
+            <tr class="topic-row head-row">
+                <th class="topic-name">
+                    {% trans "Topic" %}
+                </th>
+                <th class="topic-post-count">
+                    {% trans "Posts" %}
+                </th>
+                <th class="topic-view-count">
+                    {% trans "Views" %}
+                </th>
+                <th class="topic-last-post">
+                    {% trans "Last post" %}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% for topic in topic_list|pybb_topic_unread:user  %}
+                <tr class="topic-row {% if topic.sticky %} sticky {% endif %} {% cycle "odd" "even" %} {% if topic.on_moderation %} on-moderation {% endif %}">
+                    <td class="topic-name{% if topic.unread %} topic-unread{% endif %}">
+                        <div class="state-indicator"></div>
+                        <a href="{{ topic.get_absolute_url }}">{{ topic.name|truncatewords:10 }}</a>
+                        {% if topic.sticky %} &nbsp;[{% trans "Sticky" %}] {% endif %}
+                        {% if topic.closed %} &nbsp;[{% trans "Closed" %}] {% endif %}
+                        {% if topic.deleted %} &nbsp;[{% trans "Deleted" %}] {% endif %}
+                        {% with topic|pybb_topic_inline_pagination as pages %}
+                            {% if pages|length > 1 %}
+                                <span class="mini-pagination">
+                                    {% trans "pages" %}:
+                                    {% for page in pages %}
+                                        <span class="page">
+                                            {% if page == "..." %}
+                                                ...
+                                            {% else %}
+                                                <a href="{% url 'pybb:topic_detail' forum_slug=topic.forum.slug pk=topic.pk slug=topic.slug page=page %}">{{ page }}</a>
+                                            {% endif %}
+                                        </span>
+                                    {% endfor %}
+                                </span>
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td class="topic-post-count">
+                        {{ topic.post_count }}
+                    </td>
+                    <td class="topic-view-count">
+                        {{ topic.views }}
+                    </td>
+                    <td class="topic-last-post">
+                        {% if topic.updated %}
+                            {{ topic.updated|naturaltime }}
+                        {% endif %}
+
+                        <div>
+                            {% with last_post=topic.last_post %}
+                                {% if last_post %}
+                                    {% blocktrans with username=last_post.user %}by {{ username }}{% endblocktrans %}
+                                    <a href="{{ last_post|pybb_post_anchor_url:request.user }}">
+                                        &rarr;
+                                    </a>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                    </td>
+                </tr>
+            {%  endfor %}
+        </tbody>
+    </table>
+{% endif %}

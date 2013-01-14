@@ -1,0 +1,5 @@
+{% load thumbnail %}
+
+{% thumbnail attachment.file "64x64" as image %}
+    <img class="media-object" src="{{ image }}" />
+{% endthumbnail %}

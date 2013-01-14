@@ -1,0 +1,83 @@
+{% extends "pybb/base.html" %}
+
+{% load url from future %}
+
+
+{% load i18n pybb_tags %}
+
+{% block title %}{% trans "Reports" %}{% endblock title %}
+
+{% block breadcrumb %}
+    {% include "pybb/breadcrumb.html" with extra_crumb="Reports" %}
+{% endblock %}
+
+{% block content %}
+    <div class="forum">
+        <h2>{% trans "Reports" %}</h2>
+
+        {% include "pybb/pagination.html" %}
+
+        {% if report_list %}
+            <table class="table topic-list">
+                <thead>
+                    <tr class="topic-row head-row">
+                        <th class="report-name">
+                            {% trans "Post" %}
+                        </th>
+                        <th class="report-status">
+                            {% trans "Status" %}
+                        </th>
+                        <th class="report-count">
+                            {% trans "Reports count" %}
+                        </th>
+                        <th class="report-updated">
+                            {% trans "Updated" %}
+                        </th>
+                        <th class="report-actions">
+                            {% trans "Actions" %}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in report_list %}
+                        <tr class="report-row">
+                            <td class="report-name">
+                                <a href="{{ report.post|pybb_post_anchor_url:request.user }}">
+                                    {{ report.post }}
+                                </a>
+                            </td>
+                            <td class="report-status">
+                                {{ report.get_status_display }}
+                            </td>
+                            <td class="report-count">
+                                <a href="{% url 'report_detail' report.pk %}">
+                                    {{ report.message_count }}
+                                </a>
+                            </td>
+                            <td class="report-updated">
+                                {{ report.updated|date:"Y/m/d H:m:s" }}
+                            </td>
+                            <td class="report-actions">
+                                <ul>
+                                    <li>
+                                        <a href="{{ report.get_absolute_url }}">{% trans "view" %}</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'report_close' report.pk %}">{% trans "close" %}</a>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                    {%  endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="clear: both">
+                {% trans "No reports" %}
+            </p>
+        {% endif %}
+
+        {% include "pybb/pagination.html" %}
+    </div>
+{% endblock content %}
+

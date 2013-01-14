@@ -1,0 +1,27 @@
+{% extends "pybb/base.html" %}
+
+{% load url from future %}
+
+{% load i18n %}
+
+{% block title %}{{ PYBB_DEFAULT_TITLE }}{% endblock title %}
+
+{% block breadcrumb %}
+    {% with extra_crumb="Forum" %}{% include "pybb/breadcrumb.html" %}{% endwith %}
+{% endblock %}
+
+{% block content %}
+    {% for forum in forums %}
+        {% include "pybb/forum/_detail.html" %}
+    {% endfor %}
+
+    <a href="{% url 'pybb:forum_create' %}">{% trans "Add a forum now" %}</a>
+
+    {% if user.is_authenticated %}
+        <div id="mark-all-as-read" style="clear: both;">
+            <a href="{% url 'pybb:forum_mark_as_read' %}">
+                {% trans "Mark all forums as read" %}
+            </a>
+        </div>
+    {% endif %}
+{% endblock content %}

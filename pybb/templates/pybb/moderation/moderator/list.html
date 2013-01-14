@@ -1,0 +1,80 @@
+{% extends "pybb/base.html" %}
+
+{% load url from future %}
+
+
+{% load i18n %}
+
+{% block title %}{% blocktrans with name=object.name %}Moderators for {{ name }}{% endblocktrans %}{% endblock title %}
+
+{% block breadcrumb %}
+    {% include "pybb/breadcrumb.html" with extra_crumb="Moderators" %}
+{% endblock %}
+
+{% block content %}
+    <div class="forum">
+        <h2 style="float: left;">{% blocktrans with name=object.name %}Moderators for {{ name }}{% endblocktrans %}</h2>
+        <a style="float: right; padding-top: 10px;" href="{% url 'pybb:forum_update' object.pk %}">edit</a>
+        {% if forum.headline %}
+            <div class="forum-headline alert alert-block">
+                {{ forum.headline|safe }}
+            </div>
+        {% endif %}
+
+        {% include "pybb/pagination.html" %}
+
+        {% if moderator_list %}
+            <table class="table topic-list">
+                <thead>
+                    <tr class="topic-row head-row">
+                        <th class="moderator-name">
+                            {% trans "User" %}
+                        </th>
+                        <th class="permissions">
+                            {% trans "Permissions" %}
+                        </th>
+                        <th class="actions">
+                            {% trans "Actions" %}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for moderator in moderator_list %}
+                        <tr class="moderator-row">
+                            <td class="moderator-name">
+                                {{ moderator.user }}
+                            </td>
+                            <td class="permissions">
+                                {% with permissions=moderator.permissions %}
+                                    <ul>
+                                        {% for permission in permissions %}
+                                            <li>
+                                            {{ permission.name }}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endwith %}
+                            </td>
+                            <td class="actions">
+                                <ul>
+                                    <li><a href="{% url 'pybb:moderator_detail' object.pk moderator.pk %}">{% trans "edit" %}</a></li>
+                                    <li><a href="{% url 'pybb:moderator_delete' object.pk moderator.pk %}">{% trans "delete" %}</a></li>
+                                </ul>
+                            </td>
+                        </tr>
+                    {%  endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="clear: both">
+                {% trans "No moderators added" %}
+            </p>
+        {% endif %}
+
+        <div>
+            <a href="{% url 'pybb:moderator_create' object.pk %}">Add a new moderator</a>
+        </div>
+
+        {% include "pybb/pagination.html" %}
+    </div>
+{% endblock content %}

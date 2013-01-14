@@ -1,0 +1,31 @@
+{% extends "pybb/base.html" %}
+{% load i18n pybb_tags %}
+{% load url from future %}
+
+{% block content %}
+    <h2>{% blocktrans with username=banned.user.username %}Are you sure to unban {{ username }}?{% endblocktrans %}</h2>
+
+    <dl>
+        <dt>{% trans "Reason" %}</dl>
+        <dd>{{ banned.reason }}</dd>
+    </dl>
+
+    {% if ip_addresses %}
+        <p>{% trans "This will unban all these IP Addresses:" %}</p>
+
+        <div class="ip-addresses">
+            <ul id="ip-address-list">
+                {% for ip in ip_addresses %}
+                    <li>{{ ip.ip_address }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    <form method="post" action=".">
+        {% csrf_token %}
+        <p>
+        <a class="btn" href="{% url "ban_list" %}">← {% trans "No, take me back" %}</a>
+            <input type="submit" class="btn btn-danger" value="{% trans "Yes, I am sure" %}" />
+        </p>
+    </form>
+{% endblock content %}

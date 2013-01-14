@@ -1,0 +1,18 @@
+{% extends "pybb/base.html" %}
+{% load i18n pybb_tags %}
+
+{% block content %}
+    {% if forum %}
+        <h2>{% blocktrans with name=forum.name %}New forum for {{ name }}{% endblocktrans %}</h2>
+    {% else %}
+        <h2>{% blocktrans %}New forum{% endblocktrans %}</h2>
+    {% endif %}
+
+    <form action="" method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <p class="submit">{% include "pybb/_button_submit.html" %}</p>
+    </form>
+{% endblock content %}

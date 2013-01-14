@@ -1,0 +1,46 @@
+{% load i18n %}
+{% load url from future %}
+
+{% if not redirect_url %}
+    {% url "pybb:post_redirect" as redirect_url %}
+{% endif %}
+
+<script type="text/javascript" charset="utf-8">
+    $(document).ready(function() {
+        {% if not redirect %}
+        var hash = window.location.hash;
+
+        if (hash !== undefined) {
+            if (!$(hash).length) {
+                var results = hash.match(/\#post(\d+)/)
+
+                if (results !== null && results !== undefined && results.length > 1) {
+                    var form_string = [
+                        '<form action="{{ redirect_url }}" id="post-redirect-form" method="post">',
+                        "{% csrf_token %}",
+                        '<input type="hidden" name="post_id" value="'+ results[1] +'" />',
+                        '</form>'
+                    ].join('\n');
+
+                    $('body').append(form_string);
+
+                    $('#post-redirect-form').submit();
+                }
+            }
+        }
+        {% endif %}
+
+        var hideText = "{% trans 'Hide' %}",
+            showText = "{% trans 'Show' %}"
+
+        $('.spoiler-trigger').on('click',function() {
+            var $this = $(this)
+            , $thisSpoiler = $this.siblings('.spoiler').eq(0)
+            , text = $this.text()
+            , newText = text === showText ? hideText : showText
+
+            $thisSpoiler.toggle()
+            $this.text(newText)
+        })
+    });
+</script>

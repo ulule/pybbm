@@ -1,0 +1,55 @@
+{% extends "pybb/base.html" %}
+{% load i18n pybb_tags guardian_tags %}
+
+{% block extra_script %}
+    {{ block.super }}
+    {% include "pybb/_sceditor.html" %}
+    <script type="text/javascript" src="{{ STATIC_URL }}pybb/js/jquery.formset.js"></script>
+{% endblock %}
+
+{% block breadcrumb %}
+    {% if forum %}
+        {% with object=forum extra_crumb="New topic" %}
+            {% include "pybb/breadcrumb.html" %}
+        {% endwith %}
+    {% else %}
+        {% with object=topic extra_crumb="New reply" %}
+            {% include "pybb/breadcrumb.html" %}
+        {% endwith %}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% include "pybb/post/form.html" %}
+
+    {% if topic %}
+        {% get_obj_perms request.user for topic.forum as "forum_perms" %}
+
+        <div class="topic">
+            {% if topic.poll_type != 0 %}
+                {% include "pybb/poll/detail.html" %}
+            {% endif %}
+
+            <div class="posts">
+                {% if first_post %}{% ifnotequal first_post post_list.0 %}
+                    {% with first_post as post %}
+                        <li class="first_post">{% include "pybb/post/template.html" %}</li>
+                    {% endwith %}
+                {% endifnotequal %}{% endif %}
+                {% for post in post_list %}
+                    {% cycle "odd" "even" as rowcolors silent %}
+                    {% include "pybb/post/template.html" with page=page_obj %}
+                {% endfor %}
+            </div>
+            <div>&nbsp;</div>
+        </div>
+
+        {% if post_count > post_page_size %}
+            <hr />
+            <div style="text-align: center">
+                {% blocktrans with page_size=post_page_size %}This discussion has more {{ page_size }} answers{% endblocktrans %}
+                <a href="{{ topic.get_absolute_url }}">{% trans "Click here to see the full discussion" %}</a>
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}

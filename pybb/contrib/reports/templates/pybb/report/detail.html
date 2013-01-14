@@ -1,0 +1,57 @@
+{% extends "pybb/base.html" %}
+
+{% load i18n %}
+
+{% block title %}{% blocktrans with name=report.post %}Reports for {{ name }}{% endblocktrans %}{% endblock title %}
+
+{% block breadcrumb %}
+    {% include "pybb/breadcrumb.html" with object=report %}
+{% endblock %}
+
+{% block content %}
+    <div class="forum">
+        <h2>{% blocktrans with name=report.post %}Reports for {{ name }}{% endblocktrans %}</h2>
+
+        {% with message_list=report.reported_messages.all %}
+            {% if message_list %}
+                <table class="table report-list">
+                    <thead>
+                        <tr class="topic-row head-row">
+                            <th class="report-user">
+                                {% trans "User" %}
+                            </th>
+                            <th class="report-message">
+                                {% trans "Message" %}
+                            </th>
+                            <th class="report-count">
+                                {% trans "Date" %}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for message in message_list %}
+                            <tr class="report-row">
+                                <td class="report-user">
+                                    {{ message.user }}
+                                </td>
+                                <td class="report-message">
+                                    {{ message.message|linebreaks }}
+                                </td>
+                                <td class="report-count">
+                                    {{ message.created|date:"Y/m/d H:m:s" }}
+                                </td>
+                            </tr>
+                        {%  endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p style="clear: both">
+                {% trans "No messages" %}
+                </p>
+            {% endif %}
+
+        {% endwith %}
+    </div>
+{% endblock content %}
+
+

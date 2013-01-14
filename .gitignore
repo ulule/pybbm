@@ -1,0 +1,9 @@
+.idea
+*.pyc
+local_path.py
+settings_local.py
+dist
+*.egg-info
+testdb.sqlite
+test/example/media/pybb_upload
+docs/_build/

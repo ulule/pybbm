@@ -1,0 +1,74 @@
+{% extends "pybb/base.html" %}
+{% load pybb_tags i18n humanize %}
+
+{% block title %}{{ topic }}{% endblock %}
+
+{% block breadcrumb %}
+    {% with object=topic %}
+        {% include "pybb/breadcrumb.html" with extra_crumb="Moderation logs" %}
+    {% endwith %}
+{% endblock %}
+
+{% block content %}
+    <table class="table logs-table">
+        <thead>
+            <tr class="log-row head-row">
+                <th class="log-name">
+                    {% trans "User" %}
+                </th>
+                <th class="log-type">
+                    {% trans "Type" %}
+                </th>
+                <th class="log-action">
+                    {% trans "Action" %}
+                </th>
+                <th class="log-target">
+                    {% trans "Target" %}
+                </th>
+                <th class="log-message">
+                    {% trans "Message" %}
+                </th>
+                <th class="log-ip-address">
+                    {% trans "IP Address" %}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logmoderation_list %}
+                <tr class="log-row {% cycle "odd" "even" %}">
+                    <td class="log-user">
+                        {{ log.user }}
+                    </td>
+                    <td class="log-type">
+                        {{ log.content_object }}
+                        <br /><br />
+                        <span style="font-size: 10px;">
+                            {{ log.content_type.name }}
+                        </span>
+                    </td>
+                    <td class="log-name">
+                        {{ log.get_action_flag_display }}
+                    </td>
+                    <td class="log-target">
+                        {% if log.target_id %}
+                            {{ log.target }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td class="log-message">
+                        {{ log.change_message|linebreaks }}
+                    </td>
+                    <td class="log-ip-address">
+                        {{ log.user_ip }}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% with _("Logs") as label %}
+        {% include "pybb/pagination.html" %}
+    {% endwith %}
+{% endblock %}
+

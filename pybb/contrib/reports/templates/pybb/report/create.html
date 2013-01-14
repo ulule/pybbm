@@ -1,0 +1,14 @@
+{% extends "pybb/base.html" %}
+{% load i18n pybb_tags %}
+
+{% block content %}
+    <h2>{% blocktrans with name=post.topic.name username=post.user %}New report for a post from {{ username }} on {{ name }}{% endblocktrans %}</h2>
+
+    <form action="" method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <p class="submit">{% include "pybb/_button_submit.html" %}</p>
+    </form>
+{% endblock content %}

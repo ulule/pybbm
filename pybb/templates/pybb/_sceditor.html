@@ -1,0 +1,64 @@
+{% load url from future %}
+{% load pybb_smiley_tags staticfiles %}
+
+{% if user.is_authenticated %}
+    <script type="text/javascript" src="{% static "SCEditor/minified/jquery.sceditor.min.js" %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static "SCEditor/minified/themes/default.min.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "pybb/css/sceditor_custom.css" %}" />
+
+    <script type="text/javascript">
+        $.sceditor.setCommand(
+          "spoiler",
+          function () {
+            this.wysiwygEditorInsertHtml('<div class="spoiler-container">', '</div><br />');
+          },
+          "spoiler"
+        );
+
+        {% if PYBB_ATTACHMENT_ENABLE and not disable_attachments  %}
+        $.sceditor.setCommand(
+          "attach",
+          function (caller) {
+              var hash = caller.parents('form:first').children('input[name=hash]').val(),
+              modal = $('#attachments-modal');
+
+              $.ajax({
+                  type: 'POST',
+                  url: "{% url 'pybb:attachment_list' %}",
+                  data: {
+                      'post_hash': hash,
+                  },
+                  success: function(data) {
+                      modal.children('.modal-body').html(data);
+                      modal.modal('show');
+                  }
+              })
+
+          },
+          "attach"
+        );
+        {% endif %}
+
+        $.sceditorBBCodePlugin.setCommand(
+            "spoiler",
+            {div: {
+                class: ['spoiler-container']
+            }},
+            null,
+            '[spoiler]{0}[/spoiler]',
+            '<div class="spoiler-container">{0}</div>'
+        );
+
+        var sceditor_options = {
+            style: "{% static "pybb/css/sceditor_textarea_custom.css" %}",
+            toolbar: "bold,italic,underline,strike|left,center,right|bulletlist,orderedlist|font,size,color,spoiler|emoticon,image,email,link,unlink,attach,youtube|removeformat|source",
+            resizeMaxWidth: 900,
+            locale: '{{ LANGUAGE_CODE }}',
+            emoticons: {% autoescape off %}{% smiley_json_list %}{% endautoescape %}
+        };
+
+        $(document).ready(function() {
+            $(".pretty_editor").sceditorBBCodePlugin(sceditor_options);
+        });
+    </script>
+{% endif %}

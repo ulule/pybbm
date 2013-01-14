@@ -1,0 +1,15 @@
+Django
+sorl-thumbnail==11.12
+markdown
+postmarkup
+south
+pytils
+bbcode
+django-annoying
+django-pure-pagination
+django-nose
+lxml
+django-registration
+nose-progressive
+django-autoslug
+django-castor

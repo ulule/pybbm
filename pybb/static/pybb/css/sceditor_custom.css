@@ -1,0 +1,21 @@
+.sceditor-button-spoiler div {
+  background: url('../img/emoticons/eye.png');
+}
+
+.sceditor-button-attach div {
+  background: url('../img/emoticons/attach.png');
+}
+
+.sceditor-button-source {
+    width: 77px;
+}
+
+.sceditor-button-source div {
+  background: url('../img/bbcode.png');
+  width: 77px;
+}
+
+.sceditor-dropdown.sceditor-insertemoticon {
+    text-align: center;
+    width: 250px;
+}

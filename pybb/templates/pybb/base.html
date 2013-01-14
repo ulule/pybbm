@@ -1,0 +1,17 @@
+{% extends PYBB_TEMPLATE|default:"base.html" %}
+{% load i18n pybb_tags %}
+
+{% load url from future %}
+
+{%block title %}{{ PYBB_DEFAULT_TITLE }}{% endblock title %}
+
+{% block extra_script %}
+    {{ block.super }}
+    {% include "pybb/_static.html" %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% include "pybb/breadcrumb.html" %}
+{% endblock %}
+
+{% block content %}{% endblock content %}

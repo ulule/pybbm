@@ -1,0 +1,21 @@
+{% load i18n pybb_tags pybb_smiley_tags %}
+<div id="smiley_short_list">
+    {% for smiley in smilies %}
+        <img src="{{ smiley.image.url }}" class="{{ style_class }}" alt="{{ smiley.pattern }}" title="{{ smiley.title }}" />
+    {% endfor %}
+    {% if has_more %}
+        <a href="#all_smilies" role="button" class="btn" data-toggle="modal">{% trans "...see all smilies" %}</a>
+        <div id="all_smilies" class="modal hide" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3>{% trans "Choose a smiley" %}</h3>
+            </div>
+            <div class="modal-body">
+            <p>{% smiley_full_list %}</p>
+            </div>
+          <div class="modal-footer">
+              <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+          </div>
+        </div>
+    {% endif %}
+</div>

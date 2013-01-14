@@ -1,0 +1,25 @@
+{% extends "pybb/base.html" %}
+
+{% load pybb_tags i18n humanize %}
+
+{% block title %}{{ forum.name }}{% endblock title %}
+
+{% block breadcrumb %}
+    {% with forum as object %}
+        {% include "pybb/breadcrumb.html" %}
+    {% endwith %}
+{% endblock %}
+
+{% block content %}
+    <div class="forum">
+        {% include "pybb/forum/_detail.html" %}
+
+        {% include "pybb/pagination.html" %}
+
+        {% if PYBB_ENABLE_ANONYMOUS_POST and not forum.empty or not forum.empty %}
+            <div class="controls" style="clear: both;">
+                {% include "pybb/_button_new_topic.html" %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock content %}

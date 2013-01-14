@@ -1,0 +1,74 @@
+{% extends "pybb/base.html" %}
+
+{% load url from future %}
+
+
+{% load i18n %}
+
+{% block title %}{% blocktrans %}Ban list{% endblocktrans %}{% endblock title %}
+
+{% block breadcrumb %}
+    {% include "pybb/breadcrumb.html" with extra_crumb="Ban list" %}
+{% endblock %}
+
+{% block content %}
+    <div class="forum">
+        <h2 style="float: left;">{% blocktrans %}Ban list{% endblocktrans %}</h2>
+
+        {% if banned_list %}
+            <table class="table ban-list">
+                <thead>
+                    <tr class="topic-row head-row">
+                        <th class="banned-name">
+                            {% trans "User" %}
+                        </th>
+                        <th class="reason">
+                            {% trans "Reason" %}
+                        </th>
+                        <th class="ip-addresses">
+                            {% trans "IP Addresses" %}
+                        </th>
+                        <th class="actions">
+                            {% trans "Actions" %}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for banned in banned_list %}
+                        <tr class="banned-row">
+                            <td class="banned-name">
+                                {{ banned.user }}
+                            </td>
+                            <td class="reason">
+                                {{ banned.reason }}
+                            </td>
+                            <td class="ip-addresses">
+                                {% with ip_addresses=banned.user.ip_addresses.all %}
+                                    {% if ip_addresses %}
+                                        <ul>
+                                            {% for ip_address in ip_addresses %}
+                                                <li>{{ ip_address }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td class="actions">
+                                <ul>
+                                    <li><a href="{% url 'ban_delete' banned.user.username %}">{% trans "unban" %}</a></li>
+                                </ul>
+                            </td>
+                        </tr>
+                    {%  endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="clear: both">
+                {% trans "No banned users" %}
+            </p>
+        {% endif %}
+
+        {% include "pybb/pagination.html" %}
+    </div>
+{% endblock content %}
+

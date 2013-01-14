@@ -1,0 +1,121 @@
+{% load url from future %}
+{% load i18n thumbnail humanize %}
+
+<div id="attachments-formset">
+    <div class="progress progress-striped active" style="display: none;">
+        <div class="bar" style="width: 0;"></div>
+    </div>
+
+    <form action="{% url 'pybb:attachment_list' %}" method="post" enctype="multipart/form-data" id="attachments-form" class="form-horizontal">
+        <div class="bs-docs">
+            <h4 class="title">{% trans "Files from your computer" %}</h4>
+            {% csrf_token %}
+            <input type="hidden" name="post_hash" value="{{ post_hash }}" />
+            <input type="hidden" name="submit" value="1" />
+
+            {{ aformset.management_form }}
+
+            <table class="attachment-items">
+                {% for form in aformset %}
+                    <tr>
+                        <td>
+                            {{ form.id }}
+                            {{ form.file }}
+
+                        </td>
+                        <td>
+                            {% if form.instance.pk %}
+                                {{ form.DELETE }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% if form.file.errors %}
+                        <tr>
+                            <td colspan="2">
+                                {{ form.file.errors }}
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </table>
+        </div>
+    </form>
+
+    {% if attachments %}
+        <div class="bs-docs">
+            <h4 class="title">{% trans "Files already uploaded" %}</h4>
+
+            {% for attachment in attachments %}
+                <div class="media">
+                    {% if attachment.is_type_image %}
+                        <a class="pull-left" href="{{ attachment.file.url }}">
+                            {% include "pybb/attachment/_image.html" %}
+                        </a>
+                    {% endif %}
+                    <div class="media-body">
+                        <h4 class="media-heading">{{ attachment.filename }}</h4>
+                        {{ attachment.size_display }} ({{ attachment.get_type_display }})
+
+                        <br />
+
+                        {% blocktrans with date=attachment.created|naturaltime %}Uploaded {{ date }}{% endblocktrans %}
+
+                        <div>
+                            <form method="post" action="{% url 'pybb:attachment_delete' attachment.pk %}">
+                                {% csrf_token %}
+
+                                <a href="{% url 'pybb:attachment_delete' attachment.pk %}" class="attachment-delete-link">{% trans "Remove" %}</a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% if not forloop.last %}
+                    <hr />
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('div#attachments-formset table tr').formset({
+            deleteText: '{% trans 'remove' %}',
+            addText: '{% trans 'add' %}',
+            prefix: 'attachments'
+        });
+
+        $('.attachment-delete-link').click(function(e) {
+            e.preventDefault();
+
+            var _this = $(this);
+
+            _this.parent().ajaxSubmit({
+                complete: function(xhr) {
+                    _this.parents('.media:first').remove();
+                }
+            });
+        });
+
+        var formset = $('#attachments-formset'),
+            progress = formset.find('.progress'),
+            bar = progress.find('.bar'),
+            form = $('#attachments-form'),
+            modal = $('#attachments-modal');
+
+        modal.find('.btn-success').unbind('click').one('click', function() {
+            form.ajaxSubmit({
+                beforeSend: function() {
+                    progress.fadeIn('slow');
+                    bar.width('0%')
+                },
+                uploadProgress: function(event, position, total, percentComplete) {
+                    bar.width(percentComplete + '%')
+                },
+                complete: function(xhr) {
+                    modal.children('.modal-body').html(xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
