@@ -26,7 +26,7 @@ from pure_pagination import Paginator, EmptyPage
 from pybb import defaults
 from pybb.models import (Forum, Topic, Post, Moderator, LogModeration, Attachment, Poll,
                          TopicReadTracker, ForumReadTracker, PollAnswerUser, Subscription)
-from pybb.util import load_class, generic
+from pybb.util import load_class, generic, queryset_to_dict
 from pybb.models.base import markup
 from pybb.forms import (PostForm, AdminPostForm, PostsMoveExistingTopicForm,
                         PollAnswerFormSet, AttachmentFormSet,
@@ -36,8 +36,6 @@ from pybb.templatetags.pybb_tags import pybb_topic_poll_not_voted
 from pybb.decorators import login_required
 
 from pybb.helpers import lookup_users, lookup_post_attachments, lookup_post_topics, lookup_topic_lastposts, load_user_posts
-
-from dbutils.helpers import queryset_to_dict
 
 
 def filter_hidden(request, queryset_or_model):

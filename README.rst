@@ -1,6 +1,11 @@
 PyBBM - Django forum solution
 =============================
 
+.. image:: https://secure.travis-ci.org/semio/pybbm.png?branch=master
+    :alt: Build Status
+    :target: http://travis-ci.org/semio/pybbm
+
+
 PyBBM is a full-featured django forum solution with these features:
 
 * Avatars

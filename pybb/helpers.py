@@ -1,9 +1,7 @@
 from django.contrib.auth.models import User
 
 from pybb.models import Post, Attachment, Topic
-from pybb.util import get_profile_model
-
-from dbutils.helpers import queryset_to_dict
+from pybb.util import get_profile_model, queryset_to_dict
 
 
 Profile = get_profile_model()

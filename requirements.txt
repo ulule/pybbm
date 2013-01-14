@@ -1,4 +1,5 @@
-Django
+PIL
+Django>=1.4.1,<=1.5
 sorl-thumbnail==11.12
 markdown
 postmarkup
@@ -13,3 +14,6 @@ django-registration
 nose-progressive
 django-autoslug
 django-castor
+django-guardian==1.0.4
+celery==3.0.13
+mock
