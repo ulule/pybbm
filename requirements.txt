@@ -17,3 +17,5 @@ django-castor
 django-guardian==1.0.4
 celery==3.0.13
 mock
+python-magic
+bleach
