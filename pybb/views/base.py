@@ -1039,7 +1039,10 @@ class TopicTrackerRedirectView(generic.RedirectView):
         try:
             post = topic.posts.visible().filter(created__gte=tracker.time_stamp).order_by('created')[0]
         except IndexError:
-            return topic.get_absolute_url()
+            try:
+                return topic.last_post.get_absolute_url()
+            except Post.DoesNotExist:
+                return topic.get_absolute_url()
         else:
             return post.get_anchor_url(user=self.request.user)
 
