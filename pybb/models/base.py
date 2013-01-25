@@ -265,7 +265,7 @@ class BaseForum(ModelBase):
         last_post = self.get_last_post()
 
         if last_post:
-            self.updated = last_post.updated or last_post.created
+            self.updated = last_post.created
 
             self.last_post = last_post
             self.last_topic = last_post.topic
