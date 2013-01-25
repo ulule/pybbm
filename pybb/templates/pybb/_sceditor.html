@@ -51,10 +51,11 @@
 
         var sceditor_options = {
             style: "{% static "pybb/css/sceditor_textarea_custom.css" %}",
-            toolbar: "bold,italic,underline,strike|left,center,right|bulletlist,orderedlist|font,size,color,spoiler|emoticon,image,email,link,unlink,attach,youtube|removeformat|source",
+            toolbar: "bold,italic,underline,strike|left,center,right|bulletlist,orderedlist|font,size,color,spoiler,pastetext|emoticon,image,email,link,unlink,attach,youtube|removeformat|source",
             resizeMaxWidth: 900,
             locale: '{{ LANGUAGE_CODE }}',
-            emoticons: {% autoescape off %}{% smiley_json_list %}{% endautoescape %}
+            emoticons: {% autoescape off %}{% smiley_json_list %}{% endautoescape %},
+            enablePasteFiltering: true
         };
 
         $(document).ready(function() {
