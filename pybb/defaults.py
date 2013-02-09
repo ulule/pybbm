@@ -55,7 +55,7 @@ PYBB_ENABLE_ANONYMOUS_POST = getattr(settings, 'PYBB_ENABLE_ANONYMOUS_POST', Fal
 PYBB_ANONYMOUS_USERNAME = getattr(settings, 'PYBB_ANONYMOUS_USERNAME', 'Anonymous')
 PYBB_PREMODERATION = getattr(settings, 'PYBB_PREMODERATION', False)
 
-PYBB_BODY_CLEANERS = getattr(settings, 'PYBB_BODY_CLEANERS', [rstrip_str, filter_blanks])
+PYBB_BODY_CLEANERS = getattr(settings, 'PYBB_BODY_CLEANERS', [rstrip_str, ])
 
 PYBB_BODY_VALIDATOR = getattr(settings, 'PYBB_BODY_VALIDATOR', None)
 
