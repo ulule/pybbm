@@ -4,8 +4,6 @@ import os.path
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
-from pybb.util import filter_blanks, rstrip_str
-
 
 PYBB_TOPIC_PAGE_SIZE = getattr(settings, 'PYBB_TOPIC_PAGE_SIZE', 10)
 PYBB_FORUM_PAGE_SIZE = getattr(settings, 'PYBB_FORUM_PAGE_SIZE', 20)
@@ -55,7 +53,7 @@ PYBB_ENABLE_ANONYMOUS_POST = getattr(settings, 'PYBB_ENABLE_ANONYMOUS_POST', Fal
 PYBB_ANONYMOUS_USERNAME = getattr(settings, 'PYBB_ANONYMOUS_USERNAME', 'Anonymous')
 PYBB_PREMODERATION = getattr(settings, 'PYBB_PREMODERATION', False)
 
-PYBB_BODY_CLEANERS = getattr(settings, 'PYBB_BODY_CLEANERS', [rstrip_str, ])
+PYBB_BODY_CLEANERS = getattr(settings, 'PYBB_BODY_CLEANERS', ['pybb.util.rstrip_str', ])
 
 PYBB_BODY_VALIDATOR = getattr(settings, 'PYBB_BODY_VALIDATOR', None)
 

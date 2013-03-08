@@ -131,8 +131,8 @@ class PostForm(forms.ModelForm):
         if defaults.PYBB_BODY_VALIDATOR:
             defaults.PYBB_BODY_VALIDATOR(user, body)
 
-        for cleaner in defaults.PYBB_BODY_CLEANERS:
-            body = cleaner(user, body)
+        for cleaner_class in defaults.PYBB_BODY_CLEANERS:
+            body = load_class(cleaner_class)(user, body)
         return body
 
     def clean(self):

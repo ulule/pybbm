@@ -142,3 +142,8 @@ PYBB_NOTIFICATION_ENABLE = True
 PYBB_DUPLICATE_TOPIC_SLUG_ALLOWED = False
 
 PYBB_BAN_CHECK_TIMEOUT = 0
+
+PYBB_BODY_CLEANERS = [
+    'pybb.util.rstrip_str',
+    'pybb.util.filter_blanks',
+]
