@@ -1,5 +1,5 @@
 PIL
-Django>=1.4.1,<=1.5
+Django>=1.4.1,<1.5
 sorl-thumbnail==11.12
 markdown
 postmarkup
