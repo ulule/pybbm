@@ -15,7 +15,7 @@ from django.forms.formsets import BaseFormSet
 from pybb.models import (Topic, Post, Attachment, TopicRedirection,
                          PollAnswer, Forum, UserObjectPermission, Poll)
 from pybb import defaults
-from pybb.util import tznow, load_class
+from pybb.util import tznow, load_class, get_profile_model
 
 from autoslug.settings import slugify
 
@@ -239,9 +239,8 @@ class AdminPostForm(PostForm):
         return super(AdminPostForm, self).save(*args, **kwargs)
 
 try:
-    profile_app, profile_model = settings.AUTH_PROFILE_MODULE.split('.')
-    profile_model = ContentType.objects.get_by_natural_key(profile_app, profile_model).model_class()
-except (AttributeError, ValueError, ObjectDoesNotExist):
+    profile_model = get_profile_model()
+except SiteProfileNotAvailable:
     from pybb.contrib.profiles.models import Profile
     profile_model = Profile
 
