@@ -16,7 +16,7 @@ class ReportsTest(TransactionTestCase, SharedTestModule):
         post = Post(user=self.staff, body='[quote="zeus;%d"]Super quote[/quote]' % self.post.pk, topic=self.topic)
         post.save()
 
-        self.assertEqual(post.body_html, u'<blockquote>    <div class="quote-author">        Posted by <a class="quote-author-name" href="/users/zeus/">zeus</a>        <a class="quote-message-link" href="/xfoo/1-etopic-1/#post1" rel="nofollow"></a>    </div>    <div class="quote-message">        Super quote    </div></blockquote>')
+        self.assertEqual(post.body_html, u'<blockquote>    <div class="quote-author">        Posted by <a class="quote-author-name" href="/users/zeus/">zeus</a>        <a class="quote-message-link" href="/xfoo/1-etopic#post1" rel="nofollow"></a>    </div>    <div class="quote-message">        Super quote    </div></blockquote>')
 
         self.assertEqual(Quote.objects.filter(from_post=post).count(), 1)
 
@@ -32,7 +32,7 @@ class ReportsTest(TransactionTestCase, SharedTestModule):
                                                                              post.body), topic=self.topic)
         post.save()
 
-        self.assertEqual(post.body_html, u'<blockquote>    <div class="quote-author">        Posted by <a class="quote-author-name" href="/users/thoas/">thoas</a>        <a class="quote-message-link" href="/xfoo/1-etopic-1/#post2" rel="nofollow"></a>    </div>    <div class="quote-message">        <blockquote>    <div class="quote-author">        Posted by <a class="quote-author-name" href="/users/zeus/">zeus</a>        <a class="quote-message-link" href="/xfoo/1-etopic-1/#post1" rel="nofollow"></a>    </div>    <div class="quote-message">        bbcode <strong>test</strong>    </div></blockquote>    </div></blockquote>')
+        self.assertEqual(post.body_html, u'<blockquote>    <div class="quote-author">        Posted by <a class="quote-author-name" href="/users/thoas/">thoas</a>        <a class="quote-message-link" href="/xfoo/1-etopic#post2" rel="nofollow"></a>    </div>    <div class="quote-message">        <blockquote>    <div class="quote-author">        Posted by <a class="quote-author-name" href="/users/zeus/">zeus</a>        <a class="quote-message-link" href="/xfoo/1-etopic#post1" rel="nofollow"></a>    </div>    <div class="quote-message">        bbcode <strong>test</strong>    </div></blockquote>    </div></blockquote>')
 
         self.assertEqual(Quote.objects.filter(from_post=post).count(), 2)
 
