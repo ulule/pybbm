@@ -641,7 +641,7 @@ class BaseTopic(ModelBase):
             'forum_slug': self.forum.slug
         }
 
-        if page:
+        if page and page != 1:
             kwargs['page'] = page
 
         return reverse('pybb:topic_detail', kwargs=kwargs)

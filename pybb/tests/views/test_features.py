@@ -705,6 +705,21 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
 
         self.assertEqual(response.status_code, 404)
 
+    def test_topic_redirect_one_page(self):
+        topic = Topic(name='to-etopic', forum=self.forum, user=self.user)
+        topic.save()
+
+        response = self.client.get(reverse('pybb:topic_detail', kwargs={
+            'forum_slug': self.forum.slug,
+            'pk': topic.pk,
+            'slug': topic.slug,
+            'page': 1
+        }))
+
+        self.assertRedirects(response,
+                             topic.get_absolute_url(),
+                             301)
+
     def test_topic_updated(self):
         topic = Topic(name='etopic', forum=self.forum, user=self.user)
         topic.save()

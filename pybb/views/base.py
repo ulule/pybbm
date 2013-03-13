@@ -211,6 +211,15 @@ class ForumDetailView(ListView):
         if forum.is_hidden() and not self.request.user.is_authenticated():
             return redirect_to_login(request.get_full_path())
 
+        if 'page' in kwargs:
+            page = kwargs.get('page', None)
+
+            if page:
+                page = int(page)
+
+                if page == 1:
+                    return redirect(forum.get_absolute_url(), permanent=True)
+
         self.object_list = self.get_queryset()
 
         allow_empty = self.get_allow_empty()
@@ -394,6 +403,14 @@ class TopicDetailView(ListView):
                 return redirect(to_url)
             elif redirection.is_type_no():
                 raise Http404
+
+        page = kwargs.get('page', None)
+
+        if page:
+            page = int(page)
+
+            if page == 1:
+                return redirect(topic.get_absolute_url(), permanent=True)
 
         topic.views += 1
         topic.save()
