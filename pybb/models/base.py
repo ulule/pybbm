@@ -746,7 +746,7 @@ class RenderableItem(ModelBase):
 
             return None
 
-        self.render(self)
+        self.render()
 
         return self.body_html
 
@@ -762,7 +762,7 @@ class RenderableItem(ModelBase):
 
             return None
 
-        self.render(self)
+        self.render()
 
         return self.body_text
 
