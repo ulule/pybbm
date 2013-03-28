@@ -6,10 +6,15 @@ from pybb.models import Post
 
 from pybb.contrib.quotes import settings
 
+import re
+
 
 def quote(tag_name, value, options, parent, context):
     if not 'quote' in options:
         return value
+
+    if not settings.PYBB_QUOTES_ALLOW_EMBEDED:
+        value = re.sub(r'<blockquote>.*?</blockquote>', '', value, flags=re.S)
 
     splits = options['quote'].split(';')
 

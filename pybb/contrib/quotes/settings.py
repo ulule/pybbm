@@ -9,6 +9,8 @@ PYBB_QUOTES_USER_URL = getattr(settings, 'PYBB_QUOTES_USER_URL',
 PYBB_QUOTES_POST_URL = getattr(settings, 'PYBB_QUOTES_POST_URL',
                                lambda post: post.get_absolute_url())
 
+PYBB_QUOTES_ALLOW_EMBEDED = getattr(settings, 'PYBB_QUOTES_ALLOW_EMBEDED', True)
+
 
 PYBB_QUOTES_QUOTE_VALID_FORMAT = getattr(settings, 'PYBB_QUOTES_QUOTE_VALID_FORMAT', _(u"""<blockquote>\
     <div class="quote-author">\
