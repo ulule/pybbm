@@ -11,6 +11,7 @@ def extract_tags(html):
     stripped tags
     """
     tags = []
+    html = html.replace('%', '%%')
 
     def repl(m):
         tags.append(m.group(0))
