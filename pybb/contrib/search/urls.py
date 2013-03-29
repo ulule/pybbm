@@ -11,7 +11,7 @@ urlpatterns = patterns(
     url(r'^search/',
         search_view_factory(
             view_class=SearchView,
-            template='forum/search.html',
+            template='pybb/search.html',
             form_class=SearchForm,
         ),
         name='search'),
