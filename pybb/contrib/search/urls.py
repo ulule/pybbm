@@ -12,7 +12,7 @@ urlpatterns = patterns(
     url(PYBB_SEARCH_SEARCH_URL,
         search_view_factory(
             view_class=SearchView,
-            template='forum/search.html',
+            template='pybb/search.html',
             form_class=SearchForm,
         ),
         name='search'),
