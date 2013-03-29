@@ -7,3 +7,5 @@ PYBB_SEARCH_SEARCH_VIEW = getattr(settings,
 PYBB_SEARCH_SEARCH_FORM = getattr(settings,
                                   'PYBB_SEARCH_SEARCH_FORM',
                                   'pybb.contrib.search.forms.base.SearchForm')
+
+PYBB_SEARCH_SEARCH_URL = getattr(settings, 'PYBB_SEARCH_SEARCH_URL', r'^search/')
