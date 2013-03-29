@@ -23,15 +23,26 @@ class Highlighter(highlighting.Highlighter):
     """
     override haysatck defaul highlighter to keep html tags in the result
     """
-    def singleize_query(self):
+    def singularize_query(self):
+        self.singulars = []
         for word in list(self.query_words):
-            if word.endswith('s'):
-                self.query_words.add(word[:-1])
+            if len(word) > 1 and word.endswith('s'):
+                singular = word[:-1]
+                self.query_words.add(singular)
+                self.singulars.append(singular)
 
     def highlight(self, text_block):
         self.text_block, tags = extract_tags(text_block)
-        self.singleize_query()
+        self.singularize_query()
         locations = self.find_highlightable_words()
+        # clean location to give a chance to plurals word to be fully
+        # highlighted
+        for singular in self.singulars:
+            plural = "%ss" % singular
+            if singular in locations and plural in locations:
+                for idx in locations[plural]:
+                    if idx in locations[singular]:
+                        locations[singular].remove(idx)
         hl_text = self.render_html(locations, 0, len(self.text_block))
         return mark_safe(hl_text % tuple(tags))
 
