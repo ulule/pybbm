@@ -61,7 +61,7 @@ class TreeModelMultipleChoiceField(ModelMultipleChoiceField):
     """
     widget = TreeSelectMultiple
 
-    def __init__(self, queryset, join_field="parent", cache_choices=False, required=True,
+    def __init__(self, queryset, join_field='parent', cache_choices=False, required=True,
                  widget=None, label=None, initial=None,
                  help_text=None, *args, **kwargs):
         self.join_field = join_field

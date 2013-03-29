@@ -9,16 +9,19 @@ from pybb.models import Forum
 
 
 class SearchForm(HaystackSearchForm):
-    user_id = forms.CharField(User.objects.all(),
-                              required=False,
-                              label=_('Username'))
-
-    forums = TreeModelMultipleChoiceField(queryset=Forum.objects.all(),
-                                          join_field='forum_id',
-                                          required=False)
+    user = forms.ModelChoiceField(queryset=User.objects.all(),
+                                  required=False,
+                                  label=_('Username'))
 
     replies = forms.IntegerField(label=_('Number of answers'),
                                  min_value=0, required=False)
+
+    def __init__(self, *args, **kwargs):
+        super(SearchForm, self).__init__(*args, **kwargs)
+
+        self.fields['forums'] = TreeModelMultipleChoiceField(queryset=Forum.objects.all(),
+                                                             join_field='forum_id',
+                                                             required=False)
 
     def search(self):
         if not self.is_valid():
@@ -29,7 +32,7 @@ class SearchForm(HaystackSearchForm):
         if self.cleaned_data.get('forums', None):
             sqs = sqs.filter(topic_breadcrumbs__in=[f.id for f in self.cleaned_data['forums']])
         if self.cleaned_data.get('user_id', None):
-            sqs = sqs.filter(user_id=self.cleaned_data['user_id'])
+            sqs = sqs.filter(user_id=self.cleaned_data['user'].pk)
         if self.cleaned_data.get('replies', None):
             sqs = sqs.filter(replies__gte=self.cleaned_data['replies'])
         if self.cleaned_data.get('topic_id', None):
