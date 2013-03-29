@@ -6,6 +6,8 @@ from pybb.models import Post
 
 from pybb.contrib.quotes import settings
 
+import re
+
 
 def quote(tag_name, value, options, parent, context):
     if not 'quote' in options:
