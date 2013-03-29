@@ -79,7 +79,9 @@ class SearchView(BaseSearchView):
         # build query_string
         qs = '&'.join(['='.join([k, v]) for k, v in self.form.data.items() if k != 'page'])
 
-        self.normalize_results(page.object_list)
+        objects = [o for o in page.object_list if o is not None]
+
+        self.normalize_results(objects)
 
         # Fake Page object to build posts redirect_url
         post_page = {

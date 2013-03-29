@@ -28,6 +28,7 @@ class SearchForm(HaystackSearchForm):
             return self.no_query_found()
 
         sqs = super(SearchForm, self).search()
+        sqs = sqs.order_by('-created')
 
         if self.cleaned_data.get('forums', None):
             sqs = sqs.filter(topic_breadcrumbs__in=[f.id for f in self.cleaned_data['forums']])
