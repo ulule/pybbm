@@ -9,9 +9,9 @@ from pybb.models import Forum
 
 
 class SearchForm(HaystackSearchForm):
-    user_id = forms.ModelChoiceField(queryset=User.objects.all(),
-                                     required=False,
-                                     label=_('Username'))
+    user = forms.ModelChoiceField(queryset=User.objects.all(),
+                                  required=False,
+                                  label=_('Username'))
 
     replies = forms.IntegerField(label=_('Number of answers'),
                                  min_value=0, required=False)
@@ -32,7 +32,7 @@ class SearchForm(HaystackSearchForm):
         if self.cleaned_data.get('forums', None):
             sqs = sqs.filter(topic_breadcrumbs__in=[f.id for f in self.cleaned_data['forums']])
         if self.cleaned_data.get('user_id', None):
-            sqs = sqs.filter(user_id=self.cleaned_data['user_id'].pk)
+            sqs = sqs.filter(user_id=self.cleaned_data['user'].pk)
         if self.cleaned_data.get('replies', None):
             sqs = sqs.filter(replies__gte=self.cleaned_data['replies'])
         if self.cleaned_data.get('topic_id', None):
