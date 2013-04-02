@@ -3,7 +3,7 @@ from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 
 from haystack.forms import SearchForm as HaystackSearchForm
-form haystack.inputs import AutoQuery
+from haystack.inputs import AutoQuery
 
 from pybb.contrib.search.fields import TreeModelMultipleChoiceField
 from pybb.models import Forum
