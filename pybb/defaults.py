@@ -31,7 +31,6 @@ PYBB_DEFAULT_AVATAR_URL = getattr(settings, 'PYBB_DEFAULT_AVATAR_URL',
 PYBB_DEFAULT_TITLE = getattr(settings, 'PYBB_DEFAULT_TITLE', 'PYBB Powered Forum')
 
 PYBB_MARKUP_PREPROCESSORS = getattr(settings, 'PYBB_MARKUP_PREPROCESSORS', (
-    'pybb.contrib.quotes.processors.QuotePreProcessor',
     'pybb.contrib.smilies.processors.SmileyProcessor',
 ))
 PYBB_MARKUP_POSTPROCESSORS = getattr(settings, 'PYBB_MARKUP_POSTPROCESSORS', (
