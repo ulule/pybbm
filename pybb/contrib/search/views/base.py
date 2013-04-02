@@ -1,5 +1,5 @@
 from django.shortcuts import render_to_response
-from django.http import Http404
+from django.http import Http404, QueryDict
 
 from pure_pagination import Paginator, InvalidPage
 
@@ -76,12 +76,32 @@ class SearchView(BaseSearchView):
         Generates the actual HttpResponse to send back to the user.
         """
         (paginator, page) = self.build_page()
+
         # build query_string
-        qs = '&'.join(['='.join([k, v]) for k, v in self.form.data.items() if k != 'page'])
+        query_dict = self.form.data.copy()
 
-        objects = [o for o in page.object_list if o is not None]
+        if not isinstance(query_dict, QueryDict):
+            ## no querystring (e.g. /search/ )
+            qs = ''
+        else:
+            try:
+                del query_dict['page']
+            except KeyError:
+                pass
+            qs = query_dict.urlencode()
 
-        self.normalize_results(objects)
+        # is it an advanced search
+        advanced = False
+        for arg in ['forums',
+                    'user',
+                    'replies_limit',
+                    'search_topic_name',
+                   ]:
+            if self.form.data.get(arg,None):
+                advanced = True
+                break
+
+        self.normalize_results(page.object_list)
 
         # Fake Page object to build posts redirect_url
         post_page = {
@@ -98,6 +118,7 @@ class SearchView(BaseSearchView):
             'is_paginated': paginator.num_pages > 1,
             'show_information': True,
             'post_page': post_page,
+            'advanced': advanced,
         }
 
         if (self.results and hasattr(self.results, 'query') and

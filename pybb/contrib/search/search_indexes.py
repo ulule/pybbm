@@ -28,6 +28,7 @@ class PostIndex(SearchIndex, indexes.Indexable):
     user_id = indexes.IntegerField(model_attr='user_id')
     forum_slug = indexes.CharField()
     forum_name = indexes.CharField()
+    forum_id = indexes.IntegerField()
     topic_slug = indexes.CharField()
     topic_name = indexes.CharField(null=True)
     topic_id = indexes.IntegerField(null=True)
@@ -43,6 +44,9 @@ class PostIndex(SearchIndex, indexes.Indexable):
 
     def prepare_forum_name(self, obj):
         return obj.topic.forum.name
+
+    def prepare_forum_id(self, obj):
+        return obj.topic.forum.pk
 
     def prepare_topic_slug(self, obj):
         return obj.topic.slug
