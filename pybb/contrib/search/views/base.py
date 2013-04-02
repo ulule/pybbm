@@ -96,6 +96,8 @@ class SearchView(BaseSearchView):
                     'user',
                     'replies_limit',
                     'search_topic_name',
+                    'start_date',
+                    'end_date',
                    ]:
             if self.form.data.get(arg,None):
                 advanced = True
