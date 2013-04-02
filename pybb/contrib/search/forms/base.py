@@ -32,8 +32,8 @@ class SearchForm(HaystackSearchForm):
             return self.no_query_found()
 
         if self.cleaned_data.get('search_topic_name', False):
-            sqs = self.searchqueryset.filter
-            sqs = sqs.filter(topic_name=AutoQuery(self.cleaned_data['q']))
+            sqs = self.searchqueryset.filter(
+                topic_name=AutoQuery(self.cleaned_data['q']))
             sqs = sqs.filter(is_first_post = True)
         else:
             sqs = super(SearchForm, self).search()
