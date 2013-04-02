@@ -3,6 +3,7 @@ from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 
 from haystack.forms import SearchForm as HaystackSearchForm
+form haystack.inputs import AutoQuery
 
 from pybb.contrib.search.fields import TreeModelMultipleChoiceField
 from pybb.models import Forum
@@ -16,6 +17,9 @@ class SearchForm(HaystackSearchForm):
     replies = forms.IntegerField(label=_('Number of answers'),
                                  min_value=0, required=False)
 
+
+    search_topic_name = forms.BooleanField(required=False)
+
     def __init__(self, *args, **kwargs):
         super(SearchForm, self).__init__(*args, **kwargs)
 
@@ -27,8 +31,13 @@ class SearchForm(HaystackSearchForm):
         if not self.is_valid():
             return self.no_query_found()
 
-        sqs = super(SearchForm, self).search()
-        sqs = sqs.order_by('-created')
+        if self.cleaned_data.get('search_topic_name', False):
+            sqs = self.searchqueryset.filter
+            sqs = sqs.filter(topic_name=AutoQuery(self.cleaned_data['q']))
+            sqs = sqs.filter(is_first_post = True)
+        else:
+            sqs = super(SearchForm, self).search()
+            sqs = sqs.order_by('-created')
 
         if self.cleaned_data.get('forums', None):
             sqs = sqs.filter(topic_breadcrumbs__in=[f.id for f in self.cleaned_data['forums']])
