@@ -20,6 +20,7 @@ class SearchForm(HaystackSearchForm):
                                  min_value=0, required=False)
 
     search_topic_name = forms.BooleanField(required=False)
+    with_attachment = forms.BooleanField(required=False)
 
     start_date = forms.DateTimeField(required=False)
     end_date = forms.DateTimeField(required=False)
@@ -67,5 +68,7 @@ class SearchForm(HaystackSearchForm):
             sqs = sqs.filter(updated__gte=self.cleaned_data['start_date'])
         if self.cleaned_data.get('end_date',None):
             sqs = sqs.filter(updated__lte=self.cleaned_data['end_date'])
+        if self.cleaned_data.get('with_attachment', None):
+            sqs = sqs.filter(has_attachment=self.cleaned_data['with_attachment'])
 
         return sqs

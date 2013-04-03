@@ -38,6 +38,7 @@ class PostIndex(SearchIndex, indexes.Indexable):
     updated = indexes.DateTimeField()
     topic_breadcrumbs = indexes.MultiValueField()
     is_first_post = indexes.BooleanField()
+    has_attachment = indexes.BooleanField()
 
     def prepare_forum_slug(self, obj):
         return obj.topic.forum.slug
@@ -74,6 +75,9 @@ class PostIndex(SearchIndex, indexes.Indexable):
 
     def prepare_is_first_post(self, obj):
         return obj.topic.first_post_id == obj.pk
+
+    def prepare_has_attachment(self, obj):
+        return obj.get_attachments() and True or False
 
     def get_model(self):
         return Post
