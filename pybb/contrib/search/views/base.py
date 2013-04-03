@@ -5,7 +5,8 @@ from pure_pagination import Paginator, InvalidPage
 
 from haystack.views import SearchView as BaseSearchView
 
-from pybb.helpers import lookup_users, lookup_post_topics
+from pybb.helpers import (lookup_users, lookup_post_topics,
+                          lookup_post_attachments)
 from pybb.contrib.search.fields import TreeModelMultipleChoiceField
 from pybb.models import Forum
 
@@ -67,9 +68,11 @@ class SearchView(BaseSearchView):
         """
         lookup_post_topics(result_list)
         lookup_users(result_list)
+        lookup_post_attachments(result_list)
         for result in result_list:
             result.id = result.pk
             result.get_body_html = False
+            result.get_attachments = result._attachments
 
     def create_response(self):
         """
@@ -112,6 +115,7 @@ class SearchView(BaseSearchView):
         }
 
         context = {
+            'only_topics': self.form.data.get('search_topic_name',False),
             'qs': qs,
             'query': self.query,
             'form': self.form,
