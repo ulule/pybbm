@@ -36,7 +36,7 @@ class SearchForm(HaystackSearchForm):
         data = super(HaystackSearchForm, self).clean()
         if data.get('start_date', None):
             if not data.get('end_date', None):
-                data['end_date']= datetime.datetime.now()
+                data['end_date'] = datetime.datetime.now()
             if data['start_date'] > data['end_date']:
                 raise forms.ValidationError('Start date is after end date')
         return data
@@ -49,7 +49,7 @@ class SearchForm(HaystackSearchForm):
         if self.cleaned_data.get('search_topic_name', False):
             sqs = self.searchqueryset.filter(
                 topic_name=AutoQuery(self.cleaned_data['q']))
-            sqs = sqs.filter(is_first_post = True)
+            sqs = sqs.filter(is_first_post=True)
         else:
             sqs = super(SearchForm, self).search()
 
@@ -64,9 +64,9 @@ class SearchForm(HaystackSearchForm):
             sqs = sqs.filter(replies__gte=self.cleaned_data['replies'])
         if self.cleaned_data.get('topic_id', None):
             sqs = sqs.filter(topic_id=self.cleaned_data['topic_id'])
-        if self.cleaned_data.get('start_date',None):
+        if self.cleaned_data.get('start_date', None):
             sqs = sqs.filter(updated__gte=self.cleaned_data['start_date'])
-        if self.cleaned_data.get('end_date',None):
+        if self.cleaned_data.get('end_date', None):
             sqs = sqs.filter(updated__lte=self.cleaned_data['end_date'])
         if self.cleaned_data.get('with_attachment', None):
             sqs = sqs.filter(has_attachment=self.cleaned_data['with_attachment'])

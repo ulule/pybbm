@@ -95,15 +95,10 @@ class SearchView(BaseSearchView):
 
         # is it an advanced search
         advanced = False
-        for arg in ['forums',
-                    'user',
-                    'replies_limit',
-                    'search_topic_name',
-                    'start_date',
-                    'end_date',
-                    'with_attachment',
-                   ]:
-            if self.form.data.get(arg,None):
+        for arg in ('forums', 'user', 'replies_limit',
+                    'search_topic_name', 'start_date', 'end_date',
+                    'with_attachment', ):
+            if self.form.data.get(arg, None):
                 advanced = True
                 break
 
@@ -115,7 +110,7 @@ class SearchView(BaseSearchView):
         }
 
         context = {
-            'only_topics': self.form.data.get('search_topic_name',False),
+            'only_topics': self.form.data.get('search_topic_name', False),
             'qs': qs,
             'query': self.query,
             'form': self.form,
