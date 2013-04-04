@@ -27,11 +27,19 @@ class BBCodeMarkupEngine(BaseMarkupEngine):
         'email': ('pybb.engines.bbcode.formatters.email', None),
     }
 
+    defaults_kwargs = {
+        'replace_links': False,
+        'escape_html': False
+    }
+
     def __init__(self, *args, **kwargs):
         super(BBCodeMarkupEngine, self).__init__(*args, **kwargs)
 
-        self.parser = bbcode.Parser(replace_links=False, escape_html=False)
+        self.parser = bbcode.Parser(**self.defaults_kwargs)
 
+        self.init_formatters()
+
+    def init_formatters(self):
         simple_formatters = self.simple_formatters.items() + list(defaults.PYBB_BBCODE_MARKUP_SIMPLE_FORMATTERS)
 
         for tag_name, (format_str, context) in simple_formatters:
