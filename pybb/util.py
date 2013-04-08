@@ -118,6 +118,7 @@ def load_class(class_path, setting_name=None):
         else:
             txt = 'Error importing backend %s: "%s".' % (class_module, e)
 
+
         raise exceptions.ImproperlyConfigured(txt)
 
     try:
