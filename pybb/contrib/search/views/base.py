@@ -21,20 +21,18 @@ class SearchView(BaseSearchView):
         form = super(SearchView, self).build_form(*args, **kwargs)
 
         user = self.request.user
+
         if not user.is_authenticated():
             form.searchqueryset = form.searchqueryset.exclude(hidden=True)
-            form.fields['forums'] = TreeModelMultipleChoiceField(
-                queryset=Forum.objects.filter(hidden=False),
-                join_field='forum_id',
-                required=False
-            )
         elif not user.is_staff:
             form.searchqueryset = form.searchqueryset.exclude(staff=True)
-            form.fields['forums'] = TreeModelMultipleChoiceField(
-                queryset=Forum.objects.filter(staff=False),
-                join_field='forum_id',
-                required=False
-            )
+
+        form.fields['forums'] = TreeModelMultipleChoiceField(
+            queryset=Forum.objects.filter_by_user(user),
+            join_field='forum_id',
+            required=False
+        )
+
         return form
 
     def build_page(self):
@@ -69,6 +67,7 @@ class SearchView(BaseSearchView):
         lookup_post_topics(result_list)
         lookup_users(result_list)
         lookup_post_attachments(result_list)
+
         for result in result_list:
             result.id = result.pk
             result.get_body_html = False
