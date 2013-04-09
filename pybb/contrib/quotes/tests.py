@@ -4,6 +4,9 @@ from django.core.urlresolvers import reverse
 from pybb.tests.base import SharedTestModule
 from pybb.contrib.quotes.models import Quote
 
+from pybb.contrib.quotes.processors import QuotePreProcessor
+from pybb.contrib.quotes import settings as quotes_settings
+
 from pybb.models import Post
 
 
@@ -65,3 +68,21 @@ class ReportsTest(TransactionTestCase, SharedTestModule):
                                            kwargs={'topic_id': self.topic.id}))
         self.assertTrue(not 'body' in response.context['form'].initial)
         self.assertEqual(response.status_code, 200)
+
+    def test_emmbedded_quotes_preprocessor(self):
+        body='actual message[quote="zeus;1"]first level[quote="oleiade;2"]second level[quote="zeus;1"]third level[/quote]second level[/quote]first level[/quote]actual message'
+        qp = QuotePreProcessor(body=body)
+        quotes_settings.PYBB_QUOTES_MAX_DEPTH=1
+        self.assertEqual(qp.render(),u'actual message[quote="zeus;1"]first levelfirst level[/quote]actual message')
+        quotes_settings.PYBB_QUOTES_MAX_DEPTH=1
+        self.assertEqual(qp.render(),u'actual message[quote="zeus;1"]first levelfirst level[/quote]actual message')
+        quotes_settings.PYBB_QUOTES_MAX_DEPTH=2
+        self.assertEqual(qp.render(),u'actual message[quote="zeus;1"]first level[quote="oleiade;2"]second levelsecond level[/quote]first level[/quote]actual message')
+        quotes_settings.PYBB_QUOTES_MAX_DEPTH=3
+        self.assertEqual(qp.render(),u'actual message[quote="zeus;1"]first level[quote="oleiade;2"]second level[quote="zeus;1"]third level[/quote]second level[/quote]first level[/quote]actual message')
+        quotes_settings.PYBB_QUOTES_MAX_DEPTH=-1
+        self.assertEqual(qp.render(),u'actual message[quote="zeus;1"]first level[quote="oleiade;2"]second level[quote="zeus;1"]third level[/quote]second level[/quote]first level[/quote]actual message')
+
+
+
+
