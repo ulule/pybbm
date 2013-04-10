@@ -101,6 +101,7 @@ class SearchView(BaseSearchView):
                 advanced = True
                 break
 
+        page.object_list = [obj for obj in page.object_list if obj is not None]
         self.normalize_results(page.object_list)
 
         # Fake Page object to build posts redirect_url
