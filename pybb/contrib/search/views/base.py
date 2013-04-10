@@ -48,6 +48,7 @@ class SearchView(BaseSearchView):
             raise Http404("Pages should be 1 or greater.")
 
         start_offset = (page_no - 1) * self.results_per_page
+
         self.results[start_offset:start_offset + self.results_per_page]
 
         paginator = Paginator(self.results, self.results_per_page)
@@ -101,7 +102,6 @@ class SearchView(BaseSearchView):
                 advanced = True
                 break
 
-        page.object_list = [obj for obj in page.object_list if obj is not None]
         self.normalize_results(page.object_list)
 
         # Fake Page object to build posts redirect_url
