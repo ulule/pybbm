@@ -6,19 +6,9 @@ from django.contrib.auth.models import User
 
 from haystack.forms import SearchForm as HaystackSearchForm
 from haystack.inputs import AutoQuery
-from haystack.query import SearchQuerySet
 
 from pybb.contrib.search.fields import TreeModelMultipleChoiceField
 from pybb.models import Forum
-
-
-class SafeSearchQueryset(SearchQuerySet):
-    """remove `None` from the results if the found object is not in the db"""
-    def post_process_results(self, results):
-        result = super(SafeSearchQueryset, self).post_process_results(results)
-
-        return [obj for obj in result if obj is not None]
-
 
 
 class SearchForm(HaystackSearchForm):
@@ -36,7 +26,6 @@ class SearchForm(HaystackSearchForm):
     end_date = forms.DateTimeField(required=False)
 
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault("searchqueryset",SafeSearchQueryset())
         super(SearchForm, self).__init__(*args, **kwargs)
 
         self.fields['forums'] = TreeModelMultipleChoiceField(queryset=Forum.objects.all(),
