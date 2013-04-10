@@ -20,14 +20,23 @@ class SearchQuerySetSafeIterator(object):
     def __init__(self,sqs):
         self.sqs = sqs
         self.offset = 0
-        for ob in sqs:
-            if ob is None:
-                self.offset +=1
-            else:
-                break
+        try:
+            for ob in sqs:
+                if ob is None:
+                    self.offset +=1
+                else:
+                    break
+        except ValueError:
+            # a bug in haystack.query:122 : `if len(self) <= 0:`
+            self.offset = 0
+            self.sqs = []
 
     def __len__(self):
-        return len(self.sqs) - self.offset
+        len_ =  len(self.sqs) - self.offset
+        if len_ >= 0:
+            return len_
+        # this must not happen
+        return 0
 
     def count(self):
         return len(self)
@@ -186,7 +195,7 @@ class SearchView(BaseSearchView):
             'advanced': advanced,
         }
 
-        if (self.results and hasattr(self.results, 'query') and
+        if (self.results.__len__() > 0 and hasattr(self.results, 'query') and
                 self.results.query.backend.include_spelling):
             context['suggestion'] = self.form.get_suggestion()
 
