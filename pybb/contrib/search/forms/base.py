@@ -56,9 +56,10 @@ class SearchForm(HaystackSearchForm):
         sqs = sqs.order_by('-created')
 
         forums = self.cleaned_data.get('forums', None)
+
         if forums:
             sqs = sqs.filter(topic_breadcrumbs__in=[f.id for f in forums])
-        if self.cleaned_data.get('user_id', None):
+        if self.cleaned_data.get('user', None):
             sqs = sqs.filter(user_id=self.cleaned_data['user'].pk)
         if self.cleaned_data.get('replies', None):
             sqs = sqs.filter(replies__gte=self.cleaned_data['replies'])
