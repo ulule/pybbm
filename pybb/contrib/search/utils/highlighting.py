@@ -47,7 +47,6 @@ class Highlighter(highlighting.Highlighter):
         hl_text = self.render_html(locations, 0, len(self.text_block))
         return mark_safe(hl_text % tuple(tags))
 
-
     def find_highlightable_words(self):
         # Use a set so we only do this once per unique word.
         word_positions = {}
@@ -75,11 +74,19 @@ class Highlighter(highlighting.Highlighter):
                 # '%<span>supper</span>'
                 # wich in turn breaks string replacement
                 if word.startswith('s'):
-                    if next_offset - 1 > 0 :
-                        if (lower_text_block[next_offset - 1] == '%'
-                                and lower_text_block[next_offset - 1] != '%'):
-                            start_offset = next_offset + len(word)
-                            continue
+                    # count preceding '%' to quess if 's' is a formating mark
+                    percents = 0
+                    current_offset = next_offset - 1
+                    while current_offset > -1:
+                        if lower_text_block[current_offset] == '%':
+                            percents += 1
+                            current_offset +=1
+                        else:
+                            break
+                    if percents % 2:
+                        # we got a '%s', forget this occurence
+                        start_offset = next_offset + len(word)
+                        continue
 
                 word_positions[word].append(next_offset)
                 start_offset = next_offset + len(word)
