@@ -34,5 +34,3 @@ class QuotePreProcessor(BaseProcessor):
                 if depth <= max_depth:
                     body += self.body[start:cursor]
         return body
-
-
