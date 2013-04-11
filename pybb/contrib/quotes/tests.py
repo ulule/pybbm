@@ -14,7 +14,7 @@ class ReportsTest(TransactionTestCase, SharedTestModule):
     def setUp(self):
         self.create_user()
         self.create_initial()
-        quotes_settings.PYBB_QUOTES_MAX_DEPTH=-1
+        quotes_settings.PYBB_QUOTES_MAX_DEPTH = -1
 
     def test_simple_quote(self):
         post = Post(user=self.staff, body='[quote="zeus;%d"]Super quote[/quote]' % self.post.pk, topic=self.topic)
@@ -71,24 +71,20 @@ class ReportsTest(TransactionTestCase, SharedTestModule):
         self.assertEqual(response.status_code, 200)
 
     def test_emmbedded_quotes_preprocessor(self):
-        body='actual message[quote="zeus;1"]first level[quote="oleiade;2"]second level[quote="zeus;1"]third level[/quote]second level[/quote]first level[/quote]actual message'
+        body = 'actual message[quote="zeus;1"]first level[quote="oleiade;2"]second level[quote="zeus;1"]third level[/quote]second level[/quote]first level[/quote]actual message'
         qp = QuotePreProcessor(body=body)
         # test all depths
-        quotes_settings.PYBB_QUOTES_MAX_DEPTH=0
+        quotes_settings.PYBB_QUOTES_MAX_DEPTH = 0
         self.assertEqual(qp.render(), u'actual messageactual message')
-        quotes_settings.PYBB_QUOTES_MAX_DEPTH=1
+        quotes_settings.PYBB_QUOTES_MAX_DEPTH = 1
         self.assertEqual(qp.render(), u'actual message[quote="zeus;1"]first levelfirst level[/quote]actual message')
-        quotes_settings.PYBB_QUOTES_MAX_DEPTH=2
+        quotes_settings.PYBB_QUOTES_MAX_DEPTH = 2
         self.assertEqual(qp.render(), u'actual message[quote="zeus;1"]first level[quote="oleiade;2"]second levelsecond level[/quote]first level[/quote]actual message')
-        quotes_settings.PYBB_QUOTES_MAX_DEPTH=3
+        quotes_settings.PYBB_QUOTES_MAX_DEPTH = 3
         self.assertEqual(qp.render(), u'actual message[quote="zeus;1"]first level[quote="oleiade;2"]second level[quote="zeus;1"]third level[/quote]second level[/quote]first level[/quote]actual message')
         # check that higher depth do not break
-        quotes_settings.PYBB_QUOTES_MAX_DEPTH=4
+        quotes_settings.PYBB_QUOTES_MAX_DEPTH = 4
         self.assertEqual(qp.render(), u'actual message[quote="zeus;1"]first level[quote="oleiade;2"]second level[quote="zeus;1"]third level[/quote]second level[/quote]first level[/quote]actual message')
         # negative depth deactivate the render
-        quotes_settings.PYBB_QUOTES_MAX_DEPTH=-1
+        quotes_settings.PYBB_QUOTES_MAX_DEPTH = -1
         self.assertEqual(qp.render(), u'actual message[quote="zeus;1"]first level[quote="oleiade;2"]second level[quote="zeus;1"]third level[/quote]second level[/quote]first level[/quote]actual message')
-
-
-
-
