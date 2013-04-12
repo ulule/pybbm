@@ -1,7 +1,8 @@
-from haystack.utils import highlighting
+import re
 
 from django.utils.html import mark_safe
-import re
+
+from haystack.utils import highlighting
 
 tag_re = re.compile(r'<[^>]*?>')
 

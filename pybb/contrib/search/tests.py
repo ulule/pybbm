@@ -33,4 +33,3 @@ class SearchHighlighterTest(TransactionTestCase, SharedTestModule):
         text = 'ligne 1 %<br/>upper ligne 2 coucou <a href="#">lien</a>'
         self.assertEqual(extract_tags(text), ('ligne 1 %%%supper ligne 2 coucou %slien%s', ['<br/>', '<a href="#">', '</a>']))
         self.assertEqual(self.highlight(query, text), text)
-
