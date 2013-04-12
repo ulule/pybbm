@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from django import forms
 from django.utils.translation import ugettext as _
@@ -8,7 +8,7 @@ from haystack.forms import SearchForm as HaystackSearchForm
 from haystack.inputs import AutoQuery
 
 from pybb.contrib.search.fields import TreeModelMultipleChoiceField
-from pybb.models import Forum
+from pybb.models import Forum, Topic
 
 
 class SearchForm(HaystackSearchForm):
@@ -24,8 +24,10 @@ class SearchForm(HaystackSearchForm):
 
     start_date = forms.DateTimeField(required=False)
     end_date = forms.DateTimeField(required=False)
-    in_topic = forms.BooleanField(required=False)
-    current_topic = forms.IntegerField(required=False)
+
+    topic = forms.ModelChoiceField(queryset=Topic.objects.all(),
+                                   required=False,
+                                   label=_('Topic'))
 
     def __init__(self, *args, **kwargs):
         super(SearchForm, self).__init__(*args, **kwargs)
@@ -38,9 +40,11 @@ class SearchForm(HaystackSearchForm):
         data = super(HaystackSearchForm, self).clean()
         if data.get('start_date', None):
             if not data.get('end_date', None):
-                data['end_date'] = datetime.datetime.now()
+                data['end_date'] = datetime.now()
+
             if data['start_date'] > data['end_date']:
                 raise forms.ValidationError('Start date is after end date')
+
         return data
 
     def search(self):
@@ -57,8 +61,6 @@ class SearchForm(HaystackSearchForm):
 
         sqs = sqs.order_by('-created')
 
-        if self.cleaned_data.get('in_topic', None) and self.cleaned_data.get('current_topic', None):
-            self.cleaned_data['topic_id'] = self.cleaned_data['current_topic']
         forums = self.cleaned_data.get('forums', None)
         if forums:
             sqs = sqs.filter(topic_breadcrumbs__in=[f.id for f in forums])
@@ -66,8 +68,8 @@ class SearchForm(HaystackSearchForm):
             sqs = sqs.filter(user_id=self.cleaned_data['user'].pk)
         if self.cleaned_data.get('replies', None):
             sqs = sqs.filter(replies__gte=self.cleaned_data['replies'])
-        if self.cleaned_data.get('topic_id', None):
-            sqs = sqs.filter(topic_id=self.cleaned_data['topic_id'])
+        if self.cleaned_data.get('topic', None):
+            sqs = sqs.filter(topic_id=self.cleaned_data['topic'].pk)
         if self.cleaned_data.get('start_date', None):
             sqs = sqs.filter(updated__gte=self.cleaned_data['start_date'])
         if self.cleaned_data.get('end_date', None):
