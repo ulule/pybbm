@@ -5,6 +5,7 @@ import re
 
 tag_re = re.compile(r'<[^>]*?>')
 
+
 def extract_tags(html):
     """
     reutrn a string with all html tags replaced by '%s' placeholder and a list of
@@ -19,6 +20,7 @@ def extract_tags(html):
 
     text, nr = tag_re.subn(repl, html)
     return text, tags
+
 
 class Highlighter(highlighting.Highlighter):
     """
@@ -78,11 +80,11 @@ class Highlighter(highlighting.Highlighter):
                     percents = 0
                     current_offset = next_offset - 1
                     while current_offset > -1:
-                        if lower_text_block[current_offset] == '%':
-                            percents += 1
-                            current_offset +=1
-                        else:
+                        if lower_text_block[current_offset] != '%':
                             break
+
+                        percents += 1
+                        current_offset += 1
                     if percents % 2:
                         # we got a '%s', forget this occurence
                         start_offset = next_offset + len(word)
@@ -92,6 +94,3 @@ class Highlighter(highlighting.Highlighter):
                 start_offset = next_offset + len(word)
 
         return word_positions
-
-
-
