@@ -24,6 +24,8 @@ class SearchForm(HaystackSearchForm):
 
     start_date = forms.DateTimeField(required=False)
     end_date = forms.DateTimeField(required=False)
+    in_topic = forms.BooleanField(required=False)
+    current_topic = forms.IntegerField(required=False)
 
     def __init__(self, *args, **kwargs):
         super(SearchForm, self).__init__(*args, **kwargs)
@@ -55,8 +57,9 @@ class SearchForm(HaystackSearchForm):
 
         sqs = sqs.order_by('-created')
 
+        if self.cleaned_data.get('in_topic', None) and self.cleaned_data.get('current_topic', None):
+            self.cleaned_data['topic_id'] = self.cleaned_data['current_topic']
         forums = self.cleaned_data.get('forums', None)
-
         if forums:
             sqs = sqs.filter(topic_breadcrumbs__in=[f.id for f in forums])
         if self.cleaned_data.get('user', None):
