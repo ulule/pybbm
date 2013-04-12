@@ -417,8 +417,6 @@ class TopicQuerySetMixin(object):
                 .filter(on_moderation=False)
                 .exclude(deleted=True))
 
-        return self
-
     def visible(self):
         return self.filter(deleted=False,
                            on_moderation=False,
