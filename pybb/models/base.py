@@ -396,13 +396,26 @@ class BaseTopicRedirection(ModelBase):
 
 
 class TopicQuerySetMixin(object):
-    def filter_by_user(self, forum, user):
-        if not forum.is_moderated_by(user):
-            if user.is_authenticated():
-                return (self.filter(Q(user=user) | Q(on_moderation=False))
-                        .exclude(deleted=True))
+    def filter_by_user(self, user, forum=None):
+        if not forum is None:
+            if not forum.is_moderated_by(user):
+                if user.is_authenticated():
+                    return (self.filter(Q(user=user) | Q(on_moderation=False))
+                            .exclude(deleted=True))
 
             return self.filter(on_moderation=False).exclude(deleted=True)
+
+        if user.is_staff or user.is_superuser:
+            return self
+
+        if user.is_authenticated():
+            return (self.filter(Q(user=user) | Q(on_moderation=False))
+                    .filter(forum__staff=False)
+                    .exclude(deleted=True))
+
+        return (self.filter(forum__hidden=False, forum__staff=False)
+                .filter(on_moderation=False)
+                .exclude(deleted=True))
 
         return self
 
@@ -420,8 +433,8 @@ class TopicManager(ManagerBase):
     def get_query_set(self):
         return TopicQuerySet(self.model)
 
-    def filter_by_user(self, forum, user):
-        return self.get_query_set().filter_by_user(forum, user)
+    def filter_by_user(self, user, forum=None):
+        return self.get_query_set().filter_by_user(user, forum=forum)
 
     def visible(self):
         return self.get_query_set().visible()

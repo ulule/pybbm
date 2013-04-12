@@ -195,7 +195,7 @@ class ForumDetailView(ListView):
             raise Http404
 
         qs = (self.forum.topics.order_by('-sticky', '-updated')
-              .filter_by_user(self.forum, self.request.user))
+              .filter_by_user(self.request.user, forum=self.forum))
 
         return qs
 
