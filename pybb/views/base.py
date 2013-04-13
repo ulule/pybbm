@@ -462,7 +462,8 @@ class TopicDetailView(ListView):
         lookup_post_attachments(ctx[self.template_object_name])
 
         if self.request.user.is_authenticated():
-            if self.topic.poll_id and pybb_topic_poll_not_voted(self.topic, self.request.user):
+            if (self.topic.poll_id and
+                    pybb_topic_poll_not_voted(self.topic, self.request.user)):
                 try:
                     ctx['poll_form'] = PollForm(self.topic.poll)
                 except Poll.DoesNotExist:
@@ -512,7 +513,8 @@ class PostUpdateMixin(object):
 
                 if self.object.topic.poll:
                     if self.object.topic.head == self.object:
-                        pollformset = PollAnswerFormSet(self.request.POST, instance=self.object.topic.poll)
+                        pollformset = PollAnswerFormSet(self.request.POST,
+                                                        instance=self.object.topic.poll)
                         if pollformset.is_valid():
                             pollformset.save()
                         else:
@@ -579,7 +581,8 @@ class PostCreateView(PostUpdateMixin, generic.CreateView):
         return ctx
 
     def get_success_url(self):
-        if (not self.request.user.is_authenticated()) and defaults.PYBB_PREMODERATION:
+        if (not self.request.user.is_authenticated() and
+                defaults.PYBB_PREMODERATION):
             return reverse('pybb:index')
 
         return self.object.get_anchor_url(self.request.user)
@@ -733,7 +736,8 @@ class PostDeleteView(generic.DeleteView):
         self.topic = post.topic
         self.forum = post.topic.forum
 
-        if not self.topic.is_moderated_by(self.request.user, 'can_delete_post') and not post.user == self.request.user:
+        if (not self.topic.is_moderated_by(self.request.user, 'can_delete_post')
+                and not post.user == self.request.user):
             raise PermissionDenied
 
         return post
@@ -940,7 +944,7 @@ class TopicDeleteView(generic.DeleteView):
         self.topic = topic
         self.forum = topic.forum
 
-        if (not self.topic.is_moderated_by(self.request.user, 'can_delete_topic')):
+        if not self.topic.is_moderated_by(self.request.user, 'can_delete_topic'):
             raise PermissionDenied
 
         return topic
@@ -1340,7 +1344,8 @@ class SubscriptionChangeView(generic.RedirectView):
 
         topic_ids = self.request.POST.getlist('topic_ids')
 
-        subscriptions = (Subscription.objects.filter(topic__in=topic_ids, user=self.request.user)
+        subscriptions = (Subscription.objects.filter(topic__in=topic_ids,
+                                                     user=self.request.user)
                          .exclude(type=type)
                          .select_related('topic'))
 
