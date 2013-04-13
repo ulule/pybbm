@@ -32,7 +32,9 @@ from pybb.forms import (PostForm, AdminPostForm, PostsMoveExistingTopicForm,
 from pybb.templatetags.pybb_tags import pybb_topic_poll_not_voted
 from pybb.decorators import login_required
 
-from pybb.helpers import lookup_users, lookup_post_attachments, lookup_post_topics, lookup_topic_lastposts, load_user_posts
+from pybb.helpers import (lookup_users, lookup_post_attachments,
+                          lookup_post_topics, lookup_topic_lastposts,
+                          load_user_posts)
 
 
 def filter_hidden(request, queryset_or_model):
@@ -165,8 +167,9 @@ class ForumDetailView(ListView):
 
         ctx['forum'] = self.forum
 
-        qs = filter_hidden(self.request, self.forum.forums.select_related('last_post__topic__forum',
-                                                                          'last_post__user__profile'))
+        qs = filter_hidden(self.request,
+                           self.forum.forums.select_related('last_post__topic__forum',
+                                                            'last_post__user__profile'))
         self.forum.forums_accessed = qs
 
         lookup_topic_lastposts(ctx[self.context_object_name])
@@ -410,7 +413,8 @@ class TopicDetailView(ListView):
                 return redirect(topic.get_absolute_url(), permanent=True)
 
         topic.views += 1
-        topic.save()
+
+        Topic.objects.filter(pk=topic.pk).update(views=topic.views)
 
         return self.render_to_response(context)
 
