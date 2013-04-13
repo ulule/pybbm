@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
+import urlparse
 from collections import defaultdict
-
 
 try:
     from hashlib import sha1
@@ -30,6 +30,9 @@ from django.conf import settings
 from django.db.models import get_model
 from django.core import exceptions
 from django.utils.importlib import import_module
+from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.http import QueryDict
+from django.shortcuts import redirect
 
 
 CLASS_PATH_ERROR = 'pybb is unable to interpret settings value for %s. '\
@@ -118,7 +121,6 @@ def load_class(class_path, setting_name=None):
         else:
             txt = 'Error importing backend %s: "%s".' % (class_module, e)
 
-
         raise exceptions.ImproperlyConfigured(txt)
 
     try:
@@ -181,3 +183,21 @@ def queryset_to_dict(qs, key='pk', singular=True):
         for u in qs:
             result[getattr(u, key)].append(u)
     return result
+
+
+def redirect_to_login(next, login_url=None,
+                      redirect_field_name=REDIRECT_FIELD_NAME):
+    """
+    Redirects the user to the login page, passing the given 'next' page
+    """
+    if not login_url:
+        login_url = settings.LOGIN_URL() \
+            if callable(settings.LOGIN_URL) else settings.LOGIN_URL
+
+    login_url_parts = list(urlparse.urlparse(login_url))
+    if redirect_field_name:
+        querystring = QueryDict(login_url_parts[4], mutable=True)
+        querystring[redirect_field_name] = next
+        login_url_parts[4] = querystring.urlencode(safe='/')
+
+    return redirect(urlparse.urlunparse(login_url_parts))

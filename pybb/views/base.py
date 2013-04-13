@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import urlparse
 from datetime import datetime
 
 from django.contrib.admin.views.decorators import staff_member_required
@@ -9,7 +8,7 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseBadRequest, QueryDict
+from django.http import HttpResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, _get_queryset, render
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.decorators import method_decorator
@@ -17,8 +16,6 @@ from django.views.generic.edit import ModelFormMixin
 from django.views.decorators.csrf import csrf_protect
 from django.views.generic.edit import FormMixin
 from django.views.generic.base import TemplateResponseMixin
-from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.conf import settings
 from django.views.decorators.http import require_http_methods
 
 from pure_pagination import Paginator, EmptyPage
@@ -26,7 +23,7 @@ from pure_pagination import Paginator, EmptyPage
 from pybb import defaults
 from pybb.models import (Forum, Topic, Post, Moderator, LogModeration, Attachment, Poll,
                          TopicReadTracker, ForumReadTracker, PollAnswerUser, Subscription)
-from pybb.util import load_class, generic, queryset_to_dict
+from pybb.util import load_class, generic, queryset_to_dict, redirect_to_login
 from pybb.models.base import markup
 from pybb.forms import (PostForm, AdminPostForm, PostsMoveExistingTopicForm,
                         PollAnswerFormSet, AttachmentFormSet,
@@ -355,7 +352,7 @@ class UserPostsDeleteView(generic.DeleteView):
             'user': self.object
         })
 
-        return HttpResponseRedirect(self.get_success_url())
+        return redirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse('pybb:user_posts', kwargs={
@@ -484,8 +481,13 @@ class PostUpdateMixin(object):
     def get_context_data(self, **kwargs):
         ctx = super(PostUpdateMixin, self).get_context_data(**kwargs)
 
+        instance = None
+
+        if getattr(self, 'object'):
+            instance = self.object.topic.poll
+
         if 'pollformset' not in kwargs:
-            ctx['pollformset'] = PollAnswerFormSet(instance=self.object.topic.poll if getattr(self, 'object') else None)
+            ctx['pollformset'] = PollAnswerFormSet(instance=instance)
 
         return ctx
 
@@ -740,7 +742,7 @@ class PostDeleteView(generic.DeleteView):
         else:
             self.object.mark_as_undeleted()
 
-        return HttpResponseRedirect(self.get_success_url())
+        return redirect(self.get_success_url())
 
     def get_success_url(self):
         if self.request.user.pk != self.object.user_id:
@@ -812,7 +814,7 @@ class PostsMoveView(generic.FormView):
                 if form.is_valid():
                     topic = form.save()
 
-                    return HttpResponseRedirect(topic.get_absolute_url())
+                    return redirect(topic.get_absolute_url())
 
         return self.render_to_response(context)
 
@@ -947,7 +949,7 @@ class TopicDeleteView(generic.DeleteView):
         else:
             self.object.mark_as_undeleted()
 
-        return HttpResponseRedirect(self.get_success_url())
+        return redirect(self.get_success_url())
 
     def get_success_url(self):
         if self.object.deleted:
@@ -988,7 +990,7 @@ class TopicActionBaseView(generic.View):
             change_message=self.get_change_message(self.topic)
         )
 
-        return HttpResponseRedirect(self.topic.get_absolute_url())
+        return redirect(self.topic.get_absolute_url())
 
     def get_change_message(self, topic):
         return ''
@@ -1466,7 +1468,7 @@ def create_subscription(request):
             'type': subscription.get_type_display()
         })
 
-    return HttpResponseRedirect(topic.get_absolute_url())
+    return redirect(topic.get_absolute_url())
 
 
 @require_http_methods(['POST'])
@@ -1553,7 +1555,7 @@ class AttachmentDeleteView(generic.DeleteView):
         self.object.delete()
 
         if not self.request.is_ajax():
-            return HttpResponseRedirect(self.get_success_url())
+            return redirect(self.get_success_url())
 
         return HttpResponse('Ok')
 
@@ -1620,21 +1622,3 @@ class AttachmentListView(TemplateResponseMixin, generic.View):
             ctx['attachments'] = Attachment.objects.filter(post_hash=post_hash)
 
         return self.render_to_response(ctx)
-
-
-def redirect_to_login(next, login_url=None,
-                      redirect_field_name=REDIRECT_FIELD_NAME):
-    """
-    Redirects the user to the login page, passing the given 'next' page
-    """
-    if not login_url:
-        login_url = settings.LOGIN_URL() \
-            if callable(settings.LOGIN_URL) else settings.LOGIN_URL
-
-    login_url_parts = list(urlparse.urlparse(login_url))
-    if redirect_field_name:
-        querystring = QueryDict(login_url_parts[4], mutable=True)
-        querystring[redirect_field_name] = next
-        login_url_parts[4] = querystring.urlencode(safe='/')
-
-    return HttpResponseRedirect(urlparse.urlunparse(login_url_parts))
