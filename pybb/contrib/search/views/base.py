@@ -75,6 +75,8 @@ class SearchView(BaseSearchView):
             result.id = result.pk
             result.get_body_html = False
             result.get_attachments = result._attachments
+            if result.created == result.updated:
+                result.updated = None
 
     def create_response(self):
         """
