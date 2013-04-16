@@ -440,9 +440,11 @@ class TopicDetailView(ListView):
         self.topic.post_counts = {
             self.request.user: ctx['paginator'].count
         }
+        offset = ctx['page_obj'].number * ctx['paginator'].per_page + 1
 
-        for post in ctx[self.template_object_name]:
+        for idx, post in enumerate(ctx[self.template_object_name], offset):
             post.topic = self.topic
+            post.index = idx
 
         if self.request.user.is_authenticated():
             self.request.user.is_moderator = self.topic.is_moderated_by(self.request.user)
