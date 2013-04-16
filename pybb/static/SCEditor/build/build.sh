@@ -4,13 +4,20 @@
 # $ ./build/build.sh
 # in the terminal from the root directory.
 #
-# You must have uglifyjs, lessc, jsdoc, glue and yui-compressor
-# in order to run this buil script.
+# In order to run this build script, following must be installed:
+#
+#   * UglifyJS
+#   * Lessc
+#   * JSDoc
+#   * YUI compresser (for compressing the CSS)
+#
+# To install in Ubuntu type:
+# $ sudo apt-get install node-uglify node-less jsdoc-toolkit yui-compressor
 
 USAGE="Usage: `basename $0` [--css|--js|--docs]"
 
 DO_CSS=false
-DO_JS=true
+DO_JS=false
 DO_DOCS=false
 
 while true; do
@@ -22,19 +29,14 @@ while true; do
 	esac
 done
 
+if ! $DO_CSS ! $DO_JS ! $DO_DOCS; then
+	echo $USAGE;
+fi
 
 if $DO_CSS; then
 	echo "Creating CSS sprites"
 
-	glue themes/icons/src/famfamfam themes/icons --less --algorithm=vertical --optipng --namespace=sceditor-button
-	sed -i 's/famfamfam\-//' themes/icons/famfamfam.less
-	sed -i 's/url,/link,/' themes/icons/famfamfam.less
-	sed -i 's/url{/link{/' themes/icons/famfamfam.less
-	sed -i 's/{/ div {/' themes/icons/famfamfam.less
-	sed -i 's/,/ div,/' themes/icons/famfamfam.less
-	sed -i 's/grip div/grip/' themes/icons/famfamfam.less
-
-	for f in themes/icons/*.png
+	for f in src/themes/icons/*.png
 	do
 		echo "Processing $f file..";
 
@@ -45,7 +47,7 @@ if $DO_CSS; then
 	done
 
 	echo "Minimising CSS"
-	for f in themes/*.less
+	for f in src/themes/*.less
 	do
 		echo "Processing $f file..";
 
@@ -55,22 +57,36 @@ if $DO_CSS; then
 		lessc --yui-compress $f > minified/themes/$filename.min.css
 	done
 
-	yui-compressor --type css -o minified/jquery.sceditor.default.min.css jquery.sceditor.default.css
+	yui-compressor --type css -o minified/jquery.sceditor.default.min.css src/jquery.sceditor.default.css
 fi
 
 if $DO_JS; then
-	echo "Minimising JavaScript"
+	echo "Minifying JavaScript"
 
-	cat jquery.sceditor.js jquery.sceditor.bbcode.js > minified/jquery.sceditor.min.js
+	cat src/jquery.sceditor.js src/plugins/bbcode.js > minified/jquery.sceditor.bbcode.min.js
+	cat src/jquery.sceditor.js src/plugins/xhtml.js > minified/jquery.sceditor.xhtml.min.js
 
-	uglifyjs -nc --overwrite minified/jquery.sceditor.min.js
+	echo "Minifying SCEditor"
+	uglifyjs --comments '/^!/' -c -m -o minified/jquery.sceditor.min.js src/jquery.sceditor.js
+	uglifyjs --comments '/^!/' -c -m -o minified/jquery.sceditor.xhtml.min.js minified/jquery.sceditor.xhtml.min.js
+	uglifyjs --comments '/^!/' -c -m -o minified/jquery.sceditor.bbcode.min.js minified/jquery.sceditor.bbcode.min.js
 
-	#java -jar build/compiler.jar --js=jquery.sceditor.js --js=jquery.sceditor.bbcode.js --js_output_file=minified/jquery.sceditor.min.js
+	echo "Minifying plugins"
+	for f in src/plugins/*.js
+	do
+		echo "Minifying file $f..";
+
+		filename=$(basename "$f")
+		filename="${filename%.*}"
+
+		cp $f minified/plugins/$filename.js
+		uglifyjs --comments '/^!p/' -c -m -o minified/plugins/$filename.js minified/plugins/$filename.js
+	done
 fi
 
 if $DO_DOCS; then
 	echo "Creating Docs"
 
-	jsdoc --exclude=jquery.sceditor.xhtml.js -D="title:SCEditor" -D="noGlobal:true" -t=./build/CodeView -d=./docs ./
+	jsdoc -D="title:SCEditor" -D="noGlobal:true" -t=./build/CodeView -d=./docs ./src ./src/plugins/bbcode.js ./src/plugins/xhtml.js
 fi
 
