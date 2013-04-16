@@ -2,7 +2,7 @@ from pybb.processors import BaseProcessor
 from pybb.contrib.quotes import settings
 
 
-class QuotePreProcessor(BaseProcessor):
+class QuoteProcessor(BaseProcessor):
     def render(self):
         """strip all quotes deeper than PYBB_QUOTES_MAX_DEPTH"""
         max_depth = settings.PYBB_QUOTES_MAX_DEPTH

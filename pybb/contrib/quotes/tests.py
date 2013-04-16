@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from pybb.tests.base import SharedTestModule
 from pybb.contrib.quotes.models import Quote
 
-from pybb.contrib.quotes.processors import QuotePreProcessor
+from pybb.contrib.quotes.processors import QuoteProcessor
 from pybb.contrib.quotes import settings as quotes_settings
 
 from pybb.models import Post
@@ -72,7 +72,7 @@ class ReportsTest(TransactionTestCase, SharedTestModule):
 
     def test_emmbedded_quotes_preprocessor(self):
         body = 'actual message[quote="zeus;1"]first level[quote="oleiade;2"]second level[quote="zeus;1"]third level[/quote]second level[/quote]first level[/quote]actual message'
-        qp = QuotePreProcessor(body=body)
+        qp = QuoteProcessor(body=body)
         # test all depths
         quotes_settings.PYBB_QUOTES_MAX_DEPTH = 0
         self.assertEqual(qp.render(), u'actual messageactual message')
