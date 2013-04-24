@@ -55,7 +55,7 @@ class ReportsTest(TransactionTestCase, SharedTestModule):
 
         response = self.client.get(reverse('pybb:post_create',
                                            kwargs={'topic_id': self.topic.id}) + '?quote_id=%d' % self.post.id)
-        self.assertEqual(response.context['form'].initial['body'], u'[quote="zeus;1"]bbcode [b]test[/b][/quote]\n\n[quote="oleiade;2"][b]do you want my pere nowel?[/b][/quote]\n')
+        self.assertEqual(response.context['form'].initial['body'], u'[quote="zeus;1"]bbcode [b]test[/b][/quote]\n\n[quote="oleiade;2"][b]do you want my pere nowel?[/b][/quote]\n\n')
         self.assertEqual(response.status_code, 200)
 
         response = self.client.post(reverse('quote'), data={

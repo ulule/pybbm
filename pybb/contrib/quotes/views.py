@@ -77,8 +77,9 @@ class PostCreateView(BasePostCreateView):
 
             if len(post_quoted.keys()):
                 body = '\n'.join([quote(post, post.user.username)
-                    for post_id, post in post_quoted.iteritems()])
-                body += '\n'
+                                  for post_id, post in post_quoted.iteritems()])
+                while not body.endswith('\n\n'):
+                    body = '%s\n' % body
                 form_kwargs['initial']['body'] = body
 
         return form_kwargs
