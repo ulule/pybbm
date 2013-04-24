@@ -76,8 +76,10 @@ class PostCreateView(BasePostCreateView):
                     post_quoted[post.pk] = post
 
             if len(post_quoted.keys()):
-                form_kwargs['initial']['body'] = '\n'.join([quote(post, post.user.username)
-                                                            for post_id, post in post_quoted.iteritems()])
+                body = '\n'.join([quote(post, post.user.username)
+                    for post_id, post in post_quoted.iteritems()])
+                body += '\n'
+                form_kwargs['initial']['body'] = body
 
         return form_kwargs
 
