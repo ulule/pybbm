@@ -3,7 +3,7 @@
 from django.utils import translation
 from django.db.models import ObjectDoesNotExist
 
-from .signals import user_saved
+from .models import user_saved
 
 
 class PybbMiddleware(object):

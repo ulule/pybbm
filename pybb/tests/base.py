@@ -1,7 +1,10 @@
 from django.core.management import call_command
-from django.contrib.auth.models import User
+from django.db.models.loading import cache
+
+cache._populate()
 
 from pybb.models import Post, Topic, Forum
+from pybb.compat import User
 
 __author__ = 'zeus'
 
