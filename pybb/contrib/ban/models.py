@@ -3,9 +3,9 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import signals
 
 from pybb.base import ModelBase, ManagerBase
-from pybb.compat import User
 from pybb.contrib.ban.util import get_ip
 from pybb.contrib.ban import settings
+from pybb.compat import User
 
 
 class BannedUserManager(ManagerBase):

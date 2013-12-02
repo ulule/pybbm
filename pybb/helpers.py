@@ -1,5 +1,6 @@
-from django.contrib.auth.models import User, SiteProfileNotAvailable
+from django.contrib.auth.models import SiteProfileNotAvailable
 
+from pybb.compat import User
 from pybb.models import Post, Attachment, Topic
 from pybb.util import get_profile_model, queryset_to_dict
 
