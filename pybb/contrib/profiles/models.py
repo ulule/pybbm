@@ -53,7 +53,9 @@ class Profile(ModelBase):
             ('can_change_avatar', _('Can change avatar')),
         )
 
-        abstract = False
+        app_label = 'pybb'
+        verbose_name = _('Profile')
+        verbose_name_plural = _('Profiles')
 
     def save(self, *args, **kwargs):
         self.signature = markup(self.signature, obj=self)
