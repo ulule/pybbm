@@ -1,7 +1,7 @@
 from pybb import defaults
 from pybb.util import load_class
 
-from pybb.models.base import BaseTopicRedirection, UserObjectPermission, PostDeletion  # NOQA
+from pybb.models.base import BaseTopicRedirection, PostDeletion  # NOQA
 
 
 class TopicRedirection(BaseTopicRedirection):

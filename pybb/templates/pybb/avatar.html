@@ -1,11 +1,15 @@
 {% load thumbnail %}
 
 <div class="avatar">
-    <a href="{{ post.user.get_profile.get_absolute_url }}">
-        {% thumbnail post.user.get_profile.avatar "80x80" as avatar %}
-            <img src="{{ avatar.url }}" alt="{{ post.user }} avatar" />
-        {% empty %}
-            <img src="{{PYBB_DEFAULT_AVATAR_URL}}" alt="default avatar" />
-        {% endthumbnail %}
+    <a href="{{ post.user.get_absolute_url }}">
+        {% if post.user.avatar %}
+            {% thumbnail post.user.avatar "80x80" as avatar %}
+                <img src="{{ avatar.url }}" alt="{{ post.user }} avatar" />
+            {% empty %}
+                <img src="{{PYBB_DEFAULT_AVATAR_URL}}" alt="default avatar" />
+            {% endthumbnail %}
+        {% else %}
+                <img src="{{PYBB_DEFAULT_AVATAR_URL}}" alt="default avatar" />
+        {% endif %}
     </a>
 </div>

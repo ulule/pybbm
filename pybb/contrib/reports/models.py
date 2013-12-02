@@ -1,10 +1,10 @@
 from django.db import models
 from django.db.models import signals
-from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 
 from pybb.util import tznow
+from pybb.compat import User
 from pybb.models import Post
 from pybb.base import ManagerBase, ModelBase
 

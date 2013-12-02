@@ -2,10 +2,10 @@ from collections import defaultdict
 
 from django.db import models
 from django.db.models import signals
-from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 
 from pybb.base import ModelBase, ManagerBase
+from pybb.compat import User
 from pybb.contrib.quotes.signals import quoted
 from pybb.models import Post
 from pybb import defaults

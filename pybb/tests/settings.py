@@ -1,4 +1,4 @@
-# Django settings for example_bootstrap project.
+import django
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -63,7 +63,6 @@ INSTALLED_APPS = (
     'pybb.contrib.reports',
     'pybb.contrib.ban',
     'sorl.thumbnail',
-    'django_nose',
     'pytils',
     'registration',
     'guardian',
@@ -110,8 +109,6 @@ PYBB_ATTACHMENT_ENABLE = True
 
 PYBB_SMILIES_USE_CACHE = False
 
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.eggs.Loader',
@@ -155,3 +152,8 @@ HAYSTACK_CONNECTIONS = {
         'INDEX_NAME': 'public_forums',
     },
 }
+
+if django.VERSION <= (1, 6):
+    TEST_RUNNER = 'discover_runner.DiscoverRunner'
+
+AUTH_PROFILE_MODULE = 'profiles.Profile'

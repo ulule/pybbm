@@ -18,7 +18,7 @@ except ImportError:
 
 from pybb.models import TopicReadTracker, ForumReadTracker, PollAnswerUser
 from pybb import defaults
-from pybb.util import tznow, timedelta
+from pybb.util import tznow, timedelta, load_class
 
 register = template.Library()
 
@@ -69,10 +69,7 @@ class PybbTimeNode(template.Node):
             else:
                 tz1 = time.timezone
 
-            default_tz = defaults.PYBB_DEFAULT_TIME_ZONE
-
-            if context['user'].get_profile().time_zone:
-                default_tz = context['user'].get_profile().time_zone
+            default_tz = load_class(defaults.PYBB_DEFAULT_TIME_ZONE)(context['user'])
 
             tz = tz1 + default_tz * 60 * 60
             context_time = context_time + timedelta(seconds=tz)

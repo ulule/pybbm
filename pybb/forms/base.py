@@ -5,17 +5,16 @@ import copy
 from django import forms
 from django.forms.formsets import formset_factory
 from django.forms.models import inlineformset_factory, BaseInlineFormSet
-from django.conf import settings
-from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext as _
 from django.forms.formsets import BaseFormSet
 
 from pybb.models import (Topic, Post, Attachment, TopicRedirection,
-                         PollAnswer, Forum, UserObjectPermission, Poll)
+                         PollAnswer, Forum, Poll)
+from pybb.compat import User
+from pybb.proxies import UserObjectPermission
 from pybb import defaults
-from pybb.util import tznow, load_class, get_profile_model
+from pybb.util import tznow, load_class
 
 from autoslug.settings import slugify
 
@@ -237,12 +236,6 @@ class AdminPostForm(PostForm):
         self.user = self.cleaned_data['login']
 
         return super(AdminPostForm, self).save(*args, **kwargs)
-
-try:
-    profile_model = get_profile_model()
-except SiteProfileNotAvailable:
-    from pybb.contrib.profiles.models import Profile
-    profile_model = Profile
 
 
 class UserSearchForm(forms.Form):

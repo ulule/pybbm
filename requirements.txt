@@ -1,5 +1,5 @@
-PIL
-Django>=1.4.1,<1.5
+Pillow
+Django>=1.4,<1.7
 sorl-thumbnail==11.12
 markdown
 postmarkup
@@ -8,16 +8,14 @@ pytils
 bbcode
 django-annoying
 django-pure-pagination
-django-nose
 lxml
 django-registration
-nose-progressive
 django-autoslug
 django-castor
-django-guardian==1.0.4
-celery==3.0.13
+django-guardian==1.1.1
+celery==3.1.5
 mock
 python-magic
 bleach
--e git://github.com/lisael/django-haystack.git#egg=django-haystack-2.0.0-alpha
+django-haystack==2.1.0
 celery-haystack

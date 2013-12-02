@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
+import os
+import uuid
 import urlparse
 from collections import defaultdict
 
@@ -78,8 +80,10 @@ def get_profile_model():
         raise SiteProfileNotAvailable
 
     profile_mod = get_model(*settings.AUTH_PROFILE_MODULE.split('.'))
+
     if profile_mod is None:
         raise SiteProfileNotAvailable
+
     return profile_mod
 
 
@@ -201,3 +205,15 @@ def redirect_to_login(next, login_url=None,
         login_url_parts[4] = querystring.urlencode(safe='/')
 
     return redirect(urlparse.urlunparse(login_url_parts))
+
+
+def get_file_path(instance, filename, to='pybb/avatar'):
+    """
+    This function generate filename with uuid4
+    it's useful if:
+    - you don't want to allow others to see original uploaded filenames
+    - users can upload images with unicode in filenames wich can confuse browsers and filesystem
+    """
+    ext = filename.split('.')[-1]
+    filename = "%s.%s" % (uuid.uuid4(), ext)
+    return os.path.join(to, filename)

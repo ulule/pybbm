@@ -3,7 +3,7 @@ from datetime import datetime
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import User, Permission
+from django.contrib.auth.models import Permission
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
@@ -21,6 +21,7 @@ from django.views.decorators.http import require_http_methods
 from pure_pagination import Paginator, EmptyPage
 
 from pybb import defaults
+from pybb.compat import User
 from pybb.models import (Forum, Topic, Post, Moderator, LogModeration, Attachment, Poll,
                          TopicReadTracker, ForumReadTracker, PollAnswerUser, Subscription)
 from pybb.util import load_class, generic, queryset_to_dict, redirect_to_login

@@ -1,5 +1,4 @@
 from django.views import generic
-from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 from django.core.urlresolvers import reverse
@@ -8,6 +7,7 @@ from django.shortcuts import get_object_or_404
 
 from pybb.contrib.profiles.forms import EditProfileForm
 from pybb.models import Topic
+from pybb.compat import User
 
 
 class ProfileUpdateView(generic.UpdateView):

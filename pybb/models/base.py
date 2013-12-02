@@ -8,36 +8,31 @@ from datetime import date
 
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import User, Permission, AnonymousUser
+from django.contrib.auth.models import AnonymousUser
 from django.utils.encoding import smart_unicode
 from django.core.urlresolvers import reverse
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
-from django.conf import settings
 from django.db.models import Q, signals, F
 from django.contrib.contenttypes import generic
 from django.db.models import ObjectDoesNotExist
 
 from sorl.thumbnail import ImageField
 
+from pybb.compat import User
 from pybb.util import unescape, get_model_string, tznow
 from pybb.base import ModelBase, ManagerBase, QuerySetBase
 from pybb.subscription import notify_topic_subscribers
 from pybb import defaults
-from pybb.signals import setup_signals
 from pybb.fields import ContentTypeRestrictedFileField
-
-from guardian.models import UserObjectPermission as BaseUserObjectPermission
-from guardian.managers import UserObjectPermissionManager as BaseUserObjectPermissionManager
-from guardian.exceptions import ObjectNotPersisted
 
 from autoslug import AutoSlugField
 
 from djcastor import CAStorage
 
 from pybb.tasks import generate_markup
-from pybb.constants import TZ_CHOICES
 from pybb.processors import markup
+from pybb.util import get_file_path
 
 try:
     from south.modelsinspector import add_introspection_rules
@@ -47,26 +42,13 @@ except ImportError:
     pass
 
 
-#noinspection PyUnusedLocal
-def get_file_path(instance, filename, to='pybb/avatar'):
-    """
-    This function generate filename with uuid4
-    it's useful if:
-    - you don't want to allow others to see original uploaded filenames
-    - users can upload images with unicode in filenames wich can confuse browsers and filesystem
-    """
-    ext = filename.split('.')[-1]
-    filename = "%s.%s" % (uuid.uuid4(), ext)
-    return os.path.join(to, filename)
-
-
 class ModeratorManager(ManagerBase):
     def contribute_to_class(self, cls, name):
         signals.post_delete.connect(self.post_delete, sender=cls)
         return super(ModeratorManager, self).contribute_to_class(cls, name)
 
     def post_delete(self, instance, **kwargs):
-        from pybb.models import UserObjectPermission
+        from pybb.proxies import UserObjectPermission
 
         UserObjectPermission.objects.get_for_object(instance.user, instance.forum).delete()
 
@@ -95,7 +77,7 @@ class BaseModerator(ModelBase):
 
     @property
     def permissions(self):
-        from pybb.models import UserObjectPermission
+        from pybb.proxies import UserObjectPermission
 
         permissions = list(self.user.user_permissions.all())
         permissions += [obj_perm.permission
@@ -1019,54 +1001,6 @@ class BasePost(RenderableItem):
                 pass
 
 
-class PybbProfile(ModelBase):
-    """
-    Abstract class for user profile, site profile should be inherted from this class
-    """
-
-    class Meta(object):
-        abstract = True
-        permissions = (
-            ('can_define_password', _('Can define user password')),
-            ('can_ban_user', _('Can ban user')),
-            ('can_unban_user', _('Can unban user')),
-            ('can_change_signature', _('Can change signature')),
-            ('can_change_avatar', _('Can change avatar')),
-        )
-        abstract = True
-
-    signature = models.TextField(_('Signature'), blank=True,
-                                 max_length=defaults.PYBB_SIGNATURE_MAX_LENGTH)
-    time_zone = models.FloatField(_('Time zone'), choices=TZ_CHOICES,
-                                  default=float(defaults.PYBB_DEFAULT_TIME_ZONE))
-    language = models.CharField(_('Language'), max_length=10, blank=True,
-                                choices=settings.LANGUAGES,
-                                default=dict(settings.LANGUAGES)[settings.LANGUAGE_CODE.split('-')[0]],
-                                db_index=True)
-    show_signature = models.BooleanField(_('Show signature'), blank=True,
-                                         default=True, db_index=True)
-    post_count = models.IntegerField(_('Post count'), blank=True, default=0, db_index=True)
-    avatar = ImageField(_('Avatar'), blank=True, null=True,
-                        upload_to=get_file_path)
-    autosubscribe = models.BooleanField(_('Automatically subscribe'),
-                                        help_text=_('Automatically subscribe to topics that you answer'),
-                                        default=defaults.PYBB_DEFAULT_AUTOSUBSCRIBE,
-                                        db_index=True)
-    is_banned = models.BooleanField(default=False, db_index=True)
-
-    def save(self, *args, **kwargs):
-        self.signature = markup(self.signature, obj=self)
-
-        super(PybbProfile, self).save(*args, **kwargs)
-
-    @property
-    def avatar_url(self):
-        try:
-            return self.avatar.url
-        except:
-            return defaults.PYBB_DEFAULT_AVATAR_URL
-
-
 class BaseAttachment(ModelBase):
     TYPE_IMAGE = 1
     TYPE_APPLICATION = 2
@@ -1359,52 +1293,6 @@ class BasePollAnswerUser(ModelBase):
         self.poll_answer.poll.mark_updated()
 
 
-class UserObjectPermissionManager(BaseUserObjectPermissionManager):
-    def assign(self, permission, user, obj, ctype=None):
-        """
-        Assigns permission with given ``perm`` for an instance ``obj`` and
-        ``user``.
-        """
-        if getattr(obj, 'pk', None) is None:
-            raise ObjectNotPersisted("Object %s needs to be persisted first" % obj)
-
-        if not ctype:
-            ctype = ContentType.objects.get_for_model(obj)
-
-        if not isinstance(permission, Permission):
-            permission = Permission.objects.get(content_type=ctype, codename=permission)
-
-        obj_perm, created = self.get_or_create(
-            content_type=ctype,
-            permission=permission,
-            object_pk=obj.pk,
-            user=user)
-        return obj_perm
-
-    def remove_perm(self, perm, user, obj, ctype=None):
-        """
-        Removes permission ``perm`` for an instance ``obj`` and given ``user``.
-        """
-        if getattr(obj, 'pk', None) is None:
-            raise ObjectNotPersisted("Object %s needs to be persisted first" % obj)
-
-        if not ctype:
-            ctype = ContentType.objects.get_for_model(obj)
-
-        (self.filter(permission__codename=perm,
-                     user=user,
-                     object_pk=obj.pk,
-                     content_type=ctype)
-         .delete())
-
-
-class UserObjectPermission(BaseUserObjectPermission):
-    objects = UserObjectPermissionManager()
-
-    class Meta:
-        proxy = True
-
-
 class LogModerationManager(ManagerBase):
     def log(self, user, obj, action_flag, change_message='', level=None,
             target=None, user_ip=None, commit=True):
@@ -1539,4 +1427,5 @@ class BaseLogModeration(ModelBase):
         return smart_unicode(self.action_time)
 
 
-setup_signals()
+def get_user_timezone(user):
+    return defaults.PYBB_DEFAULT_TIME_ZONE

@@ -1,10 +1,7 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, SiteProfileNotAvailable
 
 from pybb.models import Post, Attachment, Topic
 from pybb.util import get_profile_model, queryset_to_dict
-
-
-Profile = get_profile_model()
 
 
 def load_user_posts(qs, user):
@@ -62,7 +59,11 @@ def lookup_users(qs):
 
     users = queryset_to_dict(User.objects.filter(id__in=user_ids.keys()))
 
-    profiles = queryset_to_dict(Profile.objects.filter(user__in=users.keys()), key='user_id')
+    try:
+        Profile = get_profile_model()
+        profiles = queryset_to_dict(Profile.objects.filter(user__in=users.keys()), key='user_id')
+    except SiteProfileNotAvailable:
+        profiles = {}
 
     for user_id, objs in user_ids.iteritems():
         if user_id in users:

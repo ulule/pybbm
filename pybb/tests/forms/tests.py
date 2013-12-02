@@ -3,7 +3,8 @@ from django.test import TransactionTestCase
 from pybb.forms import (ModerationForm, SearchUserForm, ForumForm, TopicMoveForm,
                         TopicMergeForm, get_topic_merge_formset, PostsMoveNewTopicForm,
                         PostsMoveExistingTopicForm)
-from pybb.models import Forum, UserObjectPermission, Topic, Post, TopicRedirection
+from pybb.models import Forum, Topic, Post, TopicRedirection
+from pybb.proxies import UserObjectPermission
 from pybb.tests.base import SharedTestModule
 from pybb import defaults
 

@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 
 
+PYBB_TIMEZONE_FROM_USER = getattr(settings, 'PYBB_TIMEZONE_FROM_USER', 'pybb.models.base.get_user_timezone')
 PYBB_TOPIC_PAGE_SIZE = getattr(settings, 'PYBB_TOPIC_PAGE_SIZE', 10)
 PYBB_FORUM_PAGE_SIZE = getattr(settings, 'PYBB_FORUM_PAGE_SIZE', 20)
 PYBB_AVATAR_WIDTH = getattr(settings, 'PYBB_AVATAR_WIDTH', 80)

@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 from django.shortcuts import redirect
@@ -6,6 +5,7 @@ from django.views.generic.edit import FormMixin
 from django.core.urlresolvers import reverse
 
 from pybb.util import generic
+from pybb.compat import User
 from pybb import defaults
 from pybb.contrib.ban.forms import BanForm
 from pybb.contrib.ban.models import BannedUser, IPAddress

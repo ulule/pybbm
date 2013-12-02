@@ -1,9 +1,9 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth.models import User
 from django.contrib.auth import signals
 
 from pybb.base import ModelBase, ManagerBase
+from pybb.compat import User
 from pybb.contrib.ban.util import get_ip
 from pybb.contrib.ban import settings
 
