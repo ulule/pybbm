@@ -190,15 +190,15 @@ class BaseForum(ModelBase):
 
         from pybb.models import Topic
 
-        res = Topic.objects.visible().filter(forum=self).aggregate(post_count=models.Sum('post_count'))
+        res = Topic.objects.visible().filter(forum_id=self.pk).aggregate(post_count=models.Sum('post_count'))
 
         post_count = res['post_count'] or 0
 
-        topic_count = Topic.objects.filter(forum=self).visible().count() or 0
+        topic_count = Topic.objects.filter(forum_id=self.pk).visible().count() or 0
 
-        res = self.__class__.objects.filter(forum=self).aggregate(post_count=models.Sum('post_count'),
-                                                                  topic_count=models.Sum('topic_count'),
-                                                                  forum_count=models.Sum('forum_count'))
+        res = self.__class__.objects.filter(forum_id=self.pk).aggregate(post_count=models.Sum('post_count'),
+                                                                        topic_count=models.Sum('topic_count'),
+                                                                        forum_count=models.Sum('forum_count'))
 
         self.post_count = post_count + (res['post_count'] or 0)
 
@@ -217,7 +217,7 @@ class BaseForum(ModelBase):
             return True
 
         if (user.is_authenticated() and
-                user.pk in [value[0] for value in self.moderators.values_list('id')]):
+                user.pk in self.moderators.values_list('id', flat=True)):
 
             if permission:
                 return user.has_perm(permission, self)
@@ -617,8 +617,7 @@ class BaseTopic(ModelBase):
     def mark_as_undeleted(self, commit=True, update=True):
         self.deleted = False
 
-        post_ids = [result[0] for result in (PostDeletion.objects.filter(post__topic=self)
-                                             .values_list('post'))]
+        post_ids = PostDeletion.objects.filter(post__topic=self).values_list('post', flat=True)
 
         self.posts.exclude(pk__in=post_ids).update(deleted=False)
 
@@ -703,7 +702,7 @@ class BaseTopic(ModelBase):
 
     def is_subscribed_by(self, user):
         return (user.is_authenticated() and
-                user.pk in self.subscribers.values_list('id'))
+                user.pk in self.subscribers.values_list('id', flat=True))
 
     def is_hidden(self):
         return self.forum.is_hidden()
