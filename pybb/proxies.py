@@ -7,7 +7,7 @@ from guardian.exceptions import ObjectNotPersisted
 
 
 class UserObjectPermissionManager(BaseUserObjectPermissionManager):
-    def assign(self, permission, user, obj, ctype=None):
+    def assign_perm(self, permission, user, obj, ctype=None):
         """
         Assigns permission with given ``perm`` for an instance ``obj`` and
         ``user``.

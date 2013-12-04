@@ -39,7 +39,7 @@ class FormsTest(TransactionTestCase, SharedTestModule):
 
     def test_moderation_form_with_existing_permissions_and_with_obj(self):
         for permission in self.permissions:
-            UserObjectPermission.objects.assign(user=self.user, permission=permission, obj=self.forum)
+            UserObjectPermission.objects.assign_perm(user=self.user, permission=permission, obj=self.forum)
 
         form = ModerationForm(permissions=self.permissions, user=self.user, obj=self.forum)
 

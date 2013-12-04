@@ -344,7 +344,7 @@ class ModerationForm(forms.Form):
 
             if value:
                 if obj:
-                    UserObjectPermission.objects.assign(permission.codename, user=user, obj=obj, ctype=ctype)
+                    UserObjectPermission.objects.assign_perm(permission.codename, user=user, obj=obj, ctype=ctype)
                 else:
                     user.user_permissions.add(permission)
             else:
