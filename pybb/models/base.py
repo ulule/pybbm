@@ -357,6 +357,13 @@ class BaseTopicRedirection(ModelBase):
                                             db_index=True)
     expired = models.DateField(_('Expired'), null=True)
 
+    class Meta(object):
+        verbose_name = _('Redirection')
+        verbose_name_plural = _('Redirections')
+        app_label = 'pybb'
+        abstract = True
+        ordering = ['-created']
+
     def is_expired(self):
         return self.expired < date.today()
 
@@ -368,13 +375,6 @@ class BaseTopicRedirection(ModelBase):
 
     def is_type_expiring(self):
         return self.type == self.TYPE_EXPIRING_REDIRECT
-
-    class Meta(object):
-        verbose_name = _('Redirection')
-        verbose_name_plural = _('Redirections')
-        app_label = 'pybb'
-        abstract = True
-        ordering = ['-created']
 
 
 class TopicQuerySetMixin(object):
@@ -506,15 +506,15 @@ class BaseTopic(ModelBase):
 
     objects = TopicManager()
 
-    def get_last_page(self):
-        return int(math.ceil(self.post_count / float(defaults.PYBB_TOPIC_PAGE_SIZE)))
-
     class Meta(object):
         ordering = ['-created']
         verbose_name = _('Topic')
         verbose_name_plural = _('Topics')
         app_label = 'pybb'
         abstract = True
+
+    def get_last_page(self):
+        return int(math.ceil(self.post_count / float(defaults.PYBB_TOPIC_PAGE_SIZE)))
 
     def __unicode__(self):
         return self.name
