@@ -16,6 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.db.models import Q, signals, F
 from django.contrib.contenttypes import generic
 from django.db.models import ObjectDoesNotExist
+from django.utils.functional import cached_property
 
 from sorl.thumbnail import ImageField
 
@@ -671,7 +672,7 @@ class BaseTopic(ModelBase):
         return self.forum.get_parents() + [self.forum, ]
 
     def poll_votes(self):
-        return self.poll.poll_votes()
+        return self.poll.poll_votes
 
     def get_poll_answers(self):
         if self.poll:
@@ -1195,13 +1196,11 @@ class BasePoll(ModelBase):
         abstract = True
         ordering = ['-updated', '-created']
 
+    @cached_property
     def poll_votes(self):
-        if not hasattr(self, '_votes'):
-            result = self.answers.aggregate(total=models.Sum('user_count'))
+        result = self.answers.aggregate(total=models.Sum('user_count'))
 
-            setattr(self, '_votes', result['total'] or 0)
-
-        return getattr(self, '_votes')
+        return result['total'] or 0
 
     def mark_updated(self):
         now = tznow()
@@ -1236,7 +1235,7 @@ class BasePollAnswer(ModelBase):
         return self.users.count()
 
     def votes_percent(self):
-        poll_votes = self.poll.poll_votes()
+        poll_votes = self.poll.poll_votes
 
         if poll_votes > 0:
             return int(1.0 * self.votes() / poll_votes * 100)

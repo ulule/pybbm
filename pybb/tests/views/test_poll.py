@@ -131,7 +131,7 @@ class PollTest(TransactionTestCase, SharedTestModule):
         values = {'answers': my_answer.id}
         response = self.client.post(vote_url, data=values, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(Topic.objects.get(id=self.topic.id).poll_votes(), 1)
+        self.assertEqual(Topic.objects.get(id=self.topic.id).poll_votes, 1)
         self.assertEqual(PollAnswer.objects.get(id=my_answer.id).votes(), 1)
         self.assertEqual(PollAnswer.objects.get(id=my_answer.id).votes_percent(), 100.0)
 
