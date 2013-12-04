@@ -671,6 +671,7 @@ class BaseTopic(ModelBase):
         """
         return self.forum.get_parents() + [self.forum, ]
 
+    @property
     def poll_votes(self):
         return self.poll.poll_votes
 
