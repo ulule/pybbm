@@ -369,6 +369,7 @@ class TopicDetailView(ListView):
     paginator_class = Paginator
     template_object_name = 'post_list'
     template_name = 'pybb/topic/list.html'
+    url = '^(?P<forum_slug>[\w\-\_]+)/(?P<pk>\d+)-(?P<slug>[\w\-\_]+)(?:\-(?P<page>\d+)/)?$'
 
     def get(self, request, *args, **kwargs):
         topic = self.get_topic()
@@ -387,7 +388,7 @@ class TopicDetailView(ListView):
         context = self.get_context_data(object_list=self.object_list)
 
         if (topic.slug != self.kwargs['slug'] or
-                topic.forum.slug != self.kwargs['forum_slug']):
+                ('forum_slug' in self.kwargs and topic.forum.slug != self.kwargs['forum_slug'])):
             return redirect(topic.get_absolute_url(), permanent=True)
 
         if topic.redirect:

@@ -141,13 +141,13 @@ urlpatterns += patterns(
         views.UserPostsDeleteView.as_view(),
         name='user_posts_delete'),
 
+    url(views.TopicDetailView.url,
+        views.TopicDetailView.as_view(),
+        name='topic_detail'),
+
     url('^(?P<slug>[\w\-\_]+)/(?:(?P<page>\d+)/)?$',
         views.ForumDetailView.as_view(),
         name='forum_detail'),
-
-    url('^(?P<forum_slug>[\w\-\_]+)/(?P<pk>\d+)-(?P<slug>[\w\-\_]+)(?:\-(?P<page>\d+)/)?$',
-        views.TopicDetailView.as_view(),
-        name='topic_detail'),
 )
 
 if defaults.PYBB_ATTACHMENT_ENABLE:
