@@ -135,10 +135,11 @@ class PostForm(forms.ModelForm):
         return body
 
     def clean(self):
-        poll_type = self.cleaned_data.get('poll_type', None)
-        poll_question = self.cleaned_data.get('poll_question', None)
-        if poll_type is not None and poll_type != Poll.TYPE_NONE and not poll_question:
-            raise forms.ValidationError(_('Poll''s question is required when adding a poll'))
+        if not defaults.PYBB_DISABLE_POLLS:
+            poll_type = self.cleaned_data.get('poll_type', None)
+            poll_question = self.cleaned_data.get('poll_question', None)
+            if poll_type is not None and poll_type != Poll.TYPE_NONE and not poll_question:
+                raise forms.ValidationError(_('Poll''s question is required when adding a poll'))
 
         return self.cleaned_data
 
@@ -159,23 +160,24 @@ class PostForm(forms.ModelForm):
                 topic.updated = tznow()
                 topic.save()
 
-                if self.cleaned_data['poll_type'] != Poll.TYPE_NONE:
-                    poll = topic.poll or Poll()
-                    poll.type = self.cleaned_data['poll_type']
-                    poll.question = self.cleaned_data['poll_question']
+                if not defaults.PYBB_DISABLE_POLLS:
+                    if self.cleaned_data['poll_type'] != Poll.TYPE_NONE:
+                        poll = topic.poll or Poll()
+                        poll.type = self.cleaned_data['poll_type']
+                        poll.question = self.cleaned_data['poll_question']
 
-                    is_new = poll.pk is None
+                        is_new = poll.pk is None
 
-                    poll.save()
+                        poll.save()
 
-                    if is_new:
-                        topic.poll = poll
-                        topic.save()
-                else:
-                    if topic.poll:
-                        topic.poll.answers.all().delete()
-                        topic.poll = None
-                        topic.save()
+                        if is_new:
+                            topic.poll = poll
+                            topic.save()
+                    else:
+                        if topic.poll:
+                            topic.poll.answers.all().delete()
+                            topic.poll = None
+                            topic.save()
 
             post.save()
 
@@ -197,14 +199,15 @@ class PostForm(forms.ModelForm):
                 topic.on_moderation = True
             topic.save()
 
-            if self.cleaned_data['poll_type'] != Poll.TYPE_NONE:
-                poll = Poll(
-                    type=self.cleaned_data['poll_type'],
-                    question=self.cleaned_data['poll_question']
-                )
-                poll.save()
+            if not defaults.PYBB_DISABLE_POLLS:
+                if self.cleaned_data['poll_type'] != Poll.TYPE_NONE:
+                    poll = Poll(
+                        type=self.cleaned_data['poll_type'],
+                        question=self.cleaned_data['poll_question']
+                    )
+                    poll.save()
 
-                topic.poll = poll
+                    topic.poll = poll
         else:
             topic = self.topic
 

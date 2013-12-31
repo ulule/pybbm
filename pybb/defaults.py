@@ -59,6 +59,7 @@ PYBB_BODY_CLEANERS = getattr(settings, 'PYBB_BODY_CLEANERS', ['pybb.util.rstrip_
 PYBB_BODY_VALIDATOR = getattr(settings, 'PYBB_BODY_VALIDATOR', None)
 
 PYBB_POLL_MAX_ANSWERS = getattr(settings, 'PYBB_POLL_MAX_ANSWERS', 10)
+PYBB_DISABLE_POLLS = getattr(settings, 'PYBB_DISABLE_POLLS', False)
 
 PYBB_AUTO_USER_PERMISSIONS = getattr(settings, 'PYBB_AUTO_USER_PERMISSIONS', False)
 
