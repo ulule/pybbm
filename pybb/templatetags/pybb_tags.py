@@ -159,8 +159,8 @@ def pybb_topic_unread(topics, user):
         topic_marks = list(qs)
         topic_dict = dict(((topic.id, topic) for topic in topic_list))
         for mark in topic_marks:
-            if (topic_dict[mark.topic.id].updated is None) or\
-               (topic_dict[mark.topic.id].updated <= mark.time_stamp):
+            if ((topic_dict[mark.topic.id].updated is None) or
+               (topic_dict[mark.topic.id].updated <= mark.time_stamp)):
                 topic_dict[mark.topic.id].unread = False
     return topic_list
 
@@ -181,8 +181,8 @@ def pybb_forum_unread(forums, user):
         ).select_related('forum')
         forum_dict = dict(((forum.id, forum) for forum in forum_list))
         for mark in forum_marks:
-            if (forum_dict[mark.forum.id].updated is None) or\
-               (forum_dict[mark.forum.id].updated <= mark.time_stamp):
+            if ((forum_dict[mark.forum.id].updated is None) or
+               (forum_dict[mark.forum.id].updated <= mark.time_stamp)):
                 forum_dict[mark.forum.id].unread = False
     return forum_list
 
