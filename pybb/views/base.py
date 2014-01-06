@@ -448,6 +448,10 @@ class TopicDetailView(ListView):
             post.topic = self.topic
             post.index = idx
 
+        ctx['topic'] = self.topic
+        ctx['subscription_types'] = Subscription.TYPE_CHOICES
+        ctx['redirect'] = self.request.GET.get('redirect', False)
+
         if self.request.user.is_authenticated():
             self.request.user.is_moderator = self.topic.is_moderated_by(self.request.user)
 
@@ -455,17 +459,6 @@ class TopicDetailView(ListView):
 
             self.topic.mark_as_read(self.request.user)
 
-        if defaults.PYBB_FREEZE_FIRST_POST:
-            ctx['first_post'] = self.topic.head
-        else:
-            ctx['first_post'] = None
-
-        ctx['topic'] = self.topic
-
-        lookup_users(ctx[self.template_object_name])
-        lookup_post_attachments(ctx[self.template_object_name])
-
-        if self.request.user.is_authenticated():
             if (self.topic.poll_id and
                     pybb_topic_poll_not_voted(self.topic, self.request.user)):
                 try:
@@ -473,16 +466,19 @@ class TopicDetailView(ListView):
                 except Poll.DoesNotExist:
                     pass
 
-        ctx['subscription_types'] = Subscription.TYPE_CHOICES
-
-        if self.request.user.is_authenticated():
             try:
                 subscription = self.request.user.subscription_set.get(topic=self.topic)
                 ctx['current_subscription_type'] = ctx['subscription_types'][subscription.type]
             except Subscription.DoesNotExist:
                 ctx['current_subscription_type'] = Subscription.TYPE_CHOICES[0]
 
-        ctx['redirect'] = self.request.GET.get('redirect', False)
+        if defaults.PYBB_FREEZE_FIRST_POST:
+            ctx['first_post'] = self.topic.head
+        else:
+            ctx['first_post'] = None
+
+        lookup_users(ctx[self.template_object_name])
+        lookup_post_attachments(ctx[self.template_object_name])
 
         return ctx
 
