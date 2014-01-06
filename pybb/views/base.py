@@ -1229,6 +1229,10 @@ class ModeratorDetailView(generic.DetailView, FormMixin):
             change_message=change_message
         )
 
+        messages.success(self.request, _(u'Permissions for moderator "%(username)s" successfully saved') % {
+            'username': self.object.user.username
+        })
+
         return reverse('pybb:moderator_detail', kwargs={
             'forum_id': self.forum.pk,
             'moderator_id': self.object.pk
@@ -1279,6 +1283,10 @@ class ModeratorCreateView(ModeratorDetailView):
             user_ip=self.request.META['REMOTE_ADDR'],
             level=LogModeration.LEVEL_HIGH
         )
+
+        messages.success(self.request, _(u'New moderator "%(username)s" created') % {
+            'username': moderator.user.username
+        })
 
         return reverse('pybb:moderator_detail', kwargs={
             'forum_id': self.forum.pk,
