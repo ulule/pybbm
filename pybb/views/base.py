@@ -475,6 +475,13 @@ class TopicDetailView(ListView):
 
         ctx['subscription_types'] = Subscription.TYPE_CHOICES
 
+        if self.request.user.is_authenticated():
+            try:
+                subscription = self.request.user.subscription_set.get(topic=self.topic)
+                ctx['current_subscription_type'] = ctx['subscription_types'][subscription.type]
+            except Subscription.DoesNotExist:
+                ctx['current_subscription_type'] = Subscription.TYPE_CHOICES[0]
+
         ctx['redirect'] = self.request.GET.get('redirect', False)
 
         return ctx
