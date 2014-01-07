@@ -88,9 +88,6 @@ class PostForm(forms.ModelForm):
         self.forum = kwargs.pop('forum', None)
         self.actor = kwargs.pop('actor', None)
 
-        if not (self.topic or self.forum or ('instance' in kwargs)):
-            raise ValueError(_('You should provide topic, forum or instance'))
-
             #Handle topic subject, poll type and question if editing topic head
         if ('instance' in kwargs) and kwargs['instance'] and (kwargs['instance'].topic.head == kwargs['instance']):
             kwargs.setdefault('initial', {})['name'] = kwargs['instance'].topic.name
@@ -105,7 +102,12 @@ class PostForm(forms.ModelForm):
 
         # remove topic specific fields
         if not (self.forum or (self.instance.pk and (self.instance.topic.head == self.instance))):
-            del self.fields['name']
+            if self.topic:
+                del self.fields['name']
+            else:
+                self.fields['forum'] = forms.ModelChoiceField(label=_('Forum'),
+                                                              queryset=Forum.objects.all(),
+                                                              required=True)
             del self.fields['poll_type']
             del self.fields['poll_question']
 
@@ -188,6 +190,9 @@ class PostForm(forms.ModelForm):
         if defaults.PYBB_PREMODERATION:
             allow_post = defaults.PYBB_PREMODERATION(self.user, self.cleaned_data['body'])
 
+        if 'forum' in self.cleaned_data and not self.forum:
+            self.forum = self.cleaned_data['forum']
+
         if self.forum:
             topic = Topic(
                 forum=self.forum,
@@ -200,7 +205,7 @@ class PostForm(forms.ModelForm):
             topic.save()
 
             if not defaults.PYBB_DISABLE_POLLS:
-                if self.cleaned_data['poll_type'] != Poll.TYPE_NONE:
+                if 'poll_type' in self.cleaned_data and self.cleaned_data['poll_type'] != Poll.TYPE_NONE:
                     poll = Poll(
                         type=self.cleaned_data['poll_type'],
                         question=self.cleaned_data['poll_question']

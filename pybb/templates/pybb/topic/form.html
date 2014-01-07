@@ -1,12 +1,11 @@
 {% load url from future %}
 {% load i18n pybb_tags %}
 <form class="post-form" action="
-    {% if topic %}
-        {% url 'pybb:post_create' topic.pk %}
+    {% if forum %}
+        {% url 'pybb:topic_create' forum.pk %}
     {% else %}
-        {% url 'pybb:post_update' pk=object.pk %}
-    {% endif %}
-    " method="post" enctype="multipart/form-data">
+        {% url 'pybb:topic_create' %}
+    {% endif %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <fieldset>
         {{ form.non_field_errors }}

@@ -607,7 +607,7 @@ class PostCreateView(PostUpdateMixin, generic.CreateView):
         self.forum = None
         self.topic = None
 
-        if 'forum_id' in kwargs:
+        if 'forum_id' in kwargs and kwargs['forum_id']:
             self.forum = get_object_or_404(filter_hidden(request, Forum), pk=kwargs['forum_id'])
         elif 'topic_id' in kwargs:
             self.topic = get_object_or_404(Topic.objects.visible(), pk=kwargs['topic_id'])

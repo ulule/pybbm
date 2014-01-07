@@ -70,7 +70,7 @@ urlpatterns += patterns(
         name='topic_poll_vote'),
 
     # Add topic/post
-    url('^forums/(?P<forum_id>\d+)/topic/add/$',
+    url('^forums/(?:(?P<forum_id>\d+)/)?topic/add/$',
         views.PostCreateView.as_view(),
         name='topic_create'),
     url('^topics/post/add/$',

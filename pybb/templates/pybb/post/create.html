@@ -20,7 +20,14 @@
 {% endblock %}
 
 {% block content %}
-    {% include "pybb/post/form.html" %}
+
+    {% if forum %}
+        {% include "pybb/topic/form.html" %}
+    {% elif not forum and not topic %}
+        {% include "pybb/topic/form.html" %}
+    {% else %}
+        {% include "pybb/post/form.html" %}
+    {% endif %}
 
     {% if topic %}
         {% get_obj_perms request.user for topic.forum as "forum_perms" %}

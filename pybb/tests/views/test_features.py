@@ -92,6 +92,19 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(Topic.objects.filter(name='new topic name').exists())
 
+    def test_global_topic_addition(self):
+        self.login_client()
+        topic_create_url = reverse('pybb:topic_create')
+        response = self.client.get(topic_create_url)
+        values = self.get_form_values(response)
+        values['body'] = 'new global topic test'
+        values['name'] = 'new global topic name'
+        values['forum'] = self.forum.id
+        values['poll_type'] = 0
+        response = self.client.post(topic_create_url, data=values, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(Topic.objects.filter(name='new global topic name').exists())
+
     def test_post_deletion(self):
         post = Post(topic=self.topic, user=self.user, body='bbcode [b]test[b]')
         post.save()
