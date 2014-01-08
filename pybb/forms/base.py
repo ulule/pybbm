@@ -106,7 +106,7 @@ class PostForm(forms.ModelForm):
                 del self.fields['name']
             else:
                 self.fields['forum'] = forms.ModelChoiceField(label=_('Forum'),
-                                                              queryset=Forum.objects.all(),
+                                                              queryset=Forum.objects.all().order_by('name'),
                                                               required=True)
             del self.fields['poll_type']
             del self.fields['poll_question']
