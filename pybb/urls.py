@@ -145,7 +145,7 @@ urlpatterns += patterns(
         views.TopicDetailView.as_view(),
         name='topic_detail'),
 
-    url('^(?P<slug>[\w\-\_]+)/(?:(?P<page>\d+)/)?$',
+    url(views.ForumDetailView.url,
         views.ForumDetailView.as_view(),
         name='forum_detail'),
 )

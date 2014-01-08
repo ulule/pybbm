@@ -162,6 +162,7 @@ class ForumDetailView(ListView):
     context_object_name = 'topic_list'
     template_name = 'pybb/forum/detail.html'
     paginator_class = Paginator
+    url = '^(?P<slug>[\w\-\_]+)/(?:(?P<page>\d+)/)?$'
 
     def get_context_data(self, **kwargs):
         ctx = super(ForumDetailView, self).get_context_data(**kwargs)
