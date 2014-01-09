@@ -578,13 +578,13 @@ class PostCreateView(PostUpdateMixin, generic.CreateView):
 
             ctx['post_count'] = qs.count()
 
-            posts = qs[:defaults.PYBB_FORUM_PAGE_SIZE]
+            posts = qs[:defaults.PYBB_POST_LIST_SIZE]
 
             for post in posts:
                 post.topic = self.topic
 
             ctx['post_list'] = posts
-            ctx['post_page_size'] = defaults.PYBB_FORUM_PAGE_SIZE
+            ctx['post_page_size'] = defaults.PYBB_POST_LIST_SIZE
 
         return ctx
 
