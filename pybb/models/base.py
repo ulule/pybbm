@@ -34,6 +34,7 @@ from djcastor import CAStorage
 from pybb.tasks import generate_markup
 from pybb.processors import markup
 from pybb.util import get_file_path
+from pybb.compat import update_fields
 
 try:
     from south.modelsinspector import add_introspection_rules
@@ -600,8 +601,13 @@ class BaseTopic(ModelBase):
                     user=user,
                     topic__forum=self.forum
                 ).delete()
-                forum_mark, new = ForumReadTracker.objects.get_or_create(forum=self.forum, user=user)
-                forum_mark.save()
+
+                if not forum_mark:
+                    ForumReadTracker.objects.create(forum=self.forum, user=user)
+
+                else:
+                    forum_mark.time_stamp = tznow()
+                    update_fields(forum_mark, fields=('time_stamp', ))
 
     def mark_as_deleted(self, commit=True, update=True):
         self.deleted = True
