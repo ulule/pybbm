@@ -2,7 +2,7 @@ Pillow
 Django>=1.4,<1.7
 sorl-thumbnail==11.12
 markdown
-postmarkup
+postmarkup==1.2.0
 south
 pytils
 bbcode
