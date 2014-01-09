@@ -1,10 +1,16 @@
 {% load url from future %}
 {% load i18n pybb_tags %}
 <form class="post-form" action="
-    {% if topic %}
+    {% if forum %}
+        {% url 'pybb:topic_create' forum.pk %}
+    {% elif topic %}
         {% url 'pybb:post_create' topic.pk %}
-    {% else %}
-        {% url 'pybb:post_update' pk=object.pk %}
+    {% elif not topic and not forum %}
+        {% if object %}
+            {% url 'pybb:post_update' pk=object.pk %}
+        {% else %}
+            {% url 'pybb:topic_create' %}
+        {% endif %}
     {% endif %}
     " method="post" enctype="multipart/form-data">
     {% csrf_token %}
