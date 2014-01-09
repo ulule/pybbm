@@ -4,6 +4,8 @@ import os.path
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
+import bleach
+
 
 PYBB_TIMEZONE_FROM_USER = getattr(settings, 'PYBB_TIMEZONE_FROM_USER', 'pybb.models.base.get_user_timezone')
 PYBB_TOPIC_PAGE_SIZE = getattr(settings, 'PYBB_TOPIC_PAGE_SIZE', 10)
@@ -36,6 +38,7 @@ PYBB_MARKUP_PREPROCESSORS = getattr(settings, 'PYBB_MARKUP_PREPROCESSORS', (
     'pybb.contrib.smilies.processors.SmileyProcessor',
 ))
 PYBB_MARKUP_POSTPROCESSORS = getattr(settings, 'PYBB_MARKUP_POSTPROCESSORS', (
+    'pybb.sanitizer.BleachProcessor',
 ))
 
 PYBB_MARKUP = getattr(settings, 'PYBB_MARKUP', 'bbcode')
@@ -172,3 +175,33 @@ PYBB_PRE_POST_CREATE_FILTERS = getattr(settings, 'PYBB_PRE_POST_CREATE_FILTERS',
 ))
 
 PYBB_UPDATE_MENTION_POST_DELTA = getattr(settings, 'PYBB_UPDATE_MENTION_POST_DELTA', 180)
+
+PYBB_ALLOWED_ATTRIBUTES = getattr(settings, 'ALLOWED_ATTRIBUTES', {
+    'a': ['href', 'title', 'class', 'target', 'rel'],
+    'div': ['class', 'id', 'style'],
+    'span': ['class', 'style'],
+    'img': ['class', 'src', 'alt', 'title'],
+    'input': ['type', 'class', 'value'],
+    'iframe': ['width', 'height', 'frameborder', 'src', 'data-youtube-id', 'allowfullscreen'],
+})
+
+PYBB_ALLOWED_TAGS = getattr(settings, 'PYBB_ALLOWED_TAGS', bleach.ALLOWED_TAGS + [
+    'input',
+    'div',
+    'span',
+    'img',
+    'strike',
+    'u',
+    'code',
+    'blockquote',
+    'iframe',
+    'br',
+])
+
+PYBB_ALLOWED_STYLES = getattr(settings, 'PYBB_ALLOWED_STYLES', bleach.ALLOWED_STYLES + [
+    'font-size',
+    'font-family',
+    'text-align',
+    'list-style-type',
+    'color',
+])

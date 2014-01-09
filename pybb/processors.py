@@ -1,10 +1,8 @@
-import bleach
 
 from django.utils.html import urlize
 
 from pybb import defaults
 from pybb.util import load_class
-from pybb.constants import ALLOWED_ATTRIBUTES, ALLOWED_STYLES, ALLOWED_TAGS
 
 
 class BaseProcessor(object):
@@ -27,7 +25,4 @@ def markup(body, obj=None, context=None):
     for postprocessor in defaults.PYBB_MARKUP_POSTPROCESSORS:
         body = load_class(postprocessor)(body, obj=obj).render()
 
-    return bleach.clean(body,
-                        tags=ALLOWED_TAGS,
-                        attributes=ALLOWED_ATTRIBUTES,
-                        styles=ALLOWED_STYLES)
+    return body

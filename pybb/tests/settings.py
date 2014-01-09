@@ -136,6 +136,7 @@ PYBB_BBCODE_MARKUP_FORMATTERS = (
 PYBB_POST_CREATE_VIEW = 'pybb.contrib.quotes.views.PostCreateView'
 
 PYBB_MARKUP_PREPROCESSORS = (
+    'pybb.sanitizer.BleachProcessor',
     'pybb.contrib.mentions.processors.MentionProcessor',
     'pybb.contrib.smilies.processors.SmileyProcessor',
 )
