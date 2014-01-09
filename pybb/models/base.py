@@ -724,7 +724,7 @@ class RenderableItem(ModelBase):
     class Meta(object):
         abstract = True
 
-    body = models.TextField(_('Message'))
+    body = models.TextField(_('Message'), null=True)
     body_html = models.TextField(_('HTML version'), null=True)
     body_text = models.TextField(_('Text version'), null=True)
 
