@@ -536,12 +536,14 @@ class BaseTopic(ModelBase):
             topic.poll = None
 
             self.poll = poll
-            self.save()
+
+            update_fields(self, fields=('poll', ))
 
         topic.topicreadtracker_set.all().update(topic=self)
 
         topic.redirect = True
-        topic.save()
+
+        update_fields(topic, fields=('redirect', ))
 
         TopicRedirection.objects.create(from_topic=topic,
                                         to_topic=self,
