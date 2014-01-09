@@ -470,7 +470,7 @@ class BaseTopic(ModelBase):
     slug = AutoSlugField(populate_from='name', max_length=255)
 
     cover = ImageField(_('Cover'), blank=True, null=True,
-                       upload_to=get_file_path)
+                       upload_to=lambda instance, filename: get_file_path(instance, filename, to='pybb/covers'))
 
     created = models.DateTimeField(_('Created'), null=True)
     updated = models.DateTimeField(_('Updated'), null=True)
