@@ -443,9 +443,15 @@ class TopicDetailView(ListView):
         self.topic.post_counts = {
             self.request.user: ctx['paginator'].count
         }
-        offset = ctx['page_obj'].number * ctx['paginator'].per_page + 1
 
-        for idx, post in enumerate(ctx[self.template_object_name], offset):
+        page_number = ctx['page_obj'].number
+
+        start = page_number
+
+        if page_number > 1:
+            start = (start - 1) * ctx['paginator'].per_page + 1
+
+        for idx, post in enumerate(ctx[self.template_object_name], start):
             post.topic = self.topic
             post.index = idx
 
