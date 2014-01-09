@@ -761,7 +761,10 @@ class PostDeleteView(generic.DeleteView):
         return redirect(self.get_success_url())
 
     def get_success_url(self):
-        messages.success(self.request, _('Your post has been successfully deleted'))
+        if self.object.deleted:
+            messages.success(self.request, _('Your post has been successfully deleted'))
+        else:
+            messages.success(self.request, _('Your post has been successfully restored'))
 
         if self.request.user.pk != self.object.user_id:
             LogModeration.objects.log(
