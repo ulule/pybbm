@@ -615,7 +615,7 @@ class BaseTopic(ModelBase):
         self.posts.visible(join=False).update(deleted=True)
 
         if commit:
-            self.save()
+            update_fields(self, fields=('deleted', ))
 
         if update:
             self.forum.update_counters(commit=commit)
@@ -628,7 +628,7 @@ class BaseTopic(ModelBase):
         self.posts.exclude(pk__in=post_ids).update(deleted=False)
 
         if commit:
-            self.save()
+            update_fields(self, fields=('deleted', ))
 
         if update:
             self.forum.update_counters(commit=commit)
@@ -961,7 +961,7 @@ class BasePost(RenderableItem):
                 self.topic.mark_as_deleted()
 
         if commit:
-            self.save()
+            update_fields(self, fields=('deleted', ))
 
     def mark_as_undeleted(self, commit=True):
         self_id = self.id
@@ -971,7 +971,7 @@ class BasePost(RenderableItem):
         PostDeletion.objects.filter(post=self).delete()
 
         if commit:
-            self.save()
+            update_fields(self, fields=('deleted', ))
 
         try:
             head_post_id = self.topic.posts.visible(join=False).order_by('created')[0].id
@@ -1212,11 +1212,11 @@ class BasePoll(ModelBase):
         now = tznow()
 
         self.updated = now
-        self.save()
+        update_fields(self, fields=('updated', ))
 
         for topic in self.topics.all():
             topic.updated = now
-            topic.save()
+            update_fields(topic, fields=('updated', ))
 
 
 class BasePollAnswer(ModelBase):
@@ -1252,7 +1252,7 @@ class BasePollAnswer(ModelBase):
         self.user_count = self.votes()
 
         if commit:
-            self.save()
+            update_fields(self, fields=('user_count', ))
 
 
 class PollAnswerUserManager(ManagerBase):
