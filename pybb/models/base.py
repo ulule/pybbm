@@ -860,9 +860,11 @@ class BasePost(RenderableItem):
         abstract = True
 
     def summary(self):
-        LIMIT = 50
-        tail = len(self.body) > LIMIT and '...' or ''
-        return self.body[:LIMIT] + tail
+        if self.body:
+            LIMIT = 50
+            tail = len(self.body) > LIMIT and '...' or ''
+            return self.body[:LIMIT] + tail
+        return None
 
     __unicode__ = summary
 
