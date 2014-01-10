@@ -100,14 +100,17 @@ class PostForm(forms.ModelForm):
 
         self.fields['hash'].initial = self.instance.get_hash()
 
+        if not (self.forum or self.topic or self.instance.pk):
+            self.fields['forum'] = forms.ModelChoiceField(label=_('Forum'),
+                                                          queryset=Forum.objects.all().order_by('name'),
+                                                          required=True)
+
         # remove topic specific fields
         if not (self.forum or (self.instance.pk and (self.instance.topic.head == self.instance))):
-            if self.topic:
+
+            if (self.instance.pk and not self.instance.topic.head == self.instance) or self.topic:
                 del self.fields['name']
-            else:
-                self.fields['forum'] = forms.ModelChoiceField(label=_('Forum'),
-                                                              queryset=Forum.objects.all().order_by('name'),
-                                                              required=True)
+
             del self.fields['poll_type']
             del self.fields['poll_question']
 
