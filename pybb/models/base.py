@@ -583,7 +583,7 @@ class BaseTopic(ModelBase):
         except ObjectDoesNotExist:
             forum_mark = None
 
-        if (forum_mark is None) or (forum_mark.time_stamp < self.updated):
+        if self.updated and ((forum_mark is None) or (forum_mark.time_stamp < self.updated)):
             # Mark topic as readed
             count = TopicReadTracker.objects.filter(topic=self, user=user).update(time_stamp=tznow())
 
