@@ -20,21 +20,18 @@ from django.utils.functional import cached_property
 
 from sorl.thumbnail import ImageField
 
-from pybb.compat import User
-from pybb.util import unescape, get_model_string, tznow
+from pybb.compat import User, update_fields
+from pybb.util import unescape, get_model_string, tznow, get_file_path
 from pybb.base import ModelBase, ManagerBase, QuerySetBase
 from pybb.subscription import notify_topic_subscribers
 from pybb import defaults
 from pybb.fields import ContentTypeRestrictedFileField
+from pybb.tasks import generate_markup
+from pybb.processors import markup
 
 from autoslug import AutoSlugField
 
 from djcastor import CAStorage
-
-from pybb.tasks import generate_markup
-from pybb.processors import markup
-from pybb.util import get_file_path
-from pybb.compat import update_fields
 
 try:
     from south.modelsinspector import add_introspection_rules
