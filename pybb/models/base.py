@@ -569,7 +569,7 @@ class BaseTopic(ModelBase):
 
     def get_last_post(self):
         try:
-            last_post = self.posts.visible().order_by('-created').select_related('user')[0]
+            last_post = self.posts.visible(join=False).order_by('-created').select_related('user')[0]
             last_post.topic = self
 
             return last_post
@@ -654,7 +654,7 @@ class BaseTopic(ModelBase):
         super(BaseTopic, self).save(*args, **kwargs)
 
     def update_counters(self, commit=True):
-        self.post_count = self.posts.visible().count()
+        self.post_count = self.posts.visible(join=False).count()
 
         last_post = self.get_last_post()
 
