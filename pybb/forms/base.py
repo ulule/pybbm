@@ -61,13 +61,7 @@ class PostForm(forms.ModelForm):
     }
 
     name = forms.CharField(label=_('Subject'))
-    poll_type = forms.TypedChoiceField(label=_('Poll type'),
-                                       choices=Poll.TYPE_CHOICES,
-                                       coerce=int,
-                                       initial=Poll.TYPE_NONE)
-    poll_question = forms.CharField(label=_('Poll question'),
-                                    required=False,
-                                    widget=forms.Textarea(attrs={'class': 'no-markitup'}))
+
     body = forms.CharField(label=_('Message'),
                            widget=forms.Textarea(attrs={'class': 'pretty_editor'}))
 
@@ -92,13 +86,22 @@ class PostForm(forms.ModelForm):
         if ('instance' in kwargs) and kwargs['instance'] and (kwargs['instance'].topic.head == kwargs['instance']):
             kwargs.setdefault('initial', {})['name'] = kwargs['instance'].topic.name
 
-            if kwargs['instance'].topic.poll:
+            if kwargs['instance'].topic.poll and not defaults.PYBB_DISABLE_POLLS:
                 kwargs.setdefault('initial', {})['poll_type'] = kwargs['instance'].topic.poll.type
                 kwargs.setdefault('initial', {})['poll_question'] = kwargs['instance'].topic.poll.question
 
         super(PostForm, self).__init__(**kwargs)
 
         self.fields['hash'].initial = self.instance.get_hash()
+
+        if not defaults.PYBB_DISABLE_POLLS:
+            self.fields['poll_type'] = forms.TypedChoiceField(label=_('Poll type'),
+                                                              choices=Poll.TYPE_CHOICES,
+                                                              coerce=int,
+                                                              initial=Poll.TYPE_NONE)
+            self.fields['poll_question'] = forms.CharField(label=_('Poll question'),
+                                                           required=False,
+                                                           widget=forms.Textarea(attrs={'class': 'no-markitup'}))
 
         if not (self.forum or self.topic or self.instance.pk):
             self.fields['forum'] = forms.ModelChoiceField(label=_('Forum'),
@@ -111,8 +114,9 @@ class PostForm(forms.ModelForm):
             if (self.instance.pk and not self.instance.topic.head == self.instance) or self.topic:
                 del self.fields['name']
 
-            del self.fields['poll_type']
-            del self.fields['poll_question']
+            if not defaults.PYBB_DISABLE_POLLS:
+                del self.fields['poll_type']
+                del self.fields['poll_question']
 
     def clean_name(self):
         name = self.cleaned_data['name']

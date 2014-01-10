@@ -11,6 +11,8 @@ PostForm = load_class(defaults.PYBB_POST_FORM)
 
 AdminPostForm = load_class(defaults.PYBB_ADMIN_POST_FORM)
 
+AdminPostForm.__bases__ = (PostForm, )
+
 UserSearchForm = load_class(defaults.PYBB_USER_SEARCH_FORM)
 
 PollForm = load_class(defaults.PYBB_POLL_FORM)
