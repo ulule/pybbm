@@ -864,7 +864,8 @@ class BasePost(RenderableItem):
             LIMIT = 50
             tail = len(self.body) > LIMIT and '...' or ''
             return self.body[:LIMIT] + tail
-        return None
+
+        return ''
 
     __unicode__ = summary
 
