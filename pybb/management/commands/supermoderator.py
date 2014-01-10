@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 
 from pybb.models import Forum
 
+
 class Command(BaseCommand):
     help = 'Set and remove moderator to all forums'
     args = '{add|del} username'

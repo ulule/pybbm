@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # vim:fileencoding=utf-8
 
-__author__ = 'zeus'
-
 from django.core.management.base import BaseCommand, CommandError
-from pybb.models import Topic, Post
 from django.core import serializers
+
+from pybb.models import Topic, Post
+
 
 class Command(BaseCommand):
     args = '<topic_id topic_id>'
