@@ -20,11 +20,11 @@ msgstr ""
 
 #: feeds.py:25 feeds.py:26
 msgid "Latest posts on forum"
-msgstr ""
+msgstr "Derniers messages du forum"
 
 #: feeds.py:36 feeds.py:37
 msgid "Latest topics on forum"
-msgstr ""
+msgstr "Derniers sujets du forum"
 
 #: fields.py:22
 #, python-format
@@ -66,7 +66,7 @@ msgstr ""
 #: contrib/ban/models.py:40
 #, python-format
 msgid "IP Address %s is banned"
-msgstr ""
+msgstr "L'adresse IP %s est bannie"
 
 #: contrib/ban/models.py:48 contrib/ban/templates/pybb/ban/delete.html:9
 #: contrib/ban/templates/pybb/ban/list.html:26
@@ -75,24 +75,24 @@ msgstr "Raison"
 
 #: contrib/ban/models.py:55
 msgid "Banned user"
-msgstr ""
+msgstr "Utilisateur banni"
 
 #: contrib/ban/models.py:56
 msgid "Banned users"
-msgstr ""
+msgstr "Utilisateurs bannis"
 
 #: contrib/ban/models.py:59
 #, python-format
 msgid "User %(user)s banned for %(reason)s"
-msgstr ""
+msgstr "Utilisateur %(user)s banni pour %(reason)s"
 
 #: contrib/ban/models.py:84 templates/pybb/moderation/logs.html:32
 msgid "IP Address"
-msgstr ""
+msgstr "Adresse IP"
 
 #: contrib/ban/models.py:85
 msgid "The IP address"
-msgstr ""
+msgstr "L'adresse IP"
 
 #: contrib/ban/models.py:93
 msgid "IP"
@@ -104,21 +104,21 @@ msgstr ""
 
 #: contrib/ban/templates/pybb/ban/access_denied.html:5
 msgid "You are banned on this network"
-msgstr ""
+msgstr "Vous êtes banni du système"
 
 #: contrib/ban/templates/pybb/ban/create.html:5
 #, python-format
 msgid "Ban user %(username)s"
-msgstr ""
+msgstr "Bannir l'utilisateur %(username)s"
 
 #: contrib/ban/templates/pybb/ban/delete.html:6
 #, python-format
 msgid "Are you sure to unban %(username)s?"
-msgstr ""
+msgstr "Étes-vous sûr de vouloir autoriser %(username)s ?"
 
 #: contrib/ban/templates/pybb/ban/delete.html:14
 msgid "This will unban all these IP Addresses:"
-msgstr ""
+msgstr "Cela va autoriser toutes ces adresses IP :"
 
 #: contrib/ban/templates/pybb/ban/delete.html:27
 #: templates/pybb/moderation/moderator/delete.html:12
@@ -135,7 +135,7 @@ msgstr "Oui, je suis sûr"
 #: contrib/ban/templates/pybb/ban/list.html:8
 #: contrib/ban/templates/pybb/ban/list.html:16
 msgid "Ban list"
-msgstr ""
+msgstr "Bannir la liste"
 
 #: contrib/ban/templates/pybb/ban/list.html:23 contrib/profiles/models.py:26
 #: contrib/reports/templates/pybb/report/detail.html:21 forms/base.py:242
@@ -144,11 +144,11 @@ msgstr ""
 #: templates/pybb/moderation/logs.html:17
 #: templates/pybb/moderation/moderator/list.html:31
 msgid "User"
-msgstr ""
+msgstr "Utilisateur"
 
 #: contrib/ban/templates/pybb/ban/list.html:29
 msgid "IP Addresses"
-msgstr ""
+msgstr "Adresses IP"
 
 #: contrib/ban/templates/pybb/ban/list.html:32
 #: contrib/reports/templates/pybb/report/list.html:37
@@ -158,11 +158,11 @@ msgstr ""
 
 #: contrib/ban/templates/pybb/ban/list.html:58 models/base.py:1333
 msgid "unban"
-msgstr ""
+msgstr "autoriser"
 
 #: contrib/ban/templates/pybb/ban/list.html:67
 msgid "No banned users"
-msgstr ""
+msgstr "Utilisateurs autorisés"
 
 #: contrib/mentions/models.py:52
 msgid "Mention"
@@ -175,17 +175,17 @@ msgstr ""
 #: contrib/profiles/forms.py:20
 #, python-format
 msgid "Avatar is too large, max size: %s bytes"
-msgstr ""
+msgstr "L'avatar est trop lourd, taille maximale : %s bytes"
 
 #: contrib/profiles/forms.py:27
 #, python-format
 msgid "Number of lines is limited to %d"
-msgstr ""
+msgstr "Le nombre de ligne est limité à %d"
 
 #: contrib/profiles/forms.py:29
 #, python-format
 msgid "Length of signature is limited to %d"
-msgstr ""
+msgstr "La longueur de la signature est limité à %d"
 
 #: contrib/profiles/models.py:28
 msgid "Signature"
@@ -193,15 +193,15 @@ msgstr ""
 
 #: contrib/profiles/models.py:30
 msgid "Time zone"
-msgstr ""
+msgstr "Fuseau horaire"
 
 #: contrib/profiles/models.py:32
 msgid "Language"
-msgstr ""
+msgstr "Langage"
 
 #: contrib/profiles/models.py:36
 msgid "Show signature"
-msgstr ""
+msgstr "Montrer la signature"
 
 #: contrib/profiles/models.py:38 models/base.py:134 models/base.py:485
 msgid "Post count"
