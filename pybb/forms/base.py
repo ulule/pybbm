@@ -405,6 +405,7 @@ class PostsMoveExistingTopicForm(forms.Form):
         topic = self.cleaned_data['topic']
 
         self.posts.update(topic=topic)
+        topic.update_counters()
 
         return topic
 
@@ -457,6 +458,7 @@ class PostsMoveNewTopicForm(forms.Form):
                                      user=self.user)
 
         self.posts.update(topic=topic)
+        topic.update_counters()
 
         return topic
 
