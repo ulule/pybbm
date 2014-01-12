@@ -614,10 +614,16 @@ class PostCreateView(PostUpdateMixin, generic.CreateView):
         self.forum = None
         self.topic = None
 
-        if 'forum_id' in kwargs and kwargs['forum_id']:
-            self.forum = get_object_or_404(filter_hidden(request, Forum), pk=kwargs['forum_id'])
-        elif 'topic_id' in kwargs:
-            self.topic = get_object_or_404(Topic.objects.visible(), pk=kwargs['topic_id'])
+        data = request.POST or {}
+
+        forum_id = kwargs.get('forum_id', data.get('forum_id', None))
+
+        topic_id = kwargs.get('topic_id', data.get('topic_id', None))
+
+        if forum_id:
+            self.forum = get_object_or_404(filter_hidden(request, Forum), pk=forum_id)
+        elif topic_id:
+            self.topic = get_object_or_404(Topic.objects.visible(), pk=topic_id)
 
             if not self.topic.is_accessible_by(request.user):
                 raise Http404
