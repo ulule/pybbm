@@ -56,12 +56,12 @@ msgstr "Oui"
 
 #: contrib/ban/models.py:29
 msgid "Cookie exists: user already banned from anonymous account"
-msgstr ""
+msgstr "Un cookie existe : l'utilisateur a déjà été banni du compte anonyme"
 
 #: contrib/ban/models.py:32
 #, python-format
 msgid "Cookie exists: user already banned for the account %s"
-msgstr ""
+msgstr "Un cookie existe : l'utilisateur a déjà été banni pour le compte %s"
 
 #: contrib/ban/models.py:40
 #, python-format
@@ -175,7 +175,7 @@ msgstr ""
 #: contrib/profiles/forms.py:20
 #, python-format
 msgid "Avatar is too large, max size: %s bytes"
-msgstr "L'avatar est trop lourd, taille maximale : %s bytes"
+msgstr "L'avatar est trop gros, taille maximale : %s bytes"
 
 #: contrib/profiles/forms.py:27
 #, python-format
@@ -205,7 +205,7 @@ msgstr "Montrer la signature"
 
 #: contrib/profiles/models.py:38 models/base.py:134 models/base.py:485
 msgid "Post count"
-msgstr ""
+msgstr "Nombre de message"
 
 #: contrib/profiles/models.py:39
 msgid "Avatar"
@@ -213,74 +213,74 @@ msgstr ""
 
 #: contrib/profiles/models.py:41
 msgid "Automatically subscribe"
-msgstr ""
+msgstr "Souscrire automatiquement"
 
 #: contrib/profiles/models.py:42
 msgid "Automatically subscribe to topics that you answer"
-msgstr ""
+msgstr "Souscrire automatiquement aux sujets auxquels vous avez participé"
 
 #: contrib/profiles/models.py:49
 msgid "Can define user password"
-msgstr ""
+msgstr "Peut modifier le mot de passe d'un utilisateur"
 
 #: contrib/profiles/models.py:50
 msgid "Can ban user"
-msgstr ""
+msgstr "Peut bannir un utilisateur"
 
 #: contrib/profiles/models.py:51
 msgid "Can unban user"
-msgstr ""
+msgstr "Peut autoriser un utilisateur"
 
 #: contrib/profiles/models.py:52
 msgid "Can change signature"
-msgstr ""
+msgstr "Peut changer la signature"
 
 #: contrib/profiles/models.py:53
 msgid "Can change avatar"
-msgstr ""
+msgstr "Peut changer l'avatar"
 
 #: contrib/profiles/models.py:57
 msgid "Profile"
-msgstr ""
+msgstr "Profil"
 
 #: contrib/profiles/models.py:58
 msgid "Profiles"
-msgstr ""
+msgstr "Profils"
 
 #: contrib/profiles/templates/pybb/profile_update.html:7
 #: contrib/profiles/templates/pybb/profile_update.html:10
 #: contrib/profiles/templates/pybb/profile_update.html:22
 msgid "Profile editing"
-msgstr ""
+msgstr "Edition du profil"
 
 #: contrib/profiles/templates/pybb/profile_update.html:18
 msgid "Change the password"
-msgstr ""
+msgstr "Changer le mot de passe"
 
 #: contrib/profiles/templates/pybb/profile_update.html:27
 msgid "Subscriptions on topics"
-msgstr ""
+msgstr "Souscription aux sujets"
 
 #: contrib/profiles/templates/pybb/profile_update.html:34
 #: templates/pybb/moderation/moderator/list.html:61
 msgid "delete"
-msgstr ""
+msgstr "supprimer"
 
 #: contrib/quotes/models.py:46
 msgid "From user"
-msgstr ""
+msgstr "De l'utilisateur"
 
 #: contrib/quotes/models.py:53
 msgid "To user"
-msgstr ""
+msgstr "A l'utilisateur"
 
 #: contrib/quotes/models.py:61
 msgid "Quote"
-msgstr ""
+msgstr "Citation"
 
 #: contrib/quotes/models.py:62
 msgid "Quotes"
-msgstr ""
+msgstr "Citations"
 
 #: contrib/quotes/settings.py:14
 #, python-format
@@ -320,47 +320,47 @@ msgstr ""
 
 #: contrib/reports/models.py:36
 msgid "New"
-msgstr ""
+msgstr "Nouveau"
 
 #: contrib/reports/models.py:37 models/base.py:477
 #: templates/pybb/forum/_detail.html:106
 msgid "Closed"
-msgstr ""
+msgstr "Fermé"
 
 #: contrib/reports/models.py:50 contrib/reports/models.py:51
 #: contrib/reports/templates/pybb/report/list.html:8
 #: contrib/reports/templates/pybb/report/list.html:16
 msgid "Reports"
-msgstr ""
+msgstr "Signalements"
 
 #: contrib/reports/models.py:79
 #, python-format
 msgid "Reports for %s"
-msgstr ""
+msgstr "Signalements pour %s"
 
 #: contrib/reports/models.py:92
 msgid "Report message"
-msgstr ""
+msgstr "Signaler un message"
 
 #: contrib/reports/models.py:93
 msgid "Report messages"
-msgstr ""
+msgstr "Signaler des messages"
 
 #: contrib/reports/views.py:35
 #, python-format
 msgid "You have already reported this post on %(topic)s!"
-msgstr ""
+msgstr "Vous avez déjà signlé ce message dans %(topic)s !"
 
 #: contrib/reports/templates/pybb/report/create.html:5
 #, python-format
 msgid "New report for a post from %(username)s on %(name)s"
-msgstr ""
+msgstr "Nouveau signalement pour un message de %(username)s dans %(name)s"
 
 #: contrib/reports/templates/pybb/report/detail.html:5
 #: contrib/reports/templates/pybb/report/detail.html:13
 #, python-format
 msgid "Reports for %(name)s"
-msgstr ""
+msgstr "Signalements pour %(name)s"
 
 #: contrib/reports/templates/pybb/report/detail.html:24 forms/base.py:65
 #: models/base.py:724 templates/pybb/moderation/logs.html:29
@@ -373,38 +373,38 @@ msgstr ""
 
 #: contrib/reports/templates/pybb/report/detail.html:49
 msgid "No messages"
-msgstr ""
+msgstr "Pas de messages"
 
 #: contrib/reports/templates/pybb/report/list.html:25 models/base.py:854
 #: models/base.py:1048
 msgid "Post"
-msgstr ""
+msgstr "Message"
 
 #: contrib/reports/templates/pybb/report/list.html:28
 msgid "Status"
-msgstr ""
+msgstr "Statut"
 
 #: contrib/reports/templates/pybb/report/list.html:31
 msgid "Reports count"
-msgstr ""
+msgstr "Nombre de signalements"
 
 #: contrib/reports/templates/pybb/report/list.html:34 models/base.py:133
 #: models/base.py:451 models/base.py:473 models/base.py:839
 #: models/base.py:1195
 msgid "Updated"
-msgstr ""
+msgstr "Mis à jour"
 
 #: contrib/reports/templates/pybb/report/list.html:63
 msgid "view"
-msgstr ""
+msgstr "voir"
 
 #: contrib/reports/templates/pybb/report/list.html:66
 msgid "close"
-msgstr ""
+msgstr "fermer"
 
 #: contrib/reports/templates/pybb/report/list.html:76
 msgid "No reports"
-msgstr ""
+msgstr "Pas de signalements"
 
 #: contrib/search/forms/base.py:17 forms/base.py:373
 msgid "Username"
@@ -455,7 +455,7 @@ msgstr "Ajouter deux ou plus de réponses pour ce sondage"
 
 #: forms/base.py:60
 msgid "A topic with that name already exists."
-msgstr ""
+msgstr "Un sujet avec ce nom existe déjà."
 
 #: forms/base.py:63 models/base.py:466
 msgid "Subject"
@@ -480,15 +480,15 @@ msgstr ""
 
 #: forms/base.py:151
 msgid "Polls question is required when adding a poll"
-msgstr ""
+msgstr "L'ajout d'une question est nécessaire lors de la création d'un sondage"
 
 #: forms/base.py:295
 msgid "A forum with that name already exists."
-msgstr ""
+msgstr "Un forum avec ce nom existe déjà."
 
 #: forms/base.py:375
 msgid "A user with that username does not exist."
-msgstr ""
+msgstr "Aucun nom d'utilisateur correspondant."
 
 #: forms/base.py:394
 msgid "Destination topic"
@@ -507,14 +507,15 @@ msgstr "Nouveau nom pour ce sujet"
 msgid ""
 "A topic with the name \"%(topic)s\" already exists in the forum \"%(forum)s\""
 msgstr ""
+"Un sujet avec le nom \"%(topic)s\" existe déjà dans le forum \"%(forum)s\""
 
 #: forms/base.py:467
 msgid "You must specify the expiring date"
-msgstr ""
+msgstr "Vous devez spécifier la date d'expiration"
 
 #: forms/base.py:478 models/base.py:478
 msgid "Redirect"
-msgstr ""
+msgstr "Redirection"
 
 #: forms/base.py:573
 msgid "Name of the topic"
@@ -522,24 +523,24 @@ msgstr "Nom pour ce sujet"
 
 #: forms/base.py:574
 msgid "Use this field to combine the current topic to another"
-msgstr ""
+msgstr "Utilisez ce champ pour fusionner ce sujet avec un autre"
 
 #: forms/base.py:587
 msgid "You can't merge a topic in the same topic"
-msgstr ""
+msgstr "Vous ne pouvez fusionner un sujet avec lui-même"
 
 #: models/base.py:67
 msgid "Moderator"
-msgstr ""
+msgstr "Modérateur"
 
 #: models/base.py:68 models/base.py:132
 msgid "Moderators"
-msgstr ""
+msgstr "Modérateurs"
 
 #: models/base.py:72
 #, python-format
 msgid "Moderator %(user)s of %(forum)s"
-msgstr ""
+msgstr "Modérateur %(user)s de %(forum)s"
 
 #: models/base.py:127
 msgid "Parent"
@@ -559,27 +560,27 @@ msgstr ""
 
 #: models/base.py:135
 msgid "Topic count"
-msgstr ""
+msgstr "Nombre de sujet"
 
 #: models/base.py:138
 msgid "Headline"
-msgstr ""
+msgstr "En-tête"
 
 #: models/base.py:139 templates/pybb/forum/_detail.html:47
 msgid "Hidden"
-msgstr ""
+msgstr "Caché"
 
 #: models/base.py:141
 msgid "Staff only"
-msgstr ""
+msgstr "Staff seulement"
 
 #: models/base.py:144
 msgid "Empty"
-msgstr ""
+msgstr "Vide"
 
 #: models/base.py:147
 msgid "If the forum is empty, you can't post into it"
-msgstr ""
+msgstr "Si le forum est vide, vous ne pouvez pas poster dedans"
 
 #: models/base.py:164
 msgid "Forums"
@@ -587,84 +588,84 @@ msgstr ""
 
 #: models/base.py:167
 msgid "Can unstick topic"
-msgstr ""
+msgstr "Peut dédépingler le sujet"
 
 #: models/base.py:168
 msgid "Can stick topic"
-msgstr ""
+msgstr "Peut épingler le sujet"
 
 #: models/base.py:169
 msgid "Can open topic"
-msgstr ""
+msgstr "Peut ouvrir un sujet"
 
 #: models/base.py:170
 msgid "Can close topic"
-msgstr ""
+msgstr "Peut fermer un sujet"
 
 #: models/base.py:171
 msgid "Can merge topic"
-msgstr ""
+msgstr "Peut fusionner un sujet"
 
 #: models/base.py:172
 msgid "Can delete topic"
-msgstr ""
+msgstr "Peut supprimer un sujet"
 
 #: models/base.py:173
 msgid "Can edit topic"
-msgstr ""
+msgstr "Peut éditer un sujet"
 
 #: models/base.py:174
 msgid "Can move topic"
-msgstr ""
+msgstr "Peut déplacer un sujet"
 
 #: models/base.py:175
 msgid "Can move post"
-msgstr ""
+msgstr "Peut déplacer un message"
 
 #: models/base.py:176
 msgid "Can edit a poll"
-msgstr ""
+msgstr "Peut éditer un sondage"
 
 #: models/base.py:177
 msgid "Can publish an announce"
-msgstr ""
+msgstr "Peut publier une annonce"
 
 #: models/base.py:178
 msgid "Can edit post"
-msgstr ""
+msgstr "Peut éditer un message"
 
 #: models/base.py:179
 msgid "Can delete post"
-msgstr ""
+msgstr "Peut supprimer un message"
 
 #: models/base.py:180
 msgid "Can see IP Address"
-msgstr ""
+msgstr "Peut voir l'adresse IP"
 
 #: models/base.py:181
 msgid "Can moderate attachments"
-msgstr ""
+msgstr "Peut gérer les pièces jointes"
 
 #: models/base.py:344
 msgid "Permanent redirect"
-msgstr ""
+msgstr "Redirection permanente"
 
 #: models/base.py:345
 msgid "Leave no redirect"
-msgstr ""
+msgstr "Pas de redirection"
 
 #: models/base.py:346
 msgid "Expiring redirect"
-msgstr ""
+msgstr "Définir une redirection avec date d'expiration"
 
 #: models/base.py:353 models/base.py:450 models/base.py:472 models/base.py:826
 #: models/base.py:838 models/base.py:1066 models/base.py:1194
 msgid "Created"
-msgstr ""
+msgstr "Créé"
 
 #: models/base.py:357
 msgid "Expired"
-msgstr ""
+msgstr "A expiré"
 
 #: models/base.py:360
 msgid "Redirection"
@@ -696,19 +697,19 @@ msgstr "Abonnements"
 
 #: models/base.py:469
 msgid "Cover"
-msgstr ""
+msgstr "Couverture"
 
 #: models/base.py:475
 msgid "Views count"
-msgstr ""
+msgstr "Nombre de vues"
 
 #: models/base.py:476 templates/pybb/forum/_detail.html:105
 msgid "Sticky"
-msgstr ""
+msgstr "Épinglé"
 
 #: models/base.py:479 models/base.py:846 templates/pybb/forum/_detail.html:107
 msgid "Deleted"
-msgstr ""
+msgstr "Supprimé"
 
 #: models/base.py:482 templates/pybb/topic/list.html:89
 msgid "Subscribers"
@@ -716,7 +717,7 @@ msgstr "Abonnés"
 
 #: models/base.py:487 models/base.py:844
 msgid "On moderation"
-msgstr ""
+msgstr "En cours de modération"
 
 #: models/base.py:511
 msgid "Topics"
@@ -724,20 +725,20 @@ msgstr "Sujets"
 
 #: models/base.py:725
 msgid "HTML version"
-msgstr ""
+msgstr "Version HTML"
 
 #: models/base.py:726
 msgid "Text version"
-msgstr ""
+msgstr "Version texte"
 
 #: models/base.py:840 models/base.py:1359
 msgid "User IP"
-msgstr ""
+msgstr "IP de l'utilisateur"
 
 #: models/base.py:855 templates/pybb/forum/_detail.html:88
 #: templates/pybb/topic/list.html:26 templates/pybb/topic/list.html.py:47
 msgid "Posts"
-msgstr ""
+msgstr "Messages"
 
 #: models/base.py:1020
 msgid "image"
@@ -753,47 +754,47 @@ msgstr ""
 
 #: models/base.py:1023
 msgid "text"
-msgstr ""
+msgstr "texte"
 
 #: models/base.py:1024
 msgid "binary"
-msgstr ""
+msgstr "binaire"
 
 #: models/base.py:1051
 msgid "Size"
-msgstr ""
+msgstr "Taille"
 
 #: models/base.py:1052
 msgid "File"
-msgstr ""
+msgstr "Fichier"
 
 #: models/base.py:1070
 msgid "Attachment"
-msgstr ""
+msgstr "Pièce jointe"
 
 #: models/base.py:1071 templates/pybb/post/form.html:36
 msgid "Attachments"
-msgstr ""
+msgstr "Pièces jointes"
 
 #: models/base.py:1125
 msgid "Topic read tracker"
-msgstr ""
+msgstr "Traqueur de lecture de sujet"
 
 #: models/base.py:1126
 msgid "Topic read trackers"
-msgstr ""
+msgstr "Traqueurs de lecture de sujet"
 
 #: models/base.py:1165
 msgid "Forum read tracker"
-msgstr ""
+msgstr "Traqueur de lecture de forum"
 
 #: models/base.py:1166
 msgid "Forum read trackers"
-msgstr ""
+msgstr "Traqueurs de lecture de forum"
 
 #: models/base.py:1183
 msgid "None"
-msgstr ""
+msgstr "Aucun"
 
 #: models/base.py:1184
 msgid "Single answer"
@@ -813,7 +814,7 @@ msgstr "Sondages"
 
 #: models/base.py:1229
 msgid "Text"
-msgstr ""
+msgstr "Texte"
 
 #: models/base.py:1234 models/base.py:1279
 msgid "Poll answer"
@@ -825,222 +826,222 @@ msgstr "Réponses"
 
 #: models/base.py:1288
 msgid "Poll answer user"
-msgstr ""
+msgstr "Réponse de l'utilisateur"
 
 #: models/base.py:1289
 msgid "Polls answers users"
-msgstr ""
+msgstr "Réponses des utilisateurs"
 
 #: models/base.py:1329
 msgid "addition"
-msgstr ""
+msgstr "ajout"
 
 #: models/base.py:1330
 msgid "deletion"
-msgstr ""
+msgstr "suppression"
 
 #: models/base.py:1331
 msgid "change"
-msgstr ""
+msgstr "modifier"
 
 #: models/base.py:1332
 msgid "ban"
-msgstr ""
+msgstr "bannir"
 
 #: models/base.py:1340
 msgid "low"
-msgstr ""
+msgstr "faible"
 
 #: models/base.py:1341
 msgid "medium"
-msgstr ""
+msgstr "moyen"
 
 #: models/base.py:1342
 msgid "high"
-msgstr ""
+msgstr "élevé"
 
 #: models/base.py:1345
 msgid "action time"
-msgstr ""
+msgstr "Date de l'action"
 
 #: models/base.py:1349
 msgid "object id"
-msgstr ""
+msgstr "identifiant de l'objet"
 
 #: models/base.py:1351
 msgid "action flag"
-msgstr ""
+msgstr "type d'action"
 
 #: models/base.py:1354
 msgid "change message"
-msgstr ""
+msgstr "objet du changement"
 
 #: models/base.py:1355
 msgid "level"
-msgstr ""
+msgstr "niveau"
 
 #: models/base.py:1368
 msgid "Log moderation"
-msgstr ""
+msgstr "Log de modération"
 
 #: models/base.py:1369
 msgid "Logs moderation"
-msgstr ""
+msgstr "Logs de modération"
 
 #: models/base.py:1400
 #, python-format
 msgid "Added %(target)s to \"%(object)s.\""
-msgstr ""
+msgstr "Ajout de %(target)s à \"%(object)s.\""
 
 #: models/base.py:1405
 #, python-format
 msgid "Added \"%(object)s\"."
-msgstr ""
+msgstr "Ajout de \"%(object)s\"."
 
 #: models/base.py:1411
 #, python-format
 msgid "Changed %(target)s to \"%(object)s.\""
-msgstr ""
+msgstr "Modification de %(target)s pour \"%(object)s.\""
 
 #: models/base.py:1415
 #, python-format
 msgid "Changed \"%(object)s\" - %(changes)s"
-msgstr ""
+msgstr "Modification de \"%(object)s\" - %(changes)s"
 
 #: models/base.py:1422
 #, python-format
 msgid "Deleted %(target)s from \"%(object)s.\""
-msgstr ""
+msgstr "Suppression de %(target)s pour \"%(object)s.\""
 
 #: models/base.py:1427
 #, python-format
 msgid "Deleted \"%(object)s.\""
-msgstr ""
+msgstr "Supression de \"%(object)s.\""
 
 #: models/base.py:1431
 msgid "LogModeration object"
-msgstr ""
+msgstr "Objet du log de modération"
 
 #: templates/pybb/_button_new_topic.html:2
 msgid "New topic"
-msgstr ""
+msgstr "Nouveau sujet"
 
 #: templates/pybb/_button_save.html:1
 msgid "Save"
-msgstr ""
+msgstr "Sauvegarder"
 
 #: templates/pybb/_button_submit.html:1
 msgid "Submit"
-msgstr ""
+msgstr "Envoyer"
 
 #: templates/pybb/_need_to_login_message.html:3
 msgid "Register"
-msgstr ""
+msgstr "S'inscrire"
 
 #: templates/pybb/_need_to_login_message.html:3
 msgid "or"
-msgstr ""
+msgstr "ou"
 
 #: templates/pybb/_need_to_login_message.html:3
 msgid "login"
-msgstr ""
+msgstr "se connecter"
 
 #: templates/pybb/_need_to_login_message.html:3
 msgid "to create to post a reply"
-msgstr ""
+msgstr "pour ajouter un message"
 
 #: templates/pybb/_static.html:33
 msgid "Hide"
-msgstr ""
+msgstr "Cacher"
 
 #: templates/pybb/_static.html:34
 msgid "Show"
-msgstr ""
+msgstr "Montrer"
 
 #: templates/pybb/_topic_pagination.html:8 templates/pybb/pagination.html:7
 msgid "previous page"
-msgstr ""
+msgstr "page précédente"
 
 #: templates/pybb/_topic_pagination.html:22 templates/pybb/pagination.html:21
 msgid "next page"
-msgstr ""
+msgstr "page suivante"
 
 #: templates/pybb/breadcrumb.html:4
 msgid "Home"
-msgstr ""
+msgstr "Accueil"
 
 #: templates/pybb/index.html:18
 msgid "Add a forum now"
-msgstr ""
+msgstr "Ajouter un forum"
 
 #: templates/pybb/index.html:23
 msgid "Mark all forums as read"
-msgstr ""
+msgstr "Marquer tous les forums comme lus"
 
 #: templates/pybb/attachment/list.html:11
 msgid "Files from your computer"
-msgstr ""
+msgstr "Fichiers sur votre ordinateur"
 
 #: templates/pybb/attachment/list.html:46
 msgid "Files already uploaded"
-msgstr ""
+msgstr "Fichiers déjà en ligne"
 
 #: templates/pybb/attachment/list.html:61
 #, python-format
 msgid "Uploaded %(date)s"
-msgstr ""
+msgstr "Uploadé %(date)s"
 
 #: templates/pybb/attachment/list.html:67
 msgid "Remove"
-msgstr ""
+msgstr "Supprimer"
 
 #: templates/pybb/attachment/list.html:83
 msgid "remove"
-msgstr ""
+msgstr "supprimer"
 
 #: templates/pybb/attachment/list.html:84
 msgid "add"
-msgstr ""
+msgstr "ajouter"
 
 #: templates/pybb/forum/_detail.html:12
 #: templates/pybb/moderation/moderator/list.html:60
 msgid "edit"
-msgstr ""
+msgstr "éditer"
 
 #: templates/pybb/forum/_detail.html:15
 msgid "moderators"
-msgstr ""
+msgstr "modérateurs"
 
 #: templates/pybb/forum/_detail.html:18
 msgid "Add a subforum now"
-msgstr ""
+msgstr "Ajouter un sous-forum"
 
 #: templates/pybb/forum/_detail.html:38 templates/pybb/forum/_detail.html:94
 msgid "Last post"
-msgstr ""
+msgstr "Dernier message"
 
 #: templates/pybb/forum/_detail.html:52
 #, python-format
 msgid "%(counter)s topic"
 msgid_plural "%(counter)s topics"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(counter)s sujet"
+msgstr[1] "%(counter)s sujets"
 
 #: templates/pybb/forum/_detail.html:53
 #, python-format
 msgid "%(counter)s post"
 msgid_plural "%(counter)s posts"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(counter)s message"
+msgstr[1] "%(counter)s messages"
 
 #: templates/pybb/forum/_detail.html:65 templates/pybb/forum/_detail.html:139
 #, python-format
 msgid "by %(username)s"
-msgstr ""
+msgstr "par %(username)s"
 
 #: templates/pybb/forum/_detail.html:91
 msgid "Views"
-msgstr ""
+msgstr "Vues"
 
 #: templates/pybb/forum/_detail.html:111
 msgid "pages"
@@ -1049,38 +1050,40 @@ msgstr ""
 #: templates/pybb/forum/create.html:6
 #, python-format
 msgid "New forum for %(name)s"
-msgstr ""
+msgstr "Nouveau forum pour %(name)s"
 
 #: templates/pybb/forum/create.html:8
 msgid "New forum"
-msgstr ""
+msgstr "Nouveau forum"
 
 #: templates/pybb/forum/update.html:5
 #, python-format
 msgid "Edit forum: %(name)s"
-msgstr ""
+msgstr "Éditer le forum : %(name)s"
 
 #: templates/pybb/mails/subscription_email_body.html:3
 msgid "replied in topic to which you are subscribed."
-msgstr ""
+msgstr "a répondu dans un sujet auquel vous avez souscrit."
 
 #: templates/pybb/mails/subscription_email_body.html:4
 msgid "Link to post:"
-msgstr ""
+msgstr "Lien vers le message :"
 
 #: templates/pybb/mails/subscription_email_body.html:5
 msgid "Link to topic:"
-msgstr ""
+msgstr "Lien vers le sujet :"
 
 #: templates/pybb/mails/subscription_email_body.html:8
 msgid ""
 "If you don't want to recive notifications on new messages in this topic "
 "visit following link:"
 msgstr ""
+"Si vous ne souhaitez pas recevoir de notifications pour les nouveaux messages de ce sujet "
+"merci de visiter le lien suivant :"
 
 #: templates/pybb/mails/subscription_email_subject.html:2
 msgid "New answer in topic that you subscribed."
-msgstr ""
+msgstr "Nouvelle réponse dans un sujet auquel vous avez souscrit."
 
 #: templates/pybb/moderation/logs.html:20
 msgid "Type"
@@ -1092,7 +1095,7 @@ msgstr ""
 
 #: templates/pybb/moderation/logs.html:26
 msgid "Target"
-msgstr ""
+msgstr "Cible"
 
 #: templates/pybb/moderation/logs.html:70
 msgid "Logs"
@@ -1101,23 +1104,23 @@ msgstr ""
 #: templates/pybb/moderation/moderator/create.html:9
 #, python-format
 msgid "Add a new moderator for %(name)s"
-msgstr ""
+msgstr "Ajouter un nouveau modérateur pour %(name)s"
 
 #: templates/pybb/moderation/moderator/delete.html:8
 #, python-format
 msgid "Are you sure you want to delete %(username)s from forum %(name)s"
-msgstr ""
+msgstr "Êtes-vous sûr de vouloir supprimer %(username)s du forum %(name)s"
 
 #: templates/pybb/moderation/moderator/detail.html:9
 #, python-format
 msgid "Edit %(username)s on %(name)s"
-msgstr ""
+msgstr "Éditer %(username)s pour %(name)s"
 
 #: templates/pybb/moderation/moderator/list.html:8
 #: templates/pybb/moderation/moderator/list.html:16
 #, python-format
 msgid "Moderators for %(name)s"
-msgstr ""
+msgstr "Modérateurs pour %(name)s"
 
 #: templates/pybb/moderation/moderator/list.html:34
 msgid "Permissions"
@@ -1125,7 +1128,7 @@ msgstr ""
 
 #: templates/pybb/moderation/moderator/list.html:70
 msgid "No moderators added"
-msgstr ""
+msgstr "Il n'y a aucun modérateur"
 
 #: templates/pybb/poll/form.html:5
 msgid "Poll answers"
@@ -1142,75 +1145,75 @@ msgstr "ajouter une réponse"
 #: templates/pybb/post/create.html:51
 #, python-format
 msgid "This discussion has more %(page_size)s answers"
-msgstr ""
+msgstr "Cette discussion a plus de %(page_size)s réponses"
 
 #: templates/pybb/post/create.html:52
 msgid "Click here to see the full discussion"
-msgstr ""
+msgstr "Cliquez ici pour voir toute la discussion"
 
 #: templates/pybb/post/delete.html:5
 msgid "Are you sure you want to delete this message?"
-msgstr ""
+msgstr "Êtes-vous sûr de vouloir supprimer ce message ?"
 
 #: templates/pybb/post/form.html:41
 msgid "Close"
-msgstr ""
+msgstr "Fermer"
 
 #: templates/pybb/post/form.html:42
 msgid "Save changes"
-msgstr ""
+msgstr "Sauvegarder les modifications"
 
 #: templates/pybb/post/template.html:36
 msgid "Edit"
-msgstr ""
+msgstr "Éditer"
 
 #: templates/pybb/post/template.html:41
 msgid "Delete"
-msgstr ""
+msgstr "Supprimer"
 
 #: templates/pybb/post/template.html:45
 msgid "Approve post"
-msgstr ""
+msgstr "Approuver le message"
 
 #: templates/pybb/post/template.html:56
 msgid "Edited"
-msgstr ""
+msgstr "Édité"
 
 #: templates/pybb/post/template.html:61
 msgid "quote"
-msgstr ""
+msgstr "citation"
 
 #: templates/pybb/post/update.html:4 templates/pybb/post/update.html.py:13
 msgid "Editing the post"
-msgstr ""
+msgstr "Éditer le message"
 
 #: templates/pybb/topic/delete.html:5
 msgid "Are you sure you want to delete this topic?"
-msgstr ""
+msgstr "Êtes-vous sûr de vouloir supprimer ce sujet ?"
 
 #: templates/pybb/topic/list.html:55
 msgid "Unstick topic"
-msgstr ""
+msgstr "Désépingler le sujet"
 
 #: templates/pybb/topic/list.html:59
 msgid "Stick topic"
-msgstr ""
+msgstr "Épingler le sujet"
 
 #: templates/pybb/topic/list.html:63
 msgid "Open topic"
-msgstr ""
+msgstr "Ouvrir le sujet"
 
 #: templates/pybb/topic/list.html:67
 msgid "Close topic"
-msgstr ""
+msgstr "Fermer le sujet"
 
 #: templates/pybb/topic/list.html:72
 msgid "Unsubscribe"
-msgstr ""
+msgstr "Se désinscrire"
 
 #: templates/pybb/topic/list.html:74
 msgid "Subscribe"
-msgstr ""
+msgstr "S'inscrire"
 
 #: templatetags/pybb_tags.py:52
 msgid "seconds ago,seconds ago,seconds ago"
@@ -1231,16 +1234,16 @@ msgstr ""
 #: templatetags/pybb_tags.py:77
 #, python-format
 msgid "today, %s"
-msgstr ""
+msgstr "aujourd'hui, %s"
 
 #: templatetags/pybb_tags.py:80
 #, python-format
 msgid "yesterday, %s"
-msgstr ""
+msgstr "hier, %s"
 
 #: views/base.py:56
 msgid "Page is empty."
-msgstr ""
+msgstr "La page est vide."
 
 #: views/base.py:230 views/base.py:386
 #, python-format
@@ -1250,20 +1253,20 @@ msgstr ""
 #: views/base.py:356
 #, fuzzy, python-format
 msgid "All messages from %(user)s has been deleted"
-msgstr "Votre abonnement à %(topic)s a été supprimé"
+msgstr "Tous les messages de l'utilisateur %(user)s ont été supprimés"
 
 #: views/base.py:736
 #, python-format
 msgid "%s is now on moderation"
-msgstr ""
+msgstr "%s est maintenant en cours de modération"
 
 #: views/base.py:771
 msgid "Your post has been successfully deleted"
-msgstr ""
+msgstr "Votre message a bien été supprimé"
 
 #: views/base.py:773
 msgid "Your post has been successfully restored"
-msgstr ""
+msgstr "Votre message a bien été restoré"
 
 #: views/base.py:926
 #, python-format
@@ -1271,6 +1274,8 @@ msgid ""
 "<a href=\"%(old_topic_url)s\">%(old_topic)s</a> successfully merged to <a "
 "href=\"%(new_topic_url)s\">%(new_topic)s</a>"
 msgstr ""
+"<a href=\"%(old_topic_url)s\">%(old_topic)s</a> a été fusionné avec <a "
+"href=\"%(new_topic_url)s\">%(new_topic)s</a>"
 
 #: views/base.py:945
 #, python-format
@@ -1278,26 +1283,28 @@ msgid ""
 "<a href=\"%(old_topic_url)s\">%(old_topic)s</a> successfully moved to <a "
 "href=\"%(new_topic_url)s\">%(new_topic)s</a>"
 msgstr ""
+"<a href=\"%(old_topic_url)s\">%(old_topic)s</a> a été déplacé dans <a "
+"href=\"%(new_topic_url)s\">%(new_topic)s</a>"
 
 #: views/base.py:1035
 #, python-format
 msgid "Stick topic %s"
-msgstr ""
+msgstr "Le sujet %s est épinglé"
 
 #: views/base.py:1047
 #, python-format
 msgid "Unstick topic %s"
-msgstr ""
+msgstr "Le sujet %s est désépinglé"
 
 #: views/base.py:1059
 #, python-format
 msgid "Close topic %s"
-msgstr ""
+msgstr "Le sujet %s est fermé"
 
 #: views/base.py:1105
 #, python-format
 msgid "Open topic %s"
-msgstr ""
+msgstr "Le sujet %s est ouvert"
 
 #: views/base.py:1235
 #, python-format
@@ -1305,16 +1312,18 @@ msgid ""
 "Changed permissions:\n"
 " %s"
 msgstr ""
+"Permissions modifiées :\n"
+" %s"
 
 #: views/base.py:1247
 #, python-format
 msgid "Permissions for moderator \"%(username)s\" successfully saved"
-msgstr ""
+msgstr "Les permissions pour le modérateur \"%(username)s\" ont bien été sauvegardées"
 
 #: views/base.py:1302
 #, python-format
 msgid "New moderator \"%(username)s\" created"
-msgstr ""
+msgstr "Nouveau modérateur \"%(username)s\" créé"
 
 #: views/base.py:1381
 #, python-format
@@ -1324,7 +1333,7 @@ msgstr "Vos abonnements ont été mis à jour : %(type)s"
 #: views/base.py:1414
 #, fuzzy
 msgid "Your subscriptions has been deleted"
-msgstr "Votre abonnement à %(topic)s a été supprimé"
+msgstr "Vos abonnements ont été supprimés"
 
 #: views/base.py:1418
 #, python-format
