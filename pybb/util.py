@@ -192,7 +192,7 @@ def queryset_to_dict(qs, key='pk', singular=True):
 def get_login_url():
     login_url = defaults.PYBB_LOGIN_URL
 
-    if login_url.startswith('/'):
+    if login_url.startswith(('/', 'http', 'https')):
         return login_url
 
     if not callable(login_url):
