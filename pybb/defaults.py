@@ -205,3 +205,9 @@ PYBB_ALLOWED_STYLES = getattr(settings, 'PYBB_ALLOWED_STYLES', bleach.ALLOWED_ST
     'list-style-type',
     'color',
 ])
+
+PYBB_LOGIN_REQUIRED_DECORATOR = getattr(settings,
+                                        'PYBB_LOGIN_REQUIRED_DECORATOR',
+                                        'pybb.decorators.login_required')
+
+PYBB_LOGIN_URL = getattr(settings, 'PYBB_LOGIN_URL', settings.LOGIN_URL)

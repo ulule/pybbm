@@ -36,6 +36,8 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.http import QueryDict
 from django.shortcuts import redirect
 
+from . import defaults
+
 
 CLASS_PATH_ERROR = 'pybb is unable to interpret settings value for %s. '\
                    '%s should be in the form of a tupple: '\
@@ -142,8 +144,6 @@ def load_class(class_path, setting_name=None):
 
 
 def get_model_string(model_name):
-    from pybb import defaults
-
     """
     Returns the model string notation Django uses for lazily loaded ForeignKeys
     (eg 'auth.User') to prevent circular imports.
@@ -189,14 +189,25 @@ def queryset_to_dict(qs, key='pk', singular=True):
     return result
 
 
+def get_login_url():
+    login_url = defaults.PYBB_LOGIN_URL
+
+    if login_url.startswith('/'):
+        return login_url
+
+    if not callable(login_url):
+        login_url = load_class(login_url)
+
+    return login_url()
+
+
 def redirect_to_login(next, login_url=None,
                       redirect_field_name=REDIRECT_FIELD_NAME):
     """
     Redirects the user to the login page, passing the given 'next' page
     """
     if not login_url:
-        login_url = settings.LOGIN_URL() \
-            if callable(settings.LOGIN_URL) else settings.LOGIN_URL
+        login_url = get_login_url()
 
     login_url_parts = list(urlparse.urlparse(login_url))
     if redirect_field_name:

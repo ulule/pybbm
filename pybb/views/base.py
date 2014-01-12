@@ -31,11 +31,12 @@ from pybb.forms import (PostForm, AdminPostForm, PostsMoveExistingTopicForm,
                         PollForm, ForumForm, ModerationForm, get_topic_move_formset,
                         SearchUserForm, get_topic_merge_formset, PostsMoveNewTopicForm)
 from pybb.templatetags.pybb_tags import pybb_topic_poll_not_voted
-from pybb.decorators import login_required
-
 from pybb.helpers import (lookup_users, lookup_post_attachments,
                           lookup_post_topics, lookup_topic_lastposts,
                           load_user_posts)
+
+
+login_required = load_class(defaults.PYBB_LOGIN_REQUIRED_DECORATOR)
 
 
 def filter_hidden(request, queryset_or_model):
