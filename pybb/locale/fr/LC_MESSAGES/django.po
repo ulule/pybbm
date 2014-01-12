@@ -272,7 +272,7 @@ msgstr "De l'utilisateur"
 
 #: contrib/quotes/models.py:53
 msgid "To user"
-msgstr "A l'utilisateur"
+msgstr "À l'utilisateur"
 
 #: contrib/quotes/models.py:61
 msgid "Quote"
@@ -588,7 +588,7 @@ msgstr ""
 
 #: models/base.py:167
 msgid "Can unstick topic"
-msgstr "Peut dédépingler le sujet"
+msgstr "Peut désépingler le sujet"
 
 #: models/base.py:168
 msgid "Can stick topic"
