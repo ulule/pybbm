@@ -734,7 +734,7 @@ class RenderableItem(ModelBase):
         self.body_text = unescape(text)
 
     def get_body_html(self, asynchronous=True, force=False):
-        if self.body_html and not force:
+        if self.body_html is not None and not force:
             return self.body_html
 
         if asynchronous:
@@ -750,7 +750,7 @@ class RenderableItem(ModelBase):
         return self.body_html
 
     def get_body_text(self, asynchronous=True, force=False):
-        if self.body_text and not force:
+        if self.body_text is not None and not force:
             return self.body_text
 
         if asynchronous:
