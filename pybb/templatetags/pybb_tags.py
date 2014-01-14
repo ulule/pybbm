@@ -140,28 +140,44 @@ def pybb_topic_unread(topics, user):
     Mark all topics in queryset/list with .unread for target user
     """
     topic_list = list(topics)
+
+    forum_marks = {}
+
     if user.is_authenticated():
         for topic in topic_list:
             topic.unread = True
-        try:
-            forum_mark = ForumReadTracker.objects.get(user=user, forum=topic_list[0].forum)
-        except:
-            forum_mark = None
+
+            if not topic.forum_id in forum_marks:
+                try:
+                    forum_mark = ForumReadTracker.objects.get(user=user, forum=topic.forum_id)
+                except:
+                    forum_mark = None
+
+                forum_marks[topic.forum_id] = forum_mark
+
         qs = TopicReadTracker.objects.filter(
             user=user,
             topic__in=topic_list
         ).select_related('topic')
-        if forum_mark:
-            qs = qs.filter(topic__updated__gt=forum_mark.time_stamp)
+
+        if forum_marks:
             for topic in topic_list:
+                if not topic.forum_id in forum_marks or not forum_marks[topic.forum_id]:
+                    continue
+
+                forum_mark = forum_marks[topic.forum_id]
+
                 if topic.updated and (topic.updated <= forum_mark.time_stamp):
                     topic.unread = False
+
         topic_marks = list(qs)
         topic_dict = dict(((topic.id, topic) for topic in topic_list))
+
         for mark in topic_marks:
             if ((topic_dict[mark.topic.id].updated is None) or
                (topic_dict[mark.topic.id].updated <= mark.time_stamp)):
                 topic_dict[mark.topic.id].unread = False
+
     return topic_list
 
 
