@@ -4,6 +4,7 @@ import os.path
 import uuid
 import magic
 import urllib
+import logging
 from datetime import date
 
 from django.db import models
@@ -11,6 +12,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import AnonymousUser
 from django.utils.encoding import smart_unicode
 from django.core.urlresolvers import reverse
+from django.core.files import File
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import Q, signals, F
@@ -32,6 +34,9 @@ from pybb.processors import markup
 from autoslug import AutoSlugField
 
 from djcastor import CAStorage
+
+from BeautifulSoup import BeautifulSoup
+from urlparse import urlparse
 
 try:
     from south.modelsinspector import add_introspection_rules
@@ -712,6 +717,27 @@ class BaseTopic(ModelBase):
     def is_hidden(self):
         return self.forum.is_hidden()
 
+    def sync_cover(self, commit=False):
+        if self.first_post:
+            for url in self.first_post.images:
+                try:
+                    path, response = urllib.urlretrieve(url)
+                    file_ext = urlparse(url).path.split('.')[-1]
+
+                    self.cover.save("%s.%s" % (self.id, file_ext),
+                                    File(open(path)), save=True)
+
+                    if commit:
+                        update_fields(self, fields=('cover', ))
+
+                    os.remove(path)
+
+                    break
+                except Exception as e:
+                    logging.error(e)
+
+            return self.cover
+
 
 class RenderableItem(ModelBase):
     """
@@ -1008,6 +1034,15 @@ class BasePost(RenderableItem):
                 Topic.objects.get(pk=old_attr.get('topic_id')).update_counters()
             except ObjectDoesNotExist:
                 pass
+
+    @property
+    def images(self):
+        if self.body:
+            soup = BeautifulSoup(self.body)
+
+            for img in soup.findAll('img'):
+                if img.get('src'):
+                    yield img['src']
 
 
 class BaseAttachment(ModelBase):
