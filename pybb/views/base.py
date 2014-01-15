@@ -27,9 +27,10 @@ from pybb.models import (Forum, Topic, Post, Moderator, LogModeration, Attachmen
 from pybb.util import load_class, generic, queryset_to_dict, redirect_to_login
 from pybb.models.base import markup
 from pybb.forms import (PostForm, AdminPostForm, PostsMoveExistingTopicForm,
-                        PollAnswerFormSet, AttachmentFormSet,
-                        PollForm, ForumForm, ModerationForm, get_topic_move_formset,
-                        SearchUserForm, get_topic_merge_formset, PostsMoveNewTopicForm)
+                        PollAnswerFormSet, AttachmentFormSet, PollForm,
+                        ForumForm, ModerationForm, SearchUserForm,
+                        get_topic_move_formset, get_topic_merge_formset,
+                        get_topics_delete_formset, PostsMoveNewTopicForm)
 from pybb.templatetags.pybb_tags import pybb_topic_poll_not_voted
 from pybb.helpers import (lookup_users, lookup_post_attachments,
                           lookup_post_topics, lookup_topic_lastposts,
@@ -956,6 +957,35 @@ class TopicMoveView(TopicBatchView):
                 'new_topic': new_topic
             })
 
+        return reverse('pybb:index')
+
+
+class TopicsDeleteView(TopicBatchView):
+    template_name = 'pybb/topic/delete.html'
+    permission_name = 'can_delete_topic'
+
+    def get_context_data(self, **kwargs):
+        topic_ids = self.request.POST.getlist('topic_ids')
+        topics = Topic.objects.filter(pk__in=topic_ids)
+
+        return dict(super(TopicBatchView, self).get_context_data(**kwargs), **{
+            'topic_ids': self.request.POST.getlist('topic_ids'),
+            'topics': topics,
+        })
+
+    def get_formset_class(self, **kwargs):
+        return get_topics_delete_formset(**kwargs)
+
+    def form_valid(self, formset):
+        topics = []
+
+        for form in formset:
+            topics.append(form.save())
+
+        return redirect(self.get_success_url(topics))
+
+    def get_success_url(self, topics):
+        messages.success(self.request, _(u'Topics successfully removed'))
         return reverse('pybb:index')
 
 
