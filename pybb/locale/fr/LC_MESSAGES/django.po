@@ -309,14 +309,13 @@ msgstr ""
 "message\">        %(message)s    </div></blockquote>"
 
 #: contrib/quotes/settings.py:34
-#, fuzzy, python-format
+#, python-format
 msgid ""
 "<blockquote>    <div class=\"quote-message\">        %(message)s    </div></"
 "blockquote>"
 msgstr ""
-"<blockquote>    <div class=\"quote-author\">        Posté par <span class="
-"\"quote-author-name\">%(username)s</span>    </div>    <div class=\"quote-"
-"message\">        %(message)s    </div></blockquote>"
+"<blockquote>    <div class=\"quote-message\">        %(message)s    </div></"
+"blockquote>"
 
 #: contrib/reports/models.py:36
 msgid "New"
@@ -411,9 +410,8 @@ msgid "Username"
 msgstr "Nom d'utilisateur"
 
 #: contrib/search/forms/base.py:19
-#, fuzzy
 msgid "Number of answers"
-msgstr "Réponses"
+msgstr "Nombre de réponses"
 
 #: contrib/search/forms/base.py:30 models/base.py:510 models/base.py:836
 #: templates/pybb/forum/_detail.html:85
@@ -1251,7 +1249,7 @@ msgid "Empty list and '%(class_name)s.allow_empty' is False."
 msgstr ""
 
 #: views/base.py:356
-#, fuzzy, python-format
+#, python-format
 msgid "All messages from %(user)s has been deleted"
 msgstr "Tous les messages de l'utilisateur %(user)s ont été supprimés"
 
@@ -1331,7 +1329,6 @@ msgid "Your subscriptions has been updated: %(type)s"
 msgstr "Vos abonnements ont été mis à jour : %(type)s"
 
 #: views/base.py:1414
-#, fuzzy
 msgid "Your subscriptions has been deleted"
 msgstr "Vos abonnements ont été supprimés"
 
