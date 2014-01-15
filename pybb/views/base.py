@@ -965,12 +965,8 @@ class TopicsDeleteView(TopicBatchView):
     permission_name = 'can_delete_topic'
 
     def get_context_data(self, **kwargs):
-        topic_ids = self.request.POST.getlist('topic_ids')
-        topics = Topic.objects.filter(pk__in=topic_ids)
-
         return dict(super(TopicBatchView, self).get_context_data(**kwargs), **{
             'topic_ids': self.request.POST.getlist('topic_ids'),
-            'topics': topics,
         })
 
     def get_formset_class(self, **kwargs):
