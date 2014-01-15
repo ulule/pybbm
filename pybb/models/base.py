@@ -383,6 +383,8 @@ class TopicQuerySetMixin(object):
                 if user.is_authenticated():
                     return (self.filter(Q(user=user) | Q(on_moderation=False))
                             .exclude(deleted=True))
+            else:
+                return self
 
             return self.filter(on_moderation=False).exclude(deleted=True)
 
