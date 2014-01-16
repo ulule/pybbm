@@ -30,7 +30,7 @@ from pybb.base import ModelBase, ManagerBase, QuerySetBase
 from pybb.subscription import notify_topic_subscribers
 from pybb import defaults
 from pybb.fields import ContentTypeRestrictedFileField, CAStorage
-from pybb.tasks import generate_markup
+from pybb.tasks import generate_markup, sync_cover
 from pybb.processors import markup
 
 from autoslug import AutoSlugField
@@ -717,8 +717,11 @@ class BaseTopic(ModelBase):
     def is_hidden(self):
         return self.forum.is_hidden()
 
-    def sync_cover(self, commit=False):
+    def sync_cover(self, commit=True, force=False):
         if not self.first_post_id:
+            return False
+
+        if force is False and self.cover:
             return False
 
         for url in self.first_post.images:
@@ -754,7 +757,7 @@ class RenderableItem(ModelBase):
     body_html = models.TextField(_('HTML version'), null=True)
     body_text = models.TextField(_('Text version'), null=True)
 
-    def render(self):
+    def render(self, commit=False):
         self.body_html = markup(self.body, obj=self)
 
         # Remove tags which was generated with the markup processor
@@ -762,15 +765,15 @@ class RenderableItem(ModelBase):
         # Unescape entities which was generated with the markup processor
         self.body_text = unescape(text)
 
+        if commit:
+            update_fields(self, fields=('body_html', 'body_text', ))
+
     def get_body_html(self, asynchronous=True, force=False):
         if self.body_html is not None and not force:
             return self.body_html
 
         if asynchronous:
-            generate_markup.delay(self._meta.db_table,
-                                  self._meta.pk.column,
-                                  self.pk,
-                                  self.body)
+            generate_markup.delay(self.pk)
 
             return None
 
@@ -783,10 +786,7 @@ class RenderableItem(ModelBase):
             return self.body_text
 
         if asynchronous:
-            generate_markup.delay(self._meta.db_table,
-                                  self._meta.pk.column,
-                                  self.pk,
-                                  self.body)
+            generate_markup.delay(self.pk)
 
             return None
 
@@ -954,6 +954,9 @@ class BasePost(RenderableItem):
             self.topic.on_moderation = False
 
         self.topic.update_counters()
+
+        if new and self.pk == self.topic.first_post_id:
+            sync_cover.delay(self.topic_id)
 
     def get_absolute_url(self):
         return self.get_anchor_url()
