@@ -3,7 +3,8 @@ import re
 from django.contrib.auth.models import User
 
 from pybb.processors import BaseProcessor
-from pybb.contrib.mentions import settings
+
+from . import settings
 
 
 class MentionProcessor(BaseProcessor):

@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
-from pybb.contrib.ban.models import BannedUser, IPAddress
+from .models import BannedUser, IPAddress
 
 
 class BanForm(forms.ModelForm):

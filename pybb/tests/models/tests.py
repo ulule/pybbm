@@ -1,25 +1,49 @@
-from django.test import TransactionTestCase
-from django.contrib.auth.models import User
+import urllib
+import os
+import tempfile
 
-from pybb.tests.base import SharedTestModule
 from pybb.models import Moderator, Post, Forum, Topic
+from pybb.tests.base import TestCase
+from pybb.compat import User
 
 from mock import patch
 
 from guardian.models import UserObjectPermission
 
 
-class ModelsTest(TransactionTestCase, SharedTestModule):
-    def setUp(self):
-        self.create_user()
-        self.create_initial()
-
-        self.newbie = User.objects.create_user('newbie', 'newbie@localhost', 'newbie')
-
+class ModelsTest(TestCase):
     def test_post_is_accessible_by_authenticated_users(self):
         self.assertTrue(self.post.is_accessible_by(self.user))
         self.assertTrue(self.post.is_accessible_by(self.staff))
         self.assertTrue(self.post.is_accessible_by(self.superuser))
+
+    def test_sync_cover(self):
+        images = [
+            'http://dummy.host/image.png'
+        ]
+
+        body = """<div>My message %s</div>""" % ''.join(['<img src="%s" />' % image for image in images])
+
+        self.post.body = body
+        self.post.body_html = body
+        self.post.save()
+
+        self.topic.first_post = self.post
+
+        for index, image in enumerate(self.post.images):
+            self.assertEqual(image, images[index])
+
+        with patch.object(urllib, 'urlretrieve') as urlretrieve:
+            file = os.path.join(os.path.dirname(__file__), '..', 'static', 'pybb', 'img', 'attachment.png')
+
+            tmp = tempfile.NamedTemporaryFile()
+            tmp.write(open(file).read())
+
+            urlretrieve.return_value = (tmp.name, None)
+
+            self.post.topic.sync_cover()
+
+            self.assertTrue(self.post.topic.cover)
 
     def test_post_in_forum_hidden_is_accessible_by_unauthenticated_user(self):
         self.forum.hidden = True
@@ -77,6 +101,8 @@ class ModelsTest(TransactionTestCase, SharedTestModule):
         self.assertFalse(self.post.is_posted_by(self.newbie))
 
     def test_topic_on_moderation(self):
+        self.post
+
         self.topic.on_moderation = True
         self.topic.save()
 
@@ -95,8 +121,11 @@ class ModelsTest(TransactionTestCase, SharedTestModule):
 
     def test_compute(self):
         # initials
-        self.assertEqual(self.parent_forum.forum_count, 1)
         self.assertEqual(self.forum.forum_count, 0)
+        self.assertEqual(self.parent_forum.forum_count, 1)
+
+        self.topic
+        self.post
 
         parent_forum = Forum.objects.get(pk=self.parent_forum.pk)
 

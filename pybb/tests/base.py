@@ -1,12 +1,20 @@
-from django.core.management import call_command
-from django.db.models.loading import cache
+import os
+import mimetypes
 
-cache._populate()
+from django.core.management import call_command
+from django import test
+from django.db.models.loading import cache; cache._populate()
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.utils.importlib import import_module
+from django.http import HttpRequest
+from django.contrib.auth import login
+from django.conf import settings
+
 
 from pybb.models import Post, Topic, Forum
 from pybb.compat import User
 
-__author__ = 'zeus'
+from exam import Exam, fixture
 
 try:
     from lxml import html
@@ -14,32 +22,78 @@ except ImportError:
     raise Exception('PyBB requires lxml for self testing')
 
 
-class SharedTestModule(object):
-    def create_user(self):
-        self.user = User.objects.create_user('zeus', 'zeus@localhost', 'zeus')
-        self.staff = User.objects.create_user('thoas', 'thoas@localhost', '$ecret')
-        self.staff.is_staff = True
-        self.staff.save()
+class FixtureMixin(Exam):
+    @fixture
+    def user(self):
+        return User.objects.create_user('zeus', 'zeus@localhost', 'zeus')
 
-        self.superuser = User.objects.create_user('oleiade', 'oleiade@localhost', '$ecret')
-        self.superuser.is_superuser = True
-        self.superuser.is_staff = True
-        self.superuser.save()
+    @fixture
+    def staff(self):
+        staff = User.objects.create_user('thoas', 'thoas@localhost', '$ecret')
+        staff.is_staff = True
+        staff.save()
 
-    def login_client(self, username='zeus', password='zeus'):
-        self.client.login(username=username, password=password)
+        return staff
 
-    def create_initial(self, post=True):
-        self.parent_forum = Forum(name='foo')
-        self.parent_forum.save()
+    @fixture
+    def newbie(self):
+        return User.objects.create_user('newbie', 'newbie@localhost', 'newbie')
 
-        self.forum = Forum(name='xfoo', description='bar', forum=self.parent_forum)
-        self.forum.save()
-        self.topic = Topic(name='etopic', forum=self.forum, user=self.user)
-        self.topic.save()
-        if post:
-            self.post = Post(topic=self.topic, user=self.user, body='bbcode [b]test[/b]')
-            self.post.save()
+    @fixture
+    def superuser(self):
+        superuser = User.objects.create_user('oleiade', 'oleiade@localhost', '$ecret')
+        superuser.is_superuser = True
+        superuser.is_staff = True
+        superuser.save()
+
+        return superuser
+
+    def login_as(self, user):
+        user.backend = settings.AUTHENTICATION_BACKENDS[0]
+
+        engine = import_module(settings.SESSION_ENGINE)
+
+        request = HttpRequest()
+        if self.client.session:
+            request.session = self.client.session
+        else:
+            request.session = engine.SessionStore()
+
+        login(request, user)
+
+        # Save the session values.
+        request.session.save()
+
+        # Set the cookie to represent the session.
+        session_cookie = settings.SESSION_COOKIE_NAME
+        self.client.cookies[session_cookie] = request.session.session_key
+        cookie_data = {
+            'max-age': None,
+            'path': '/',
+            'domain': settings.SESSION_COOKIE_DOMAIN,
+            'secure': settings.SESSION_COOKIE_SECURE or None,
+            'expires': None,
+        }
+        self.client.cookies[session_cookie].update(cookie_data)
+
+    def login(self):
+        self.login_as(self.user)
+
+    @fixture
+    def parent_forum(self):
+        return Forum.objects.create(name='foo')
+
+    @fixture
+    def forum(self):
+        return Forum.objects.create(name='xfoo', description='bar', forum=self.parent_forum)
+
+    @fixture
+    def topic(self):
+        return Topic.objects.create(name='etopic', forum=self.forum, user=self.user)
+
+    @fixture
+    def post(self):
+        return Post.objects.create(topic=self.topic, user=self.user, body='bbcode [b]test[/b]')
 
     def create_smilies(self):
         call_command('loaddata', 'smilies.json', verbosity=0)
@@ -51,9 +105,28 @@ class SharedTestModule(object):
         return dict(html.fromstring(response.content).xpath(attr % form)[0].form_values())
 
 
+class TestCase(test.TestCase, FixtureMixin):
+    pass
+
+
+class TransactionTestCase(test.TransactionTestCase, FixtureMixin):
+    pass
+
+
 def premoderate(user, post):
     """
     Test premoderate function
     Allow post without moderation for staff users only
     """
-    return user.username.startswith('allowed')
+    return user.is_staff
+
+
+def get_image_path(name):
+    return os.path.join(os.path.dirname(__file__), 'static', 'pybb', 'img',
+                        name)
+
+
+def get_uploaded_file(name):
+    data = open(get_image_path(name)).read()
+    return SimpleUploadedFile(name, data,
+                              content_type=mimetypes.guess_type(name)[0])

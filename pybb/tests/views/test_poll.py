@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
 from django.core.urlresolvers import reverse
-from django.test import TransactionTestCase
 
-from pybb.tests.base import SharedTestModule
+from pybb.tests.base import TransactionTestCase
 from pybb import defaults
 from pybb.models import PollAnswer, Topic, Poll
 
 
-class PollTest(TransactionTestCase, SharedTestModule):
+class PollTest(TransactionTestCase):
     def setUp(self):
-        self.create_user()
-        self.create_initial()
         self.PYBB_POLL_MAX_ANSWERS = defaults.PYBB_POLL_MAX_ANSWERS
         defaults.PYBB_POLL_MAX_ANSWERS = 2
 
     def test_poll_add(self):
         topic_create_url = reverse('pybb:topic_create', kwargs={'forum_id': self.forum.id})
-        self.login_client()
+
+        self.login()
+
         response = self.client.get(topic_create_url)
         values = self.get_form_values(response)
         values['body'] = 'test poll body'
@@ -31,13 +30,17 @@ class PollTest(TransactionTestCase, SharedTestModule):
         new_topic = Topic.objects.get(name='test poll name')
 
         self.assertIsNone(new_topic.poll)
+
         self.assertFalse(PollAnswer.objects.filter(poll=new_topic.poll).exists())  # no answers here
 
         values['name'] = 'test poll name 1'
         values['poll_type'] = 1
         values['answers-0-text'] = 'answer1'  # not enough answers
+
         values['answers-TOTAL_FORMS'] = 1
+
         response = self.client.post(topic_create_url, values, follow=True)
+
         self.assertFalse(Topic.objects.filter(name='test poll name 1').exists())
 
         values['name'] = 'test poll name 1'
@@ -65,7 +68,7 @@ class PollTest(TransactionTestCase, SharedTestModule):
 
     def test_poll_edit(self):
         edit_topic_url = reverse('pybb:post_update', kwargs={'pk': self.post.id})
-        self.login_client()
+        self.login()
         response = self.client.get(edit_topic_url)
         values = self.get_form_values(response)
         values['poll_type'] = 1  # add_poll
@@ -124,7 +127,7 @@ class PollTest(TransactionTestCase, SharedTestModule):
             PollAnswer.objects.create(poll=poll, text='answer1')
             PollAnswer.objects.create(poll=poll, text='answer2')
 
-        self.login_client()
+        self.login()
         recreate_poll(poll_type=Poll.TYPE_SINGLE)
         vote_url = reverse('pybb:topic_poll_vote', kwargs={'pk': self.topic.id})
         my_answer = PollAnswer.objects.all()[0]

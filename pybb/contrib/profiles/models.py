@@ -8,10 +8,10 @@ from django.db.models.signals import post_save
 
 from pybb import defaults
 from pybb.constants import TZ_CHOICES
-from pybb.util import get_file_path
 from pybb.base import ModelBase
 from pybb.processors import markup
 from pybb.compat import User
+from pybb.fields import CAStorage
 
 from annoying.fields import AutoOneToOneField
 
@@ -37,7 +37,8 @@ class Profile(ModelBase):
                                          default=True, db_index=True)
     post_count = models.IntegerField(_('Post count'), blank=True, default=0, db_index=True)
     avatar = ImageField(_('Avatar'), blank=True, null=True,
-                        upload_to=get_file_path)
+                        storage=CAStorage(),
+                        upload_to='pybb/avatars')
     autosubscribe = models.BooleanField(_('Automatically subscribe'),
                                         help_text=_('Automatically subscribe to topics that you answer'),
                                         default=defaults.PYBB_DEFAULT_AUTOSUBSCRIBE,

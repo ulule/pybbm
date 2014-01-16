@@ -7,7 +7,8 @@ from django.utils.translation import ugettext_lazy as _
 from pybb.models import Post
 from pybb.compat import User
 from pybb.base import ModelBase, ManagerBase
-from pybb.contrib.mentions.signals import mentioned
+
+from .signals import mentioned
 
 
 class MentionManager(ManagerBase):

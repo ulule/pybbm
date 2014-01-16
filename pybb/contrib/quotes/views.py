@@ -9,12 +9,12 @@ from django.core.exceptions import PermissionDenied
 from pybb.views.base import (PostCreateView as BasePostCreateView,
                              TopicDetailView as BaseTopicDetailView,
                              PostsCreateView as BasePostsCreateView)
-from pybb.contrib.quotes.exceptions import QuoteException
-from pybb.contrib.quotes.models import quote
 from pybb.models import Post, Topic
 from pybb import defaults
-
 from pybb.util import generic, load_class
+
+from .exceptions import QuoteException
+from .models import quote
 
 
 def make_session_key(topic):

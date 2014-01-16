@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from pybb.contrib.smilies.models import Smiley
+from .models import Smiley
+
 
 class SmileyAdmin(admin.ModelAdmin):
     list_display = ('pattern', 'title', 'image', 'is_active', 'in_one_click', 'display_order', 'match_order')

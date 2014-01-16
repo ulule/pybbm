@@ -8,4 +8,5 @@ dist
 *.egg-info
 testdb.sqlite
 test/example/media/pybb_upload
+test/media/*
 docs/_build/

@@ -1,32 +1,18 @@
 from django.core.urlresolvers import reverse
-from django.test import TransactionTestCase
 
-from pybb.tests.base import SharedTestModule
+from pybb.tests.base import TestCase
 from pybb.forms import ForumForm, ModerationForm
 from pybb.models import Forum, Moderator
 from pybb import defaults
 
 
-class ForumsTest(TransactionTestCase, SharedTestModule):
-    def setUp(self):
-        self.create_user()
-
-        self.parent = Forum.objects.create(
-            name='My parent forum',
-            position=0
-        )
-        self.forum = Forum.objects.create(
-            name='My forum',
-            position=0,
-            forum=self.parent
-        )
-
+class ForumsTest(TestCase):
     def test_create_view(self):
         url = reverse('pybb:forum_create', kwargs={
-            'forum_id': self.parent.pk
+            'forum_id': self.parent_forum.pk
         })
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.get(url)
 
@@ -39,15 +25,17 @@ class ForumsTest(TransactionTestCase, SharedTestModule):
 
     def test_create_complete(self):
         url = reverse('pybb:forum_create', kwargs={
-            'forum_id': self.parent.pk
+            'forum_id': self.parent_forum.pk
         })
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         data = {
             'name': 'My forum 2',
             'position': 1,
         }
+
+        self.forum
 
         response = self.client.post(url, data=data)
 
@@ -66,7 +54,7 @@ class ForumsTest(TransactionTestCase, SharedTestModule):
             'pk': self.forum.pk
         })
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.get(url)
 
@@ -82,7 +70,7 @@ class ForumsTest(TransactionTestCase, SharedTestModule):
             'pk': self.forum.pk
         })
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.post(url, data={
             'name': 'Renamed forum',
@@ -101,7 +89,7 @@ class ForumsTest(TransactionTestCase, SharedTestModule):
             'pk': self.forum.pk
         })
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.get(url)
 
@@ -110,7 +98,7 @@ class ForumsTest(TransactionTestCase, SharedTestModule):
                                 'pybb/moderation/moderator/list.html')
 
     def test_moderator_view(self):
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         moderator = Moderator.objects.create(forum=self.forum, user=self.user)
 
@@ -129,7 +117,7 @@ class ForumsTest(TransactionTestCase, SharedTestModule):
             self.failUnless(isinstance(form, ModerationForm))
 
     def test_moderator_update_complete(self):
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         moderator = Moderator.objects.create(forum=self.forum, user=self.user)
 
@@ -153,7 +141,7 @@ class ForumsTest(TransactionTestCase, SharedTestModule):
             'forum_id': self.forum.pk,
         })
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.get(url)
 
@@ -166,7 +154,7 @@ class ForumsTest(TransactionTestCase, SharedTestModule):
             'forum_id': self.forum.pk,
         })
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.get(url)
 
@@ -188,7 +176,7 @@ class ForumsTest(TransactionTestCase, SharedTestModule):
         self.assertTrue(self.user.has_perms([codename for codename in defaults.PYBB_FORUM_PERMISSIONS], self.forum))
 
         self.assertEqual(self.forum.moderators.count(), 1)
-        self.assertIn(self.user, [moderator for moderator in self.forum.moderators.all()])
+        self.assertIn(self.user, [m for m in self.forum.moderators.all()])
 
     def test_moderator_delete_view(self):
         moderator = Moderator.objects.create(forum=self.forum, user=self.user)
@@ -198,7 +186,7 @@ class ForumsTest(TransactionTestCase, SharedTestModule):
             'moderator_id': moderator.pk
         })
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.get(url)
 
@@ -214,7 +202,7 @@ class ForumsTest(TransactionTestCase, SharedTestModule):
             'moderator_id': moderator.pk
         })
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.post(url)
 

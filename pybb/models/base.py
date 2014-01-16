@@ -4,13 +4,17 @@ import os.path
 import uuid
 import magic
 import urllib
+import logging
 from datetime import date
+from BeautifulSoup import BeautifulSoup
+from urlparse import urlparse
 
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import AnonymousUser
 from django.utils.encoding import smart_unicode
 from django.core.urlresolvers import reverse
+from django.core.files import File
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import Q, signals, F
@@ -21,17 +25,15 @@ from django.utils.functional import cached_property
 from sorl.thumbnail import ImageField
 
 from pybb.compat import User, update_fields
-from pybb.util import unescape, get_model_string, tznow, get_file_path
+from pybb.util import unescape, get_model_string, tznow
 from pybb.base import ModelBase, ManagerBase, QuerySetBase
 from pybb.subscription import notify_topic_subscribers
 from pybb import defaults
-from pybb.fields import ContentTypeRestrictedFileField
+from pybb.fields import ContentTypeRestrictedFileField, CAStorage
 from pybb.tasks import generate_markup
 from pybb.processors import markup
 
 from autoslug import AutoSlugField
-
-from djcastor import CAStorage
 
 try:
     from south.modelsinspector import add_introspection_rules
@@ -469,7 +471,8 @@ class BaseTopic(ModelBase):
     slug = AutoSlugField(populate_from='name', max_length=255)
 
     cover = ImageField(_('Cover'), blank=True, null=True,
-                       upload_to=lambda instance, filename: get_file_path(instance, filename, to='pybb/covers'))
+                       storage=CAStorage(),
+                       upload_to=defaults.PYBB_COVER_UPLOAD_TO)
 
     created = models.DateTimeField(_('Created'), null=True)
     updated = models.DateTimeField(_('Updated'), null=True)
@@ -713,6 +716,30 @@ class BaseTopic(ModelBase):
 
     def is_hidden(self):
         return self.forum.is_hidden()
+
+    def sync_cover(self, commit=False):
+        if not self.first_post_id:
+            return False
+
+        for url in self.first_post.images:
+            try:
+                path, response = urllib.urlretrieve(url)
+            except Exception as e:
+                logging.error(e)
+            else:
+                file_ext = urlparse(url).path.split('.')[-1]
+
+                self.cover.save("%s.%s" % (self.id, file_ext),
+                                File(open(path)), save=True)
+
+                if commit:
+                    update_fields(self, fields=('cover', ))
+
+                os.remove(path)
+
+                return True
+
+        return False
 
 
 class RenderableItem(ModelBase):
@@ -1011,6 +1038,15 @@ class BasePost(RenderableItem):
             except ObjectDoesNotExist:
                 pass
 
+    @property
+    def images(self):
+        if self.body_html:
+            soup = BeautifulSoup(self.body_html)
+
+            for img in soup.findAll('img'):
+                if img.get('src'):
+                    yield img['src']
+
 
 class BaseAttachment(ModelBase):
     TYPE_IMAGE = 1
@@ -1053,8 +1089,7 @@ class BaseAttachment(ModelBase):
     size = models.IntegerField(_('Size'))
     file = ContentTypeRestrictedFileField(_('File'),
                                           upload_to=defaults.PYBB_ATTACHMENT_UPLOAD_TO,
-                                          storage=CAStorage(location=defaults.PYBB_ATTACHMENT_LOCATION,
-                                                            base_url=defaults.PYBB_ATTACHMENT_BASE_URL),
+                                          storage=CAStorage(),
                                           content_types=MIMETYPES,
                                           max_upload_size=5242880,
                                           null=True, blank=True)

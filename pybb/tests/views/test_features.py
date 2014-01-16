@@ -2,29 +2,29 @@
 import time
 from datetime import timedelta, date
 
-from django.test import TransactionTestCase
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test.client import Client
-from django.contrib.auth.models import User
 
 from pybb import defaults
-from pybb.models import (Post, Topic, Forum, TopicRedirection, Subscription, PostDeletion)
+from pybb.compat import User
+from pybb.models import (Post, Topic, Forum,
+                         TopicRedirection, Subscription, PostDeletion)
 
-from pybb.tests.base import html, SharedTestModule
+from pybb.tests.base import html, TestCase
 
 from mock import patch
 
 
-class FeaturesTest(TransactionTestCase, SharedTestModule):
+class FeaturesTest(TestCase):
     def setUp(self):
         self.ORIG_PYBB_ENABLE_ANONYMOUS_POST = defaults.PYBB_ENABLE_ANONYMOUS_POST
         self.ORIG_PYBB_PREMODERATION = defaults.PYBB_PREMODERATION
         defaults.PYBB_PREMODERATION = False
         defaults.PYBB_ENABLE_ANONYMOUS_POST = False
-        self.create_user()
-        self.create_initial()
         mail.outbox = []
+
+        self.post  # noqa
 
     def test_base(self):
          # Check index page
@@ -49,7 +49,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
 
     def test_profile_edit(self):
          # Self profile edit
-        self.login_client()
+        self.login()
         response = self.client.get(reverse('profile_update'))
         self.assertEqual(response.status_code, 200)
         values = self.get_form_values(response, 'profile-edit')
@@ -81,7 +81,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
         self.assertContains(response, u'bbcode <strong>test</strong>')
 
     def test_topic_addition(self):
-        self.login_client()
+        self.login()
         topic_create_url = reverse('pybb:topic_create', kwargs={'forum_id': self.forum.id})
         response = self.client.get(topic_create_url)
         values = self.get_form_values(response)
@@ -93,7 +93,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
         self.assertTrue(Topic.objects.filter(name='new topic name').exists())
 
     def test_global_topic_addition(self):
-        self.login_client()
+        self.login()
         topic_create_url = reverse('pybb:topic_create')
         response = self.client.get(topic_create_url)
         values = self.get_form_values(response)
@@ -133,7 +133,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
 
         topic_move_url = reverse('pybb:topic_move')
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.post(topic_move_url, data={
             'topic_ids': [topic.pk]
@@ -151,7 +151,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
 
         topic_merge_url = reverse('pybb:topic_move')
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         name = 'new name for a topic'
 
@@ -187,7 +187,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
 
         topic_merge_url = reverse('pybb:topic_merge')
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.post(topic_merge_url, data={
             'topic_ids': [topic.pk]
@@ -200,7 +200,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
     def test_posts_move_view(self):
         post_move_url = reverse('pybb:post_move')
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.post(post_move_url, data={
             'post_ids': [self.post.pk]
@@ -212,7 +212,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
     def test_posts_move_complete_new_topic(self):
         post_move_url = reverse('pybb:post_move')
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         post_ids = [self.post.pk]
 
@@ -239,7 +239,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
 
         post_move_url = reverse('pybb:post_move')
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         post_ids = [self.post.pk]
 
@@ -264,7 +264,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
 
         topic_merge_url = reverse('pybb:topic_merge')
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.post(topic_merge_url, data={
             'topic_ids': [topic.pk],
@@ -399,7 +399,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
         self.assertEqual(client.get(topic_staff.get_absolute_url()).status_code, 200)
 
     def test_inactive(self):
-        self.login_client()
+        self.login()
         url = reverse('pybb:post_create', kwargs={'topic_id': self.topic.id})
         response = self.client.get(url)
         values = self.get_form_values(response)
@@ -413,25 +413,8 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
         self.client.post(url, values, follow=True)
         self.assertEqual(len(Post.objects.filter(body='test ban 2')), 0)
 
-    def get_csrf(self, form):
-        return form.xpath('//input[@name="csrfmiddlewaretoken"]/@value')[0]
-
-    def test_csrf(self):
-        client = Client(enforce_csrf_checks=True)
-        client.login(username='zeus', password='zeus')
-        post_url = reverse('pybb:post_create', kwargs={'topic_id': self.topic.id})
-        response = client.get(post_url)
-        values = self.get_form_values(response)
-        del values['csrfmiddlewaretoken']
-        response = client.post(post_url, values, follow=True)
-        self.assertNotEqual(response.status_code, 200)
-        response = client.get(self.topic.get_absolute_url())
-        values = self.get_form_values(response)
-        response = client.post(reverse('pybb:post_create', kwargs={'topic_id': self.topic.id}), values, follow=True)
-        self.assertEqual(response.status_code, 200)
-
     def test_ajax_preview(self):
-        self.login_client()
+        self.login()
         response = self.client.post(reverse('pybb:post_preview'), data={'data': '[b]test bbcode ajax preview[/b]'})
         self.assertEqual(response.status_code, 200)
 
@@ -442,13 +425,13 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
         self.assertContains(client.get(self.forum.get_absolute_url()), 'test <b>headline</b>')
 
     def test_quote(self):
-        self.login_client()
+        self.login()
         response = self.client.get(reverse('pybb:post_create', kwargs={'topic_id': self.topic.id}), data={'quote_id': self.post.id, 'body': 'test tracking'}, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.post.body)
 
     def test_post_update(self):
-        self.login_client()
+        self.login()
 
         post_update_url = reverse('pybb:post_update', kwargs={'pk': self.post.id})
         response = self.client.get(post_update_url)
@@ -480,7 +463,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
         response = self.client.get(post_update_url)
         self.assertEqual(response.status_code, 200)
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.post(post_update_url, data=values, follow=True)
         self.assertEqual(response.status_code, 200)
@@ -491,7 +474,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
     def test_admin_post_add(self):
         self.user.is_staff = True
         self.user.save()
-        self.login_client()
+        self.login()
         response = self.client.post(reverse('pybb:post_create',
                                             kwargs={'topic_id': self.topic.id}),
                                     data={
@@ -506,7 +489,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
     def test_stick(self):
         self.user.is_superuser = True
         self.user.save()
-        self.login_client()
+        self.login()
         self.assertEqual(self.client.get(reverse('pybb:topic_stick', kwargs={'pk': self.topic.id}), follow=True).status_code, 200)
         self.assertEqual(self.client.get(reverse('pybb:topic_unstick', kwargs={'pk': self.topic.id}), follow=True).status_code, 200)
 
@@ -515,7 +498,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
         post.save()
         self.user.is_superuser = True
         self.user.save()
-        self.login_client()
+        self.login()
         response = self.client.post(reverse('pybb:post_delete', args=[post.id]), follow=True)
         self.assertEqual(response.status_code, 200)
          # Check that topic and forum exists ;)
@@ -536,7 +519,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
         post = Post(topic=self.topic, user=self.user, body='test to delete')
         post.save()
 
-        self.login_client()
+        self.login()
 
         response = self.client.post(reverse('pybb:post_delete', args=[post.id]))
         self.assertEqual(response.status_code, 302)
@@ -551,7 +534,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
 
         PostDeletion.objects.create(post=post, user=self.user)
 
-        self.login_client()
+        self.login()
 
         response = self.client.post(reverse('pybb:post_delete', args=[post.id]))
         self.assertEqual(response.status_code, 302)
@@ -563,7 +546,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
         self.assertFalse(post.deleted)
 
     def test_delete_post_topic_view(self):
-        self.login_client()
+        self.login()
 
         response = self.client.post(reverse('pybb:post_delete', args=[self.post.id]))
 
@@ -580,7 +563,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
         post.save()
         post.mark_as_deleted(user=self.user)
 
-        self.login_client()
+        self.login()
 
         self.post.mark_as_deleted(user=self.user)
 
@@ -599,7 +582,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
     def test_open_close(self):
         self.user.is_superuser = True
         self.user.save()
-        self.login_client()
+        self.login()
         post_create_url = reverse('pybb:post_create', args=[self.topic.id])
         response = self.client.get(post_create_url)
         values = self.get_form_values(response)
@@ -614,14 +597,14 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
         self.assertEqual(response.status_code, 200)
 
     def test_delete_topic_view(self):
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
         response = self.client.get(reverse('pybb:topic_delete', args=[self.topic.id]), follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response,
                                 'pybb/topic/delete.html')
 
     def test_delete_topic_complete(self):
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
         response = self.client.post(reverse('pybb:topic_delete', args=[self.topic.id]), follow=True)
         self.assertRedirects(response, self.topic.forum.get_absolute_url())
 
@@ -654,7 +637,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
                                                    type=Subscription.TYPE_INSTANT_ALERT,
                                                    user=self.staff)
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.post(reverse('pybb:subscription_change'), data={
             'topic_ids': [self.topic.pk],
@@ -672,7 +655,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
                                     type=Subscription.TYPE_INSTANT_ALERT,
                                     user=self.staff)
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.get(reverse('pybb:subscription_list'))
 
@@ -754,7 +737,7 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)

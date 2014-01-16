@@ -1,25 +1,22 @@
-from django.test import TransactionTestCase
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User
+from django.db.models.loading import cache; cache._populate()
 from django.test.client import RequestFactory
 
-from pybb.tests.base import SharedTestModule
-from pybb.contrib.ban.forms import BanForm
-from pybb.contrib.ban.models import BannedUser, IPAddress
-from pybb.contrib.ban import settings
-from pybb.contrib.ban.middleware import PybbBanMiddleware
+from .forms import BanForm
+from .models import BannedUser, IPAddress
+from . import settings
+from .middleware import PybbBanMiddleware
+
+from pybb.tests.base import TestCase
 
 from mock import patch
 
 
-class BanTest(TransactionTestCase, SharedTestModule):
-    def setUp(self):
-        self.create_user()
-
+class BanTest(TestCase):
     def test_ban_list_view(self):
         url = reverse('ban_list')
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.get(url)
 
@@ -32,7 +29,7 @@ class BanTest(TransactionTestCase, SharedTestModule):
             'username': self.user.username
         })
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.get(url)
 
@@ -48,7 +45,7 @@ class BanTest(TransactionTestCase, SharedTestModule):
             'username': self.user.username
         })
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.post(url, data={
             'reason': 'Because he is too small'
@@ -64,7 +61,7 @@ class BanTest(TransactionTestCase, SharedTestModule):
             'username': self.user.username
         })
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         IPAddress.objects.bulk_create([
             IPAddress(user=self.user, ip_address='199.59.149.230'),
@@ -94,7 +91,7 @@ class BanTest(TransactionTestCase, SharedTestModule):
             'username': self.user.username
         })
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         BannedUser.objects.create(user=self.user)
 
@@ -115,7 +112,7 @@ class BanTest(TransactionTestCase, SharedTestModule):
             'username': self.user.username
         })
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         BannedUser.objects.create(user=self.user)
 
@@ -143,40 +140,34 @@ class BanTest(TransactionTestCase, SharedTestModule):
             IPAddress(user=self.user, ip_address='74.125.230.201', banned=False),
         ])
 
-        newbie = User.objects.create_user('newbie', 'newbie@localhost', '$ecret')
-
         factory = RequestFactory(REMOTE_ADDR='199.59.149.230')
         request = factory.get('/post/1')
 
-        BannedUser.objects.user_logged_in(User, request, newbie)
+        BannedUser.objects.user_logged_in(self.newbie.__class__, request, self.newbie)
 
-        self.assertEqual(BannedUser.objects.filter(user=newbie).count(), 1)
+        self.assertEqual(BannedUser.objects.filter(user=self.newbie).count(), 1)
 
     def test_reban_existing_cookie(self):
         BannedUser.objects.create(user=self.user)
 
-        newbie = User.objects.create_user('newbie', 'newbie@localhost', '$ecret')
-
         factory = RequestFactory()
         factory.cookies[settings.PYBB_BAN_COOKIE_NAME] = self.user.pk
         request = factory.get('/post/1')
 
-        BannedUser.objects.user_logged_in(User, request, newbie)
+        BannedUser.objects.user_logged_in(self.newbie.__class__, request, self.newbie)
 
-        self.assertEqual(BannedUser.objects.filter(user=newbie).count(), 1)
+        self.assertEqual(BannedUser.objects.filter(user=self.newbie).count(), 1)
 
     def test_reban_existing_fake_cookie(self):
         BannedUser.objects.create(user=self.user)
 
-        newbie = User.objects.create_user('newbie', 'newbie@localhost', '$ecret')
-
         factory = RequestFactory()
         factory.cookies[settings.PYBB_BAN_COOKIE_NAME] = self.user.pk
         request = factory.get('/post/1')
 
-        BannedUser.objects.user_logged_in(User, request, newbie)
+        BannedUser.objects.user_logged_in(self.newbie.__class__, request, self.newbie)
 
-        self.assertEqual(BannedUser.objects.filter(user=newbie).count(), 1)
+        self.assertEqual(BannedUser.objects.filter(user=self.newbie).count(), 1)
 
     def test_ban_already_banned_user(self):
         BannedUser.objects.create(user=self.user)
@@ -185,11 +176,13 @@ class BanTest(TransactionTestCase, SharedTestModule):
         factory.cookies[settings.PYBB_BAN_COOKIE_NAME] = 'h4ck0r'
         request = factory.get('/post/1')
 
-        BannedUser.objects.user_logged_in(User, request, self.user)
+        BannedUser.objects.user_logged_in(self.newbie.__class__, request, self.newbie)
 
         self.assertEqual(BannedUser.objects.filter(user=self.user).count(), 1)
 
     def test_ban_middelware(self):
+        from pybb.compat import User
+
         with patch.object(User, 'is_authenticated') as is_authenticated:
             is_authenticated.return_value = True
 
