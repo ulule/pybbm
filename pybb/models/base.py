@@ -6,6 +6,8 @@ import magic
 import urllib
 import logging
 from datetime import date
+from BeautifulSoup import BeautifulSoup
+from urlparse import urlparse
 
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
@@ -34,9 +36,6 @@ from pybb.processors import markup
 from autoslug import AutoSlugField
 
 from djcastor import CAStorage
-
-from BeautifulSoup import BeautifulSoup
-from urlparse import urlparse
 
 try:
     from south.modelsinspector import add_introspection_rules
@@ -718,25 +717,27 @@ class BaseTopic(ModelBase):
         return self.forum.is_hidden()
 
     def sync_cover(self, commit=False):
-        if self.first_post:
-            for url in self.first_post.images:
-                try:
-                    path, response = urllib.urlretrieve(url)
-                    file_ext = urlparse(url).path.split('.')[-1]
+        if not self.first_post_id:
+            return False
 
-                    self.cover.save("%s.%s" % (self.id, file_ext),
-                                    File(open(path)), save=True)
+        for url in self.first_post.images:
+            try:
+                path, response = urllib.urlretrieve(url)
+                file_ext = urlparse(url).path.split('.')[-1]
 
-                    if commit:
-                        update_fields(self, fields=('cover', ))
+                self.cover.save("%s.%s" % (self.id, file_ext),
+                                File(open(path)), save=True)
 
-                    os.remove(path)
+                if commit:
+                    update_fields(self, fields=('cover', ))
 
-                    break
-                except Exception as e:
-                    logging.error(e)
+                os.remove(path)
+            except Exception as e:
+                logging.error(e)
+            else:
+                return True
 
-            return self.cover
+        return False
 
 
 class RenderableItem(ModelBase):
