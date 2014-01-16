@@ -31,7 +31,7 @@ from pybb.forms import (PostForm, AdminPostForm, PostsMoveExistingTopicForm,
                         PollAnswerFormSet, AttachmentFormSet, PollForm,
                         ForumForm, ModerationForm, SearchUserForm,
                         get_topic_move_formset, get_topic_merge_formset,
-                        get_topics_delete_formset, PostsMoveNewTopicForm)
+                        get_topic_delete_formset, PostsMoveNewTopicForm)
 from pybb.templatetags.pybb_tags import pybb_topic_poll_not_voted
 from pybb.helpers import (lookup_users, lookup_post_attachments,
                           lookup_post_topics, lookup_topic_lastposts,
@@ -994,7 +994,7 @@ class TopicsDeleteView(TopicBatchView):
         return context
 
     def get_formset_class(self, **kwargs):
-        return get_topics_delete_formset(**kwargs)
+        return get_topic_delete_formset(**kwargs)
 
     def form_valid(self, formset):
         topics = []

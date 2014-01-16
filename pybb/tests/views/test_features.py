@@ -277,28 +277,23 @@ class FeaturesTest(TestCase):
         self.assertRedirects(response, reverse('pybb:index'))
 
     def test_topics_delete_view(self):
-        topic1 = Topic.objects.create(name='Topic 1', forum=self.forum, user=self.superuser)
         topic2 = Topic.objects.create(name='Topic 2', forum=self.forum, user=self.superuser)
-
-        post1 = Post(topic=topic1, user=self.superuser, body='post on topic1')
-        post1.save()
 
         post2 = Post(topic=topic2, user=self.superuser, body='post on topic2')
         post2.save()
 
         topics_delete_url = reverse('pybb:topics_delete')
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.post(topics_delete_url, data={
-            'topic_ids': [topic1.pk, topic2.pk],
-            'topics': [topic1, topic2]
+            'topic_ids': [self.topic.pk, topic2.pk],
+            'topic': topic2,
+            'confirm': True
         })
 
-        topic1 = Topic.objects.get(pk=topic1.pk)
         topic2 = Topic.objects.get(pk=topic2.pk)
 
-        self.assertTrue(topic1.delete)
         self.assertTrue(topic2.delete)
 
         self.assertEqual(response.status_code, 200)
@@ -306,31 +301,29 @@ class FeaturesTest(TestCase):
         self.assertTemplateUsed(response, 'pybb/topic/delete.html')
 
     def test_topics_delete_complete(self):
-        topic1 = Topic.objects.create(name='Topic 1', forum=self.forum, user=self.superuser)
         topic2 = Topic.objects.create(name='Topic 2', forum=self.forum, user=self.superuser)
-
-        post1 = Post(topic=topic1, user=self.superuser, body='post on topic1')
-        post1.save()
 
         post2 = Post(topic=topic2, user=self.superuser, body='post on topic2')
         post2.save()
 
         topics_delete_url = reverse('pybb:topics_delete')
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.post(topics_delete_url, data={
-            'topic_ids': [topic1.pk, topic2.pk],
-            'form-TOTAL_FORMS': 1,
+            'topic_ids': [self.topic.pk, topic2.pk],
+            'form-TOTAL_FORMS': 2,
             'form-INITIAL_FORMS': 0,
-            'form-0-topics': [topic1.pk, topic2.pk],
+            'form-0-topic': self.topic.pk,
+            'form-0-confirm': True,
+            'form-1-topic': topic2.pk,
+            'form-1-confirm': True,
             'submit': 1
         })
 
-        topic1 = Topic.objects.get(pk=topic1.pk)
         topic2 = Topic.objects.get(pk=topic2.pk)
 
-        self.assertTrue(topic1.delete)
+        self.assertTrue(self.topic.delete)
         self.assertTrue(topic2.delete)
 
         self.assertRedirects(response, reverse('pybb:index'))
