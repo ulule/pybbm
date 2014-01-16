@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from django.core.urlresolvers import reverse
 
-from pybb.tests.base import TestCase
+from pybb.tests.base import TransactionTestCase
 from pybb import defaults
 from pybb.models import PollAnswer, Topic, Poll
 
 
-class PollTest(TestCase):
+class PollTest(TransactionTestCase):
     def setUp(self):
         self.PYBB_POLL_MAX_ANSWERS = defaults.PYBB_POLL_MAX_ANSWERS
         defaults.PYBB_POLL_MAX_ANSWERS = 2

@@ -22,7 +22,7 @@ except ImportError:
     raise Exception('PyBB requires lxml for self testing')
 
 
-class TestCase(test.TestCase, Exam):
+class FixtureMixin(Exam):
     @fixture
     def user(self):
         return User.objects.create_user('zeus', 'zeus@localhost', 'zeus')
@@ -103,6 +103,14 @@ class TestCase(test.TestCase, Exam):
             attr = '//form[@class="%s"]'
 
         return dict(html.fromstring(response.content).xpath(attr % form)[0].form_values())
+
+
+class TestCase(test.TestCase, FixtureMixin):
+    pass
+
+
+class TransactionTestCase(test.TransactionTestCase, FixtureMixin):
+    pass
 
 
 def premoderate(user, post):
