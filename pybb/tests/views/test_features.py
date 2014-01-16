@@ -295,6 +295,12 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
             'topics': [topic1, topic2]
         })
 
+        topic1 = Topic.objects.get(pk=topic1.pk)
+        topic2 = Topic.objects.get(pk=topic2.pk)
+
+        self.assertTrue(topic1.delete)
+        self.assertTrue(topic2.delete)
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['form'].forms), 1)
         self.assertTemplateUsed(response, 'pybb/topic/delete.html')
@@ -317,10 +323,15 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
             'topic_ids': [topic1.pk, topic2.pk],
             'form-TOTAL_FORMS': 1,
             'form-INITIAL_FORMS': 0,
-            'form-0-topics': topic1.pk,
-            'form-1-topics': topic2.pk,
+            'form-0-topics': [topic1.pk, topic2.pk],
             'submit': 1
         })
+
+        topic1 = Topic.objects.get(pk=topic1.pk)
+        topic2 = Topic.objects.get(pk=topic2.pk)
+
+        self.assertTrue(topic1.delete)
+        self.assertTrue(topic2.delete)
 
         self.assertRedirects(response, reverse('pybb:index'))
 

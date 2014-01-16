@@ -312,18 +312,25 @@ class FormsTest(TransactionTestCase, SharedTestModule):
         post2 = Post(topic=topic2, user=self.superuser, body='post on topic2')
         post2.save()
 
-        topics = Topic.objects.filter(forum=self.forum)
+        topics = Topic.objects.filter(pk__in=[topic1.pk, topic2.pk])
 
         form = TopicsDeleteForm(topics=topics, data={
-            'topics': [topic1.pk, topic2.pk]
+            'topics': [topic1.pk, topic2.pk],
         })
 
         self.assertTrue(form.is_valid())
 
         form.save()
 
+        topic1 = Topic.objects.get(pk=topic1.pk)
+        topic2 = Topic.objects.get(pk=topic2.pk)
+        post1 = Post.objects.get(pk=post1.pk)
+        post2 = Post.objects.get(pk=post2.pk)
+
         self.assertTrue(topic1.deleted)
         self.assertTrue(topic2.deleted)
+        self.assertTrue(post1.deleted)
+        self.assertTrue(post2.deleted)
 
     def test_topics_delete_formset(self):
         topic1 = Topic.objects.create(name='Topic 1', forum=self.forum, user=self.superuser)
@@ -335,7 +342,7 @@ class FormsTest(TransactionTestCase, SharedTestModule):
         post2 = Post(topic=topic2, user=self.superuser, body='post on topic2')
         post2.save()
 
-        topics = Topic.objects.filter(forum=self.forum)
+        topics = Topic.objects.filter(pk__in=[topic1.pk, topic2.pk])
 
         FormSet = get_topics_delete_formset(topics=topics)
 
@@ -350,5 +357,12 @@ class FormsTest(TransactionTestCase, SharedTestModule):
         for form in formset:
             form.save()
 
-        self.assertTrue(topic1.deleted)
-        self.assertTrue(topic2.deleted)
+        topic1 = Topic.objects.get(pk=topic1.pk)
+        topic2 = Topic.objects.get(pk=topic2.pk)
+        post1 = Post.objects.get(pk=post1.pk)
+        post2 = Post.objects.get(pk=post2.pk)
+
+        self.assertTrue(topic1.delete)
+        self.assertTrue(topic2.delete)
+        self.assertTrue(post1.deleted)
+        self.assertTrue(post2.deleted)
