@@ -1,25 +1,20 @@
 from django.db.models.loading import cache
 cache._populate()
 
-from django.test import TransactionTestCase
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import Permission
 
 from pybb.forms import (ModerationForm, SearchUserForm, ForumForm, TopicMoveForm,
                         TopicMergeForm, get_topic_merge_formset, PostsMoveNewTopicForm,
                         PostsMoveExistingTopicForm, TopicsDeleteForm, get_topics_delete_formset)
 from pybb.models import Forum, Topic, Post, TopicRedirection
 from pybb.proxies import UserObjectPermission
-from pybb.tests.base import SharedTestModule
 from pybb import defaults
-
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import Permission
+from pybb.tests.base import TestCase
 
 
-class FormsTest(TransactionTestCase, SharedTestModule):
+class FormsTest(TestCase):
     def setUp(self):
-        self.create_user()
-        self.create_initial()
-
         self.permissions = []
 
         self.content_type = ContentType.objects.get_for_model(Forum)
@@ -85,6 +80,8 @@ class FormsTest(TransactionTestCase, SharedTestModule):
         self.failUnless(form.is_valid())
 
     def test_forum_form(self):
+        self.forum
+
         data = {
             'name': 'test',
             'position': 1
@@ -283,6 +280,8 @@ class FormsTest(TransactionTestCase, SharedTestModule):
         self.assertEqual(new_topic.posts.count(), 2)
 
     def test_posts_move_existing_topic_form(self):
+        self.post
+
         forum = Forum.objects.create(name='temporary forum')
 
         topic = Topic.objects.create(name='move_topic', forum=forum, user=self.superuser)

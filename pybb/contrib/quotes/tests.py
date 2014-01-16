@@ -1,21 +1,15 @@
-from django.test import TransactionTestCase
 from django.core.urlresolvers import reverse
 
-from pybb.tests.base import SharedTestModule
-from pybb.contrib.quotes.models import Quote
+from pybb.tests.base import TestCase
 
-from pybb.contrib.quotes.processors import QuoteProcessor
-from pybb.contrib.quotes import settings as quotes_settings
+from .models import Quote
+from .processors import QuoteProcessor
+from . import settings as quotes_settings
 
 from pybb.models import Post
 
 
-class ReportsTest(TransactionTestCase, SharedTestModule):
-    def setUp(self):
-        self.create_user()
-        self.create_initial()
-        quotes_settings.PYBB_QUOTES_MAX_DEPTH = -1
-
+class QuotesTest(TestCase):
     def test_simple_quote(self):
         post = Post(user=self.staff, body='[quote="zeus;%d"]Super quote[/quote]' % self.post.pk, topic=self.topic)
         post.save()
@@ -41,7 +35,10 @@ class ReportsTest(TransactionTestCase, SharedTestModule):
         self.assertEqual(Quote.objects.filter(from_post=post).count(), 2)
 
     def test_multiple_quote_add(self):
-        self.login_client(username='thoas', password='$ecret')
+        self.user
+        self.login_as(self.staff)
+
+        self.post
 
         post = Post(topic=self.topic, user=self.superuser, body='[b]do you want my pere nowel?[/b]')
         post.save()
@@ -55,7 +52,9 @@ class ReportsTest(TransactionTestCase, SharedTestModule):
 
         response = self.client.get(reverse('pybb:post_create',
                                            kwargs={'topic_id': self.topic.id}) + '?quote_id=%d' % self.post.id)
+
         self.assertEqual(response.context['form'].initial['body'], u'[quote="zeus;1"]bbcode [b]test[/b][/quote]\n\n[quote="oleiade;2"][b]do you want my pere nowel?[/b][/quote]\n\n')
+
         self.assertEqual(response.status_code, 200)
 
         response = self.client.post(reverse('quote'), data={

@@ -47,6 +47,7 @@ class BasePollAnswerFormset(BaseInlineFormSet):
 
         if forms_cnt > defaults.PYBB_POLL_MAX_ANSWERS:
             raise forms.ValidationError(_('You can''t add more than %s answers for poll') % defaults.PYBB_POLL_MAX_ANSWERS)
+
         if forms_cnt < 2:
             raise forms.ValidationError(_('Add two or more answers for this poll'))
 
@@ -81,6 +82,7 @@ class PostForm(forms.ModelForm):
         self.topic = kwargs.pop('topic', None)
         self.forum = kwargs.pop('forum', None)
         self.actor = kwargs.pop('actor', None)
+        self.pollformset = None
 
             #Handle topic subject, poll type and question if editing topic head
         if ('instance' in kwargs) and kwargs['instance'] and (kwargs['instance'].topic.head == kwargs['instance']):
@@ -142,6 +144,14 @@ class PostForm(forms.ModelForm):
         for cleaner_class in defaults.PYBB_BODY_CLEANERS:
             body = load_class(cleaner_class)(user, body)
         return body
+
+    def is_valid(self):
+        is_valid = super(PostForm, self).is_valid()
+
+        if self.pollformset:
+            is_valid &= self.pollformset.is_valid()
+
+        return is_valid
 
     def clean(self):
         if not defaults.PYBB_DISABLE_POLLS:

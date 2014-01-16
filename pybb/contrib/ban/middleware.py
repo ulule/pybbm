@@ -4,9 +4,9 @@ from django.template.loader import render_to_string
 from django.http import HttpResponseForbidden
 from django.core.cache import cache
 
-from pybb.contrib.ban.models import IPAddress, BannedUser
-from pybb.contrib.ban import settings
-from pybb.contrib.ban.util import set_cookie, get_ip
+from .models import IPAddress, BannedUser
+from . import settings
+from .util import set_cookie, get_ip
 
 
 def forbid(request, context=None):

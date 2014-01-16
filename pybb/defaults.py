@@ -25,9 +25,7 @@ PYBB_ATTACHMENT_SIZE_LIMIT = getattr(settings, 'PYBB_ATTACHMENT_SIZE_LIMIT', 102
 PYBB_ATTACHMENT_ENABLE = getattr(settings, 'PYBB_ATTACHMENT_ENABLE', True)
 PYBB_NOTIFICATION_ENABLE = getattr(settings, 'PYBB_NOTIFICATION_ENABLE', False)
 PYBB_ATTACHMENT_UPLOAD_TO = getattr(settings, 'PYBB_ATTACHMENT_UPLOAD_TO', os.path.join('pybb', 'attachments'))
-PYBB_ATTACHMENT_BASE_URL = getattr(settings, 'PYBB_ATTACHMENT_BASE_URL', os.path.join(settings.MEDIA_URL, 'pybb', 'attachments/'))
-PYBB_ATTACHMENT_LOCATION = getattr(settings, 'PYBB_ATTACHMENT_LOCATION', os.path.join(settings.MEDIA_ROOT,
-                                                                                      PYBB_ATTACHMENT_UPLOAD_TO))
+PYBB_COVER_UPLOAD_TO = getattr(settings, 'PYBB_COVER_UPLOAD_TO', os.path.join('pybb', 'covers'))
 
 PYBB_DEFAULT_AVATAR_URL = getattr(settings, 'PYBB_DEFAULT_AVATAR_URL',
                                   getattr(settings, 'STATIC_URL', '') + 'pybb/img/default_avatar.jpg')
@@ -213,3 +211,8 @@ PYBB_LOGIN_REQUIRED_DECORATOR = getattr(settings,
                                         'pybb.decorators.login_required')
 
 PYBB_LOGIN_URL = getattr(settings, 'PYBB_LOGIN_URL', settings.LOGIN_URL)
+
+PYBB_FILE_SHARD_WIDTH = getattr(settings, 'PYBB_FILE_SHARD_WIDTH', 2)
+PYBB_FILE_SHARD_DEPTH = getattr(settings, 'PYBB_FILE_SHARD_DEPTH', 2)
+
+PYBB_STORAGE_CLASS = getattr(settings, 'PYBB_STORAGE_CLASS', settings.DEFAULT_FILE_STORAGE)

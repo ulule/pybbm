@@ -1,4 +1,4 @@
-from pybb.contrib.reports.models import Report, ReportMessage
+from .models import Report, ReportMessage
 
 from django import forms
 

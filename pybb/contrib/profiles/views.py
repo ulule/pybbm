@@ -5,9 +5,10 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 
-from pybb.contrib.profiles.forms import EditProfileForm
 from pybb.models import Topic
 from pybb.compat import User
+
+from .forms import EditProfileForm
 
 
 class ProfileUpdateView(generic.UpdateView):

@@ -1,15 +1,11 @@
-from django.test import TransactionTestCase
 from django.core.urlresolvers import reverse
 
-from pybb.tests.base import SharedTestModule
+from pybb.tests.base import TestCase
 
 
-class PreModerationTest(TransactionTestCase, SharedTestModule):
-    def setUp(self):
-        self.create_user()
-
+class PreModerationTest(TestCase):
     def test_logmoderation_list_view(self):
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.get(reverse('pybb:logmoderation_list'))
         self.assertEqual(response.status_code, 200)

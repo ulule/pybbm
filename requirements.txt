@@ -11,7 +11,6 @@ django-pure-pagination
 lxml
 django-registration
 django-autoslug
-django-castor
 django-guardian==1.1.1
 celery==3.1.5
 mock
@@ -19,3 +18,5 @@ python-magic
 bleach
 django-haystack==2.1.0
 celery-haystack
+BeautifulSoup==3.2.1
+exam

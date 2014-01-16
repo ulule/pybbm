@@ -1,5 +1,5 @@
 from pybb.processors import BaseProcessor
-from pybb.contrib.quotes import settings
+from . import settings
 
 
 class QuoteProcessor(BaseProcessor):

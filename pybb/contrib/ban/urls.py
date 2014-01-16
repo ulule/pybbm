@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, url
 
-from pybb.contrib.ban.views import (BanCreateView, BanListView,
-                                    BanDeleteView)
+from .views import (BanCreateView, BanListView,
+                    BanDeleteView)
 
 
 urlpatterns = patterns(

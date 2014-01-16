@@ -1,38 +1,31 @@
-import os
-
-from django.test import TransactionTestCase
 from django.core.urlresolvers import reverse
-from django.core.files import File
 
-from pybb.tests.base import SharedTestModule
+from pybb.tests.base import TestCase, get_uploaded_file
 from pybb import defaults
 from pybb.models import Post, Attachment
 
 
-class AttachmentTest(TransactionTestCase, SharedTestModule):
+class AttachmentTest(TestCase):
     def setUp(self):
         self.PYBB_ATTACHMENT_ENABLE = defaults.PYBB_ATTACHMENT_ENABLE
         defaults.PYBB_ATTACHMENT_ENABLE = True
         self.ORIG_PYBB_PREMODERATION = defaults.PYBB_PREMODERATION
         defaults.PYBB_PREMODERATION = False
-        self.file = open(os.path.join(os.path.dirname(__file__), '..', 'static', 'pybb', 'img', 'attachment.png'))
-        self.create_user()
-        self.create_initial()
 
     def test_attachment(self):
         post_create_url = reverse('pybb:post_create', kwargs={'topic_id': self.topic.id})
-        self.login_client()
+        self.login()
         response = self.client.get(post_create_url)
         values = self.get_form_values(response)
         values['body'] = 'test attachment'
-        values['attachments-0-file'] = self.file
+        values['attachments-0-file'] = get_uploaded_file('attachment.png')
         response = self.client.post(post_create_url, values, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(Post.objects.filter(body='test attachment').exists())
 
     def test_attachment_complete(self):
         post_create_url = reverse('pybb:post_create', kwargs={'topic_id': self.topic.id})
-        self.login_client()
+        self.login()
         response = self.client.get(post_create_url)
         values = self.get_form_values(response)
 
@@ -46,7 +39,7 @@ class AttachmentTest(TransactionTestCase, SharedTestModule):
 
         attachment_values = self.get_form_values(response, form='attachments-form', attr='//form[@id="%s"]')
 
-        attachment_values['attachments-0-file'] = self.file
+        attachment_values['attachments-0-file'] = get_uploaded_file('attachment.png')
 
         response = self.client.post(post_attachment_url, attachment_values)
 
@@ -66,8 +59,7 @@ class AttachmentTest(TransactionTestCase, SharedTestModule):
         self.post.hash = self.post.get_hash()
         self.post.save()
 
-        file = File(self.file)
-        file.name = os.path.basename(self.file.name)
+        file = get_uploaded_file('attachment.png')
 
         attachment = Attachment.objects.create(
             file=file,
@@ -76,7 +68,7 @@ class AttachmentTest(TransactionTestCase, SharedTestModule):
             user=self.user
         )
 
-        self.login_client()
+        self.login()
 
         response = self.client.get(reverse('pybb:attachment_delete', kwargs={
             'pk': attachment.pk
@@ -90,8 +82,7 @@ class AttachmentTest(TransactionTestCase, SharedTestModule):
         self.post.hash = self.post.get_hash()
         self.post.save()
 
-        file = File(self.file)
-        file.name = os.path.basename(self.file.name)
+        file = get_uploaded_file('attachment.png')
 
         attachment = Attachment.objects.create(
             file=file,
@@ -100,7 +91,7 @@ class AttachmentTest(TransactionTestCase, SharedTestModule):
             user=self.user
         )
 
-        self.login_client()
+        self.login()
 
         response = self.client.post(reverse('pybb:attachment_delete', kwargs={
             'pk': attachment.pk
@@ -114,8 +105,7 @@ class AttachmentTest(TransactionTestCase, SharedTestModule):
         self.post.hash = self.post.get_hash()
         self.post.save()
 
-        file = File(self.file)
-        file.name = os.path.basename(self.file.name)
+        file = get_uploaded_file('attachment.png')
 
         attachment = Attachment.objects.create(
             file=file,
@@ -124,7 +114,7 @@ class AttachmentTest(TransactionTestCase, SharedTestModule):
             user=self.user
         )
 
-        self.login_client()
+        self.login()
 
         post_attachment_url = reverse('pybb:attachment_list')
 
@@ -140,8 +130,7 @@ class AttachmentTest(TransactionTestCase, SharedTestModule):
         self.post.hash = self.post.get_hash()
         self.post.save()
 
-        file = File(self.file)
-        file.name = os.path.basename(self.file.name)
+        file = get_uploaded_file('attachment.png')
 
         Attachment.objects.create(
             file=file,
@@ -150,7 +139,7 @@ class AttachmentTest(TransactionTestCase, SharedTestModule):
             user=self.user
         )
 
-        self.login_client()
+        self.login()
 
         post_attachment_url = reverse('pybb:attachment_list')
 
@@ -160,7 +149,7 @@ class AttachmentTest(TransactionTestCase, SharedTestModule):
 
         attachment_values = self.get_form_values(response, form='attachments-form', attr='//form[@id="%s"]')
 
-        attachment_values['attachments-0-file'] = self.file
+        attachment_values['attachments-0-file'] = get_uploaded_file('attachment.png')
 
         self.assertEqual(response.status_code, 200)
 
