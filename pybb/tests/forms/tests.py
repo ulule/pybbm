@@ -1,8 +1,11 @@
+from django.db.models.loading import cache
+cache._populate()
+
 from django.test import TransactionTestCase
 
 from pybb.forms import (ModerationForm, SearchUserForm, ForumForm, TopicMoveForm,
                         TopicMergeForm, get_topic_merge_formset, PostsMoveNewTopicForm,
-                        PostsMoveExistingTopicForm)
+                        PostsMoveExistingTopicForm, TopicsDeleteForm, get_topics_delete_formset)
 from pybb.models import Forum, Topic, Post, TopicRedirection
 from pybb.proxies import UserObjectPermission
 from pybb.tests.base import SharedTestModule
@@ -298,3 +301,54 @@ class FormsTest(TransactionTestCase, SharedTestModule):
         form.save()
 
         self.assertEqual(self.topic.posts.count(), 2)
+
+    def test_topics_delete_form(self):
+        topic1 = Topic.objects.create(name='Topic 1', forum=self.forum, user=self.superuser)
+        topic2 = Topic.objects.create(name='Topic 2', forum=self.forum, user=self.superuser)
+
+        post1 = Post(topic=topic1, user=self.superuser, body='post on topic1')
+        post1.save()
+
+        post2 = Post(topic=topic2, user=self.superuser, body='post on topic2')
+        post2.save()
+
+        topics = Topic.objects.filter(forum=self.forum)
+
+        form = TopicsDeleteForm(topics=topics, data={
+            'topics': [topic1.pk, topic2.pk]
+        })
+
+        self.assertTrue(form.is_valid())
+
+        form.save()
+
+        self.assertTrue(topic1.deleted)
+        self.assertTrue(topic2.deleted)
+
+    def test_topics_delete_formset(self):
+        topic1 = Topic.objects.create(name='Topic 1', forum=self.forum, user=self.superuser)
+        topic2 = Topic.objects.create(name='Topic 2', forum=self.forum, user=self.superuser)
+
+        post1 = Post(topic=topic1, user=self.superuser, body='post on topic1')
+        post1.save()
+
+        post2 = Post(topic=topic2, user=self.superuser, body='post on topic2')
+        post2.save()
+
+        topics = Topic.objects.filter(forum=self.forum)
+
+        FormSet = get_topics_delete_formset(topics=topics)
+
+        formset = FormSet(data={
+            'form-TOTAL_FORMS': 1,
+            'form-INITIAL_FORMS': 0,
+            'form-0-topics': [topic1.pk, topic2.pk],
+        })
+
+        self.assertTrue(formset.is_valid())
+
+        for form in formset:
+            form.save()
+
+        self.assertTrue(topic1.deleted)
+        self.assertTrue(topic2.deleted)

@@ -276,6 +276,54 @@ class FeaturesTest(TransactionTestCase, SharedTestModule):
 
         self.assertRedirects(response, reverse('pybb:index'))
 
+    def test_topics_delete_view(self):
+        topic1 = Topic.objects.create(name='Topic 1', forum=self.forum, user=self.superuser)
+        topic2 = Topic.objects.create(name='Topic 2', forum=self.forum, user=self.superuser)
+
+        post1 = Post(topic=topic1, user=self.superuser, body='post on topic1')
+        post1.save()
+
+        post2 = Post(topic=topic2, user=self.superuser, body='post on topic2')
+        post2.save()
+
+        topics_delete_url = reverse('pybb:topics_delete')
+
+        self.login_client(username='thoas', password='$ecret')
+
+        response = self.client.post(topics_delete_url, data={
+            'topic_ids': [topic1.pk, topic2.pk],
+            'topics': [topic1, topic2]
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['form'].forms), 1)
+        self.assertTemplateUsed(response, 'pybb/topic/delete.html')
+
+    def test_topics_delete_complete(self):
+        topic1 = Topic.objects.create(name='Topic 1', forum=self.forum, user=self.superuser)
+        topic2 = Topic.objects.create(name='Topic 2', forum=self.forum, user=self.superuser)
+
+        post1 = Post(topic=topic1, user=self.superuser, body='post on topic1')
+        post1.save()
+
+        post2 = Post(topic=topic2, user=self.superuser, body='post on topic2')
+        post2.save()
+
+        topics_delete_url = reverse('pybb:topics_delete')
+
+        self.login_client(username='thoas', password='$ecret')
+
+        response = self.client.post(topics_delete_url, data={
+            'topic_ids': [topic1.pk, topic2.pk],
+            'form-TOTAL_FORMS': 1,
+            'form-INITIAL_FORMS': 0,
+            'form-0-topics': topic1.pk,
+            'form-1-topics': topic2.pk,
+            'submit': 1
+        })
+
+        self.assertRedirects(response, reverse('pybb:index'))
+
     def test_forum_updated(self):
         time.sleep(1)
         topic = Topic(name='xtopic', forum=self.forum, user=self.user)
