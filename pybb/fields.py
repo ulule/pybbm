@@ -125,7 +125,7 @@ class CAStorage(storage_class):
         if dirname:
             results = [dirname, ] + results
 
-        return [dirname, ] + results
+        return results
 
     def path(self, hexdigest):
         shards = self.shard(hexdigest)
