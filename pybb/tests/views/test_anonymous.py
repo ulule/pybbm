@@ -1,13 +1,13 @@
-from django.test import TransactionTestCase
-from django.contrib.auth.models import User, Permission
+from django.contrib.auth.models import Permission
 from django.core.urlresolvers import reverse
 
-from pybb.tests.base import SharedTestModule
 from pybb import defaults
+from pybb.compat import User
+from pybb.tests.base import TestCase
 from pybb.models import Post, Topic, Forum
 
 
-class AnonymousTest(TransactionTestCase, SharedTestModule):
+class AnonymousTest(TestCase):
     def setUp(self):
         self.ORIG_PYBB_ENABLE_ANONYMOUS_POST = defaults.PYBB_ENABLE_ANONYMOUS_POST
         self.ORIG_PYBB_ANONYMOUS_USERNAME = defaults.PYBB_ANONYMOUS_USERNAME

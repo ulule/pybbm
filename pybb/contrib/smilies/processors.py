@@ -3,8 +3,9 @@ import re
 from django.utils.functional import memoize
 
 from pybb.processors import BaseProcessor
-from pybb.contrib.smilies import settings
-from pybb.contrib.smilies.models import Smiley
+
+from . import settings
+from .models import Smiley
 
 _cache = {}
 

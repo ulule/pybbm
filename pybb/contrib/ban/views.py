@@ -7,8 +7,9 @@ from django.core.urlresolvers import reverse
 from pybb.util import generic
 from pybb.compat import User
 from pybb import defaults
-from pybb.contrib.ban.forms import BanForm
-from pybb.contrib.ban.models import BannedUser, IPAddress
+
+from .forms import BanForm
+from .models import BannedUser, IPAddress
 
 from pure_pagination import Paginator
 

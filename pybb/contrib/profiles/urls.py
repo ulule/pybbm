@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 
-from pybb.contrib.profiles.views import ProfileUpdateView, UserDetailView
+from .views import ProfileUpdateView, UserDetailView
 
 
 urlpatterns = patterns(

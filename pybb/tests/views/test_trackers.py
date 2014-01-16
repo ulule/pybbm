@@ -1,19 +1,16 @@
-from django.test import TransactionTestCase
-from django.test.client import Client
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User
-
-from pybb.tests.base import SharedTestModule
+from django.test.client import Client
 
 from pybb.models import ForumReadTracker, TopicReadTracker, Topic, Post, Forum
+from pybb.compat import User
+
+from pybb.tests.base import TestCase
 
 
-class TrackersTest(TransactionTestCase, SharedTestModule):
-    def setUp(self):
-        self.create_user()
-        self.create_initial()
-
+class TrackersTest(TestCase):
     def test_read_tracking_multi_user(self):
+        self.post
+
         topic_1 = self.topic
         topic_2 = Topic(name='topic_2', forum=self.forum, user=self.user)
         topic_2.save()
@@ -98,6 +95,8 @@ class TrackersTest(TransactionTestCase, SharedTestModule):
         self.assertEqual(TopicReadTracker.objects.filter(user=user_bob).count(), 0)
 
     def test_read_tracking_multi_forum(self):
+        self.post
+
         topic_1 = self.topic
         topic_2 = Topic(name='topic_2', forum=self.forum, user=self.user)
         topic_2.save()
@@ -109,31 +108,30 @@ class TrackersTest(TransactionTestCase, SharedTestModule):
 
         Topic(name='garbage', forum=forum_2, user=self.user).save()
 
-        client = Client()
-        client.login(username='zeus', password='zeus')
+        self.login_as(self.user)
 
          # everything starts unread
-        self.assertEqual(ForumReadTracker.objects.all().count(), 0)
-        self.assertEqual(TopicReadTracker.objects.all().count(), 0)
+        self.assertEqual(ForumReadTracker.objects.count(), 0)
+        self.assertEqual(TopicReadTracker.objects.count(), 0)
 
          # user reads topic_1, they should get one topic read tracker, there should be no forum read trackers
-        client.get(topic_1.get_absolute_url())
-        self.assertEqual(TopicReadTracker.objects.all().count(), 1)
+        self.client.get(topic_1.get_absolute_url())
+        self.assertEqual(TopicReadTracker.objects.count(), 1)
         self.assertEqual(TopicReadTracker.objects.filter(user=self.user).count(), 1)
         self.assertEqual(TopicReadTracker.objects.filter(user=self.user, topic=topic_1).count(), 1)
 
          # user reads topic_2, they should get a forum read tracker,
          #  there should be no topic read trackers for the user
-        client.get(topic_2.get_absolute_url())
-        self.assertEqual(TopicReadTracker.objects.all().count(), 0)
-        self.assertEqual(ForumReadTracker.objects.all().count(), 1)
+        self.client.get(topic_2.get_absolute_url())
+        self.assertEqual(TopicReadTracker.objects.count(), 0)
+        self.assertEqual(ForumReadTracker.objects.count(), 1)
         self.assertEqual(ForumReadTracker.objects.filter(user=self.user).count(), 1)
         self.assertEqual(ForumReadTracker.objects.filter(user=self.user, forum=self.forum).count(), 1)
 
     def test_forum_mark_as_read(self):
         url = reverse('pybb:forum_mark_as_read')
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.get(url)
 
@@ -144,7 +142,7 @@ class TrackersTest(TransactionTestCase, SharedTestModule):
     def test_forum_mark_as_read_specific(self):
         url = reverse('pybb:forum_mark_as_read')
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.post(url, data={
             'forum_id': self.forum.pk
@@ -155,7 +153,9 @@ class TrackersTest(TransactionTestCase, SharedTestModule):
         self.assertEqual(ForumReadTracker.objects.filter(user=self.staff, forum=self.forum).count(), 1)
 
     def test_topic_tracker_redirect_view(self):
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
+
+        self.post
 
         response = self.client.get(reverse('pybb:topic_tracker_redirect', kwargs={
             'topic_id': self.topic.pk

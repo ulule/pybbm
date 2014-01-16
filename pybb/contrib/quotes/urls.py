@@ -1,6 +1,6 @@
 from django.conf.urls import url, patterns
 
-from pybb.contrib.quotes.views import QuoteView
+from .views import QuoteView
 
 
 urlpatterns = patterns(

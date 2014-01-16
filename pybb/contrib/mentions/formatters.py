@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 
-from pybb.contrib.mentions import settings
-from pybb.contrib.mentions.signals import mentioned
+from . import settings
+from .signals import mentioned
 
 
 def mention(tag_name, value, options, parent, context):

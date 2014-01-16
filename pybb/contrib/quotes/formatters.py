@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-from django.contrib.auth.models import User
-
-from pybb.contrib.quotes.signals import quoted
+from pybb.compat import User
 from pybb.models import Post
 
-from pybb.contrib.quotes import settings
-
-import re
+from .signals import quoted
+from . import settings
 
 
 def quote(tag_name, value, options, parent, context):

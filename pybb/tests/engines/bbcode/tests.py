@@ -1,18 +1,11 @@
-from django.test import TransactionTestCase
-
-from pybb.tests.base import SharedTestModule
+from pybb.tests.base import TestCase
 from pybb.engines.bbcode import BBCodeMarkupEngine
 from pybb.engines.bbcode.formatters import FONT_FAMILIES, FONT_SIZES
 
 from pybb.models.base import markup
 
 
-class BBCodeMarkupEngineTest(TransactionTestCase, SharedTestModule):
-    def setUp(self):
-        self.create_user()
-        self.create_initial()
-        self.create_smilies()
-
+class BBCodeMarkupEngineTest(TestCase):
     def test_simple_formatters(self):
         messages = (
             ('[left]test[/left]', '<div style="text-align:left;">test</div>'),
@@ -44,6 +37,9 @@ class BBCodeMarkupEngineTest(TransactionTestCase, SharedTestModule):
             self.assertEqual(markup_engine.render(), '<span style="font-size:%s">test</span>' % size)
 
     def test_multiple_formatters(self):
+        self.staff
+        self.create_smilies()
+
         messages = (
             ('[left][url url="http://ulule.com" title="Ulule"][img alt="Ulule" class="link"]http://ulule.com/logo.png[/img][/url][/left]',
              u'<div style="text-align: left;"><a href="http://ulule.com" rel="nofollow" target="_blank" title="Ulule"><img alt="Ulule" class="link" src="http://ulule.com/logo.png"></a></div>'),

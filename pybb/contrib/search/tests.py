@@ -1,11 +1,9 @@
-from django.test import TransactionTestCase
+from pybb.tests.base import TestCase
 
-from pybb.tests.base import SharedTestModule
-
-from pybb.contrib.search.utils.highlighting import Highlighter, extract_tags
+from .utils.highlighting import Highlighter, extract_tags
 
 
-class SearchHighlighterTest(TransactionTestCase, SharedTestModule):
+class SearchHighlighterTest(TestCase):
     def highlight(self, query, text):
         h = Highlighter(query)
         return h.highlight(text)

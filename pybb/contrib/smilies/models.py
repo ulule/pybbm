@@ -1,7 +1,7 @@
 from django.db import models
 
 from pybb.base import ModelBase, ManagerBase
-from pybb.contrib.smilies import settings
+from . import settings
 
 
 class SmileyManager(ManagerBase):

@@ -507,7 +507,9 @@ class PostUpdateMixin(object):
             instance = self.object.topic.poll
 
         if 'pollformset' not in kwargs:
-            ctx['pollformset'] = PollAnswerFormSet(instance=instance)
+            pollformset = PollAnswerFormSet(instance=instance)
+
+            ctx['pollformset'] = pollformset
 
         return ctx
 
@@ -544,6 +546,8 @@ class PostUpdateMixin(object):
             except Exception, e:
                 transaction.rollback()
                 raise e
+
+        import pdb; pdb.set_trace()
 
         if success:
             return super(ModelFormMixin, self).form_valid(form)
@@ -731,8 +735,13 @@ class PostModerateView(generic.RedirectView):
         if not post.topic.is_moderated_by(self.request.user):
             raise PermissionDenied
 
-        post.on_moderation = False
+        post.on_moderation = not post.on_moderation
         post.save()
+
+        if post.on_moderation:
+            change_message = _('%s is now on moderation') % post
+        else:
+            change_message = _('%s is not on moderation anymore') % post
 
         LogModeration.objects.log(
             user=self.request.user,
@@ -740,7 +749,7 @@ class PostModerateView(generic.RedirectView):
             action_flag=LogModeration.ACTION_FLAG_CHANGE,
             user_ip=self.request.META['REMOTE_ADDR'],
             level=LogModeration.LEVEL_MEDIUM,
-            change_message=_('%s is now on moderation') % post
+            change_message=change_message
         )
 
         return post.get_anchor_url(self.request.user)

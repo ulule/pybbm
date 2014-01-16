@@ -1,17 +1,13 @@
-from django.test import TransactionTestCase
 from django.core.urlresolvers import reverse
 from django.template import Context, Template
 
-from pybb.tests.base import SharedTestModule
-from pybb.contrib.reports.forms import ReportMessageForm
-from pybb.contrib.reports.models import Report, ReportMessage
+from pybb.tests.base import TestCase
+
+from .forms import ReportMessageForm
+from .models import Report, ReportMessage
 
 
-class ReportsTest(TransactionTestCase, SharedTestModule):
-    def setUp(self):
-        self.create_user()
-        self.create_initial()
-
+class ReportsTest(TestCase):
     def test_report_create_view(self):
         url = reverse('report_create', args=[self.post.pk])
 
@@ -19,7 +15,7 @@ class ReportsTest(TransactionTestCase, SharedTestModule):
 
         self.assertEqual(response.status_code, 302)
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.get(url)
 
@@ -34,7 +30,7 @@ class ReportsTest(TransactionTestCase, SharedTestModule):
     def test_report_create_complete(self):
         url = reverse('report_create', args=[self.post.pk])
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.post(url, data={
             'message': 'This post is not right'
@@ -54,7 +50,7 @@ class ReportsTest(TransactionTestCase, SharedTestModule):
     def test_report_create_complete_with_existing_report(self):
         url = reverse('report_create', args=[self.post.pk])
 
-        self.login_client(username='oleiade', password='$ecret')
+        self.login_as(self.superuser)
 
         report = Report.objects.create(post=self.post)
         ReportMessage.objects.create(report=report, message='test', user=self.staff)
@@ -78,7 +74,7 @@ class ReportsTest(TransactionTestCase, SharedTestModule):
         report = Report.objects.create(post=self.post)
         ReportMessage.objects.create(report=report, message='test', user=self.staff)
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.post(url, data={
             'message': 'This post is not right again'
@@ -94,7 +90,7 @@ class ReportsTest(TransactionTestCase, SharedTestModule):
     def test_report_list_view(self):
         url = reverse('report_list')
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         report = Report.objects.create(post=self.post)
         ReportMessage.objects.create(report=report, message='test', user=self.staff)
@@ -108,7 +104,7 @@ class ReportsTest(TransactionTestCase, SharedTestModule):
                                 'pybb/report/list.html')
 
     def test_report_detail_view(self):
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         report = Report.objects.create(post=self.post)
         ReportMessage.objects.create(report=report, message='test', user=self.staff)
@@ -121,7 +117,7 @@ class ReportsTest(TransactionTestCase, SharedTestModule):
                                 'pybb/report/detail.html')
 
     def test_report_close_view(self):
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         report = Report.objects.create(post=self.post)
         ReportMessage.objects.create(report=report, message='test', user=self.staff)

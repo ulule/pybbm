@@ -1,17 +1,12 @@
-from django.test import TransactionTestCase
+from pybb.tests.base import TestCase
 
-from pybb.tests.base import SharedTestModule
-from pybb.contrib.smilies.processors import SmileyProcessor
+from .processors import SmileyProcessor
 
 from pybb.models import Post
 
 
-class SmiliesTest(TransactionTestCase, SharedTestModule):
+class SmiliesTest(TestCase):
     fixtures = ['smilies.json']
-
-    def setUp(self):
-        self.create_user()
-        self.create_initial(post=False)
 
     def test_processors(self):
         self.post = Post(topic=self.topic, user=self.user, body='this is a smiiiile! :D')

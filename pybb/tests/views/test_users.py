@@ -1,14 +1,9 @@
-from django.test import TransactionTestCase
 from django.core.urlresolvers import reverse
 
-from pybb.tests.base import SharedTestModule
+from pybb.tests.base import TestCase
 
 
-class UsersTest(TransactionTestCase, SharedTestModule):
-    def setUp(self):
-        self.create_user()
-        self.create_initial()
-
+class UsersTest(TestCase):
     def test_user_posts_view(self):
         url = reverse('pybb:user_posts', kwargs={
             'username': self.user.username
@@ -18,7 +13,7 @@ class UsersTest(TransactionTestCase, SharedTestModule):
 
         self.assertEqual(response.status_code, 302)
 
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         response = self.client.get(url)
 
@@ -28,7 +23,7 @@ class UsersTest(TransactionTestCase, SharedTestModule):
                                 'pybb/user/post_list.html')
 
     def test_user_posts_delete_view(self):
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         url = reverse('pybb:user_posts_delete', kwargs={
             'username': self.user.username
@@ -41,7 +36,7 @@ class UsersTest(TransactionTestCase, SharedTestModule):
                                 'pybb/user/posts_delete.html')
 
     def test_user_posts_delete_complete(self):
-        self.login_client(username='thoas', password='$ecret')
+        self.login_as(self.staff)
 
         url = reverse('pybb:user_posts_delete', kwargs={
             'username': self.user.username

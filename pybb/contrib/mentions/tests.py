@@ -1,19 +1,17 @@
-from django.test import TransactionTestCase
-
-from pybb.tests.base import SharedTestModule
+from pybb.tests.base import TestCase
 from pybb.models.base import markup
-from pybb.contrib.mentions.processors import MentionProcessor
-from pybb.contrib.mentions.models import Mention
+
+from .processors import MentionProcessor
+from .models import Mention
 
 from pybb.models import Post
 
 
-class MentionsTest(TransactionTestCase, SharedTestModule):
-    def setUp(self):
-        self.create_user()
-        self.create_initial(post=False)
-
+class MentionsTest(TestCase):
     def test_processors(self):
+        self.user
+        self.staff
+
         self.post = Post(topic=self.topic, user=self.user, body='@thoas is right!')
         processor = MentionProcessor(self.post.body, obj=self.post)
 
@@ -30,6 +28,10 @@ class MentionsTest(TransactionTestCase, SharedTestModule):
                                                 to_user=self.staff).count(), 1)
 
     def test_multiple_mentions(self):
+        self.user
+        self.staff
+        self.superuser
+
         multiple_mentions = Post(topic=self.topic, user=self.user, body='@thoas is right and @oleiade or @zeus!')
 
         processor = MentionProcessor(multiple_mentions.body, obj=multiple_mentions)

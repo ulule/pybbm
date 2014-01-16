@@ -8,8 +8,8 @@ from django.utils.decorators import method_decorator
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 
-from pybb.contrib.reports.models import ReportMessage, Report
-from pybb.contrib.reports.forms import ReportMessageForm
+from .models import ReportMessage, Report
+from .forms import ReportMessageForm
 from pybb.models import Post
 
 from pure_pagination import Paginator

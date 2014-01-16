@@ -1,7 +1,7 @@
 from django.conf.urls import url, patterns
 
-from pybb.contrib.reports.views import (ReportCreateView, ReportListView,
-                                        ReportDetailView, ReportCloseView)
+from .views import (ReportCreateView, ReportListView,
+                    ReportDetailView, ReportCloseView)
 
 
 urlpatterns = patterns(
