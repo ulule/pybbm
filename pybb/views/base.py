@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
+from collections import defaultdict
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.contenttypes.models import ContentType
@@ -872,10 +873,11 @@ class TopicBatchView(generic.FormView):
     def get_initial(self):
         return {}
 
-    def get_form_class(self):
-        topic_ids = self.request.POST.getlist('topic_ids')
+    def get_queryset(self):
+        return Topic.objects.visible().filter(pk__in=self.request.POST.getlist('topic_ids'))
 
-        topics = Topic.objects.visible().filter(pk__in=topic_ids)
+    def get_form_class(self):
+        topics = self.get_queryset()
 
         if not len(topics):
             raise Http404
@@ -971,10 +973,25 @@ class TopicsDeleteView(TopicBatchView):
     template_name = 'pybb/topic/delete.html'
     permission_name = 'can_delete_topic'
 
+    def get_queryset(self):
+        return Topic.objects.filter(pk__in=self.request.POST.getlist('topic_ids'))
+
     def get_context_data(self, **kwargs):
-        return dict(super(TopicBatchView, self).get_context_data(**kwargs), **{
+        context = dict(super(TopicBatchView, self).get_context_data(**kwargs), **{
             'topic_ids': self.request.POST.getlist('topic_ids'),
         })
+
+        formset = context['form']
+
+        topics = defaultdict(list)
+
+        for form in formset.forms:
+            if form.topic.deleted:
+                topics['deleted'].append(form.topic)
+            else:
+                topics['restored'].append(form.topic)
+
+        return context
 
     def get_formset_class(self, **kwargs):
         return get_topics_delete_formset(**kwargs)

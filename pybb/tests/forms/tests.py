@@ -6,7 +6,7 @@ from django.contrib.auth.models import Permission
 
 from pybb.forms import (ModerationForm, SearchUserForm, ForumForm, TopicMoveForm,
                         TopicMergeForm, get_topic_merge_formset, PostsMoveNewTopicForm,
-                        PostsMoveExistingTopicForm, TopicsDeleteForm, get_topics_delete_formset)
+                        PostsMoveExistingTopicForm, TopicDeleteForm, get_topic_delete_formset)
 from pybb.models import Forum, Topic, Post, TopicRedirection
 from pybb.proxies import UserObjectPermission
 from pybb import defaults
@@ -301,67 +301,40 @@ class FormsTest(TestCase):
 
         self.assertEqual(self.topic.posts.count(), 2)
 
-    def test_topics_delete_form(self):
-        topic1 = Topic.objects.create(name='Topic 1', forum=self.forum, user=self.superuser)
-        topic2 = Topic.objects.create(name='Topic 2', forum=self.forum, user=self.superuser)
-
-        post1 = Post(topic=topic1, user=self.superuser, body='post on topic1')
-        post1.save()
-
-        post2 = Post(topic=topic2, user=self.superuser, body='post on topic2')
-        post2.save()
-
-        topics = Topic.objects.filter(pk__in=[topic1.pk, topic2.pk])
-
-        form = TopicsDeleteForm(topics=topics, data={
-            'topics': [topic1.pk, topic2.pk],
+    def test_topic_delete_form(self):
+        form = TopicDeleteForm(topic=self.topic, data={
+            'topic': self.topic.pk,
+            'confirm': True
         })
 
         self.assertTrue(form.is_valid())
 
         form.save()
 
-        topic1 = Topic.objects.get(pk=topic1.pk)
-        topic2 = Topic.objects.get(pk=topic2.pk)
-        post1 = Post.objects.get(pk=post1.pk)
-        post2 = Post.objects.get(pk=post2.pk)
+        self.assertTrue(self.topic.deleted)
 
-        self.assertTrue(topic1.deleted)
-        self.assertTrue(topic2.deleted)
-        self.assertTrue(post1.deleted)
-        self.assertTrue(post2.deleted)
-
-    def test_topics_delete_formset(self):
-        topic1 = Topic.objects.create(name='Topic 1', forum=self.forum, user=self.superuser)
+    def test_topic_delete_formset(self):
         topic2 = Topic.objects.create(name='Topic 2', forum=self.forum, user=self.superuser)
-
-        post1 = Post(topic=topic1, user=self.superuser, body='post on topic1')
-        post1.save()
 
         post2 = Post(topic=topic2, user=self.superuser, body='post on topic2')
         post2.save()
 
-        topics = Topic.objects.filter(pk__in=[topic1.pk, topic2.pk])
+        topics = Topic.objects.filter(pk__in=[self.topic.pk, topic2.pk])
 
-        FormSet = get_topics_delete_formset(topics=topics)
+        FormSet = get_topic_delete_formset(topics=topics)
 
         formset = FormSet(data={
-            'form-TOTAL_FORMS': 1,
+            'form-TOTAL_FORMS': 2,
             'form-INITIAL_FORMS': 0,
-            'form-0-topics': [topic1.pk, topic2.pk],
+            'form-0-topic': self.topic.pk,
+            'form-0-confirm': True,
+            'form-1-topic': topic2.pk,
+            'form-1-confirm': True,
         })
 
         self.assertTrue(formset.is_valid())
 
         for form in formset:
-            form.save()
+            topic = form.save()
 
-        topic1 = Topic.objects.get(pk=topic1.pk)
-        topic2 = Topic.objects.get(pk=topic2.pk)
-        post1 = Post.objects.get(pk=post1.pk)
-        post2 = Post.objects.get(pk=post2.pk)
-
-        self.assertTrue(topic1.delete)
-        self.assertTrue(topic2.delete)
-        self.assertTrue(post1.deleted)
-        self.assertTrue(post2.deleted)
+            self.assertTrue(topic.deleted)
