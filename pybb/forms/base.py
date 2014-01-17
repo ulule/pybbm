@@ -653,4 +653,4 @@ def get_topic_delete_formset(topics, form=TopicDeleteForm):
 
             return super(BaseTopicDeleteFormSet, self)._construct_form(i, **kwargs)
 
-    return formset_factory(form=load_class(defaults.PYBB_TOPIC_DELETE_FORM), formset=BaseTopicDeleteFormSet)
+    return formset_factory(extra=len(topics), form=load_class(defaults.PYBB_TOPIC_DELETE_FORM), formset=BaseTopicDeleteFormSet)

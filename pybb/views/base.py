@@ -987,9 +987,11 @@ class TopicsDeleteView(TopicBatchView):
 
         for form in formset.forms:
             if form.topic.deleted:
-                topics['deleted'].append(form.topic)
+                topics['to_restore'].append(form)
             else:
-                topics['restored'].append(form.topic)
+                topics['to_delete'].append(form)
+
+        context['topics'] = dict(topics)
 
         return context
 
@@ -1005,7 +1007,23 @@ class TopicsDeleteView(TopicBatchView):
         return redirect(self.get_success_url(topics))
 
     def get_success_url(self, topics):
-        messages.success(self.request, _(u'Topics successfully removed'))
+        sorted_topics = defaultdict(str)
+
+        for topic in topics:
+            if topic.deleted:
+                sorted_topics['deleted'] += _(u'<a href="%(topic_url)s">%(topic)s</a> ') % {
+                    'topic_url': topic.get_absolute_url(),
+                    'topic': topic
+                }
+            else:
+                sorted_topics['restored'] += _(u'<a href="%(topic_url)s">%(topic)s</a> ') % {
+                    'topic_url': topic.get_absolute_url(),
+                    'topic': topic
+                }
+
+        messages.success(self.request, _(sorted_topics['deleted'] + u'successfully deleted'))
+        messages.success(self.request, _(sorted_topics['restored'] + u'successfully restored'))
+
         return reverse('pybb:index')
 
 
