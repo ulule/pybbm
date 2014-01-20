@@ -1007,24 +1007,28 @@ class TopicsDeleteView(TopicBatchView):
         return redirect(self.get_success_url(topics))
 
     def get_success_url(self, topics):
-        sorted_topics = defaultdict(str)
+        sorted_topics = defaultdict(list)
 
         for topic in topics:
             if topic.deleted:
-                sorted_topics['deleted'] += _(u'<a href="%(topic_url)s">%(topic)s</a> ') % {
-                    'topic_url': topic.get_absolute_url(),
-                    'topic': topic
-                }
+                sorted_topics['deleted'].append(topic)
             else:
-                sorted_topics['restored'] += _(u'<a href="%(topic_url)s">%(topic)s</a> ') % {
-                    'topic_url': topic.get_absolute_url(),
-                    'topic': topic
-                }
+                sorted_topics['restored'].append(topic)
 
-        if sorted_topics['deleted']:
-            messages.success(self.request, _(sorted_topics['deleted'] + u'successfully deleted'))
-        if sorted_topics['restored']:
-            messages.success(self.request, _(sorted_topics['restored'] + u'successfully restored'))
+        actions = {
+            'deleted': _('deleted'),
+            'restored': _('restored'),
+        }
+
+        for key in ('deleted', 'restored', ):
+            if key in sorted_topics:
+                messages.success(self.request, _(u'%(topics)s successfully %(action)s') % {
+                    'topics': ' '.join([u'<a href="%(topic_url)s">%(topic)s</a>' % {
+                        'topic_url': topic.get_absolute_url(),
+                        'topic': topic
+                    } for topic in sorted_topics[key]]),
+                    'action': actions[key]
+                })
 
         return reverse('pybb:index')
 

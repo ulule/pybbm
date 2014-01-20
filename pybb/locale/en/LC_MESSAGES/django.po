@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-01-10 18:13+0100\n"
+"POT-Creation-Date: 2014-01-20 15:21+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,12 +25,12 @@ msgstr ""
 msgid "Latest topics on forum"
 msgstr ""
 
-#: fields.py:22
+#: fields.py:37
 #, python-format
 msgid "Filetype %(content_type)s not supported for %(filename)s."
 msgstr ""
 
-#: fields.py:28
+#: fields.py:43
 #, python-format
 msgid ""
 "Please keep filesize under %(max_upload_size)s. Current filesize "
@@ -42,59 +42,59 @@ msgstr ""
 msgid "Ban IP Address %s"
 msgstr ""
 
-#: contrib/ban/forms.py:27 forms/base.py:345
+#: contrib/ban/forms.py:27 forms/base.py:355
 msgid "No"
 msgstr ""
 
-#: contrib/ban/forms.py:28 forms/base.py:346
+#: contrib/ban/forms.py:28 forms/base.py:356
 msgid "Yes"
 msgstr ""
 
-#: contrib/ban/models.py:29
+#: contrib/ban/models.py:31
 msgid "Cookie exists: user already banned from anonymous account"
 msgstr ""
 
-#: contrib/ban/models.py:32
+#: contrib/ban/models.py:34
 #, python-format
 msgid "Cookie exists: user already banned for the account %s"
 msgstr ""
 
-#: contrib/ban/models.py:40
+#: contrib/ban/models.py:42
 #, python-format
 msgid "IP Address %s is banned"
 msgstr ""
 
-#: contrib/ban/models.py:48 contrib/ban/templates/pybb/ban/delete.html:9
+#: contrib/ban/models.py:50 contrib/ban/templates/pybb/ban/delete.html:9
 #: contrib/ban/templates/pybb/ban/list.html:26
 msgid "Reason"
 msgstr ""
 
-#: contrib/ban/models.py:55
+#: contrib/ban/models.py:57
 msgid "Banned user"
 msgstr ""
 
-#: contrib/ban/models.py:56
+#: contrib/ban/models.py:58
 msgid "Banned users"
 msgstr ""
 
-#: contrib/ban/models.py:59
+#: contrib/ban/models.py:61
 #, python-format
 msgid "User %(user)s banned for %(reason)s"
 msgstr ""
 
-#: contrib/ban/models.py:84 templates/pybb/moderation/logs.html:32
+#: contrib/ban/models.py:86 templates/pybb/moderation/logs.html:32
 msgid "IP Address"
 msgstr ""
 
-#: contrib/ban/models.py:85
+#: contrib/ban/models.py:87
 msgid "The IP address"
 msgstr ""
 
-#: contrib/ban/models.py:93
+#: contrib/ban/models.py:95
 msgid "IP"
 msgstr ""
 
-#: contrib/ban/models.py:94
+#: contrib/ban/models.py:96
 msgid "IPs"
 msgstr ""
 
@@ -134,8 +134,8 @@ msgid "Ban list"
 msgstr ""
 
 #: contrib/ban/templates/pybb/ban/list.html:23 contrib/profiles/models.py:26
-#: contrib/reports/templates/pybb/report/detail.html:21 forms/base.py:242
-#: models/base.py:474 models/base.py:837 models/base.py:1282
+#: contrib/reports/templates/pybb/report/detail.html:21 forms/base.py:252
+#: models/base.py:479 models/base.py:866 models/base.py:1319
 #: templates/pybb/mails/subscription_email_body.html:3
 #: templates/pybb/moderation/logs.html:17
 #: templates/pybb/moderation/moderator/list.html:31
@@ -152,7 +152,7 @@ msgstr ""
 msgid "Actions"
 msgstr ""
 
-#: contrib/ban/templates/pybb/ban/list.html:58 models/base.py:1333
+#: contrib/ban/templates/pybb/ban/list.html:58 models/base.py:1370
 msgid "unban"
 msgstr ""
 
@@ -160,11 +160,11 @@ msgstr ""
 msgid "No banned users"
 msgstr ""
 
-#: contrib/mentions/models.py:52
+#: contrib/mentions/models.py:53
 msgid "Mention"
 msgstr ""
 
-#: contrib/mentions/models.py:53
+#: contrib/mentions/models.py:54
 msgid "Mentions"
 msgstr ""
 
@@ -199,7 +199,7 @@ msgstr ""
 msgid "Show signature"
 msgstr ""
 
-#: contrib/profiles/models.py:38 models/base.py:134 models/base.py:485
+#: contrib/profiles/models.py:38 models/base.py:136 models/base.py:490
 msgid "Post count"
 msgstr ""
 
@@ -207,39 +207,39 @@ msgstr ""
 msgid "Avatar"
 msgstr ""
 
-#: contrib/profiles/models.py:41
+#: contrib/profiles/models.py:42
 msgid "Automatically subscribe"
 msgstr ""
 
-#: contrib/profiles/models.py:42
+#: contrib/profiles/models.py:43
 msgid "Automatically subscribe to topics that you answer"
 msgstr ""
 
-#: contrib/profiles/models.py:49
+#: contrib/profiles/models.py:50
 msgid "Can define user password"
 msgstr ""
 
-#: contrib/profiles/models.py:50
+#: contrib/profiles/models.py:51
 msgid "Can ban user"
 msgstr ""
 
-#: contrib/profiles/models.py:51
+#: contrib/profiles/models.py:52
 msgid "Can unban user"
 msgstr ""
 
-#: contrib/profiles/models.py:52
+#: contrib/profiles/models.py:53
 msgid "Can change signature"
 msgstr ""
 
-#: contrib/profiles/models.py:53
+#: contrib/profiles/models.py:54
 msgid "Can change avatar"
 msgstr ""
 
-#: contrib/profiles/models.py:57
+#: contrib/profiles/models.py:58
 msgid "Profile"
 msgstr ""
 
-#: contrib/profiles/models.py:58
+#: contrib/profiles/models.py:59
 msgid "Profiles"
 msgstr ""
 
@@ -307,7 +307,7 @@ msgstr ""
 msgid "New"
 msgstr ""
 
-#: contrib/reports/models.py:37 models/base.py:477
+#: contrib/reports/models.py:37 models/base.py:482
 #: templates/pybb/forum/_detail.html:106
 msgid "Closed"
 msgstr ""
@@ -347,8 +347,8 @@ msgstr ""
 msgid "Reports for %(name)s"
 msgstr ""
 
-#: contrib/reports/templates/pybb/report/detail.html:24 forms/base.py:65
-#: models/base.py:724 templates/pybb/moderation/logs.html:29
+#: contrib/reports/templates/pybb/report/detail.html:24 forms/base.py:66
+#: models/base.py:753 templates/pybb/moderation/logs.html:29
 msgid "Message"
 msgstr ""
 
@@ -360,8 +360,8 @@ msgstr ""
 msgid "No messages"
 msgstr ""
 
-#: contrib/reports/templates/pybb/report/list.html:25 models/base.py:854
-#: models/base.py:1048
+#: contrib/reports/templates/pybb/report/list.html:25 models/base.py:883
+#: models/base.py:1086
 msgid "Post"
 msgstr ""
 
@@ -373,9 +373,9 @@ msgstr ""
 msgid "Reports count"
 msgstr ""
 
-#: contrib/reports/templates/pybb/report/list.html:34 models/base.py:133
-#: models/base.py:451 models/base.py:473 models/base.py:839
-#: models/base.py:1195
+#: contrib/reports/templates/pybb/report/list.html:34 models/base.py:135
+#: models/base.py:455 models/base.py:478 models/base.py:868
+#: models/base.py:1232
 msgid "Updated"
 msgstr ""
 
@@ -391,7 +391,7 @@ msgstr ""
 msgid "No reports"
 msgstr ""
 
-#: contrib/search/forms/base.py:17 forms/base.py:373
+#: contrib/search/forms/base.py:17 forms/base.py:383
 msgid "Username"
 msgstr ""
 
@@ -399,7 +399,7 @@ msgstr ""
 msgid "Number of answers"
 msgstr ""
 
-#: contrib/search/forms/base.py:30 models/base.py:510 models/base.py:836
+#: contrib/search/forms/base.py:30 models/base.py:515 models/base.py:865
 #: templates/pybb/forum/_detail.html:85
 msgid "Topic"
 msgstr ""
@@ -433,475 +433,475 @@ msgstr ""
 msgid "You cant add more than %s answers for poll"
 msgstr ""
 
-#: forms/base.py:51
+#: forms/base.py:52
 msgid "Add two or more answers for this poll"
 msgstr ""
 
-#: forms/base.py:60
+#: forms/base.py:61
 msgid "A topic with that name already exists."
 msgstr ""
 
-#: forms/base.py:63 models/base.py:466
+#: forms/base.py:64 models/base.py:470
 msgid "Subject"
 msgstr ""
 
-#: forms/base.py:68
+#: forms/base.py:69
 msgid "Hash"
 msgstr ""
 
-#: forms/base.py:98 models/base.py:1188
+#: forms/base.py:100 models/base.py:1225
 msgid "Poll type"
 msgstr ""
 
-#: forms/base.py:102 models/base.py:1192
+#: forms/base.py:104 models/base.py:1229
 msgid "Poll question"
 msgstr ""
 
-#: forms/base.py:107 models/base.py:163 models/base.py:465
+#: forms/base.py:109 models/base.py:165 models/base.py:469
 #: templates/pybb/forum/_detail.html:35
 msgid "Forum"
 msgstr ""
 
-#: forms/base.py:151
+#: forms/base.py:161
 msgid "Polls question is required when adding a poll"
 msgstr ""
 
-#: forms/base.py:295
+#: forms/base.py:305
 msgid "A forum with that name already exists."
 msgstr ""
 
-#: forms/base.py:375
+#: forms/base.py:385
 msgid "A user with that username does not exist."
 msgstr ""
 
-#: forms/base.py:394
+#: forms/base.py:404
 msgid "Destination topic"
 msgstr ""
 
-#: forms/base.py:413 forms/base.py:474
+#: forms/base.py:424 forms/base.py:486
 msgid "Destination forum"
 msgstr ""
 
-#: forms/base.py:417 forms/base.py:470
+#: forms/base.py:428 forms/base.py:482
 msgid "New name for this topic"
 msgstr ""
 
-#: forms/base.py:421 forms/base.py:466
+#: forms/base.py:432 forms/base.py:478
 #, python-format
 msgid ""
 "A topic with the name \"%(topic)s\" already exists in the forum \"%(forum)s\""
 msgstr ""
 
-#: forms/base.py:467
+#: forms/base.py:479
 msgid "You must specify the expiring date"
 msgstr ""
 
-#: forms/base.py:478 models/base.py:478
+#: forms/base.py:490 models/base.py:483
 msgid "Redirect"
 msgstr ""
 
-#: forms/base.py:573
+#: forms/base.py:585
 msgid "Name of the topic"
 msgstr ""
 
-#: forms/base.py:574
+#: forms/base.py:586
 msgid "Use this field to combine the current topic to another"
 msgstr ""
 
-#: forms/base.py:587
+#: forms/base.py:599
 msgid "You can't merge a topic in the same topic"
 msgstr ""
 
-#: models/base.py:67
+#: models/base.py:69
 msgid "Moderator"
 msgstr ""
 
-#: models/base.py:68 models/base.py:132
+#: models/base.py:70 models/base.py:134
 msgid "Moderators"
 msgstr ""
 
-#: models/base.py:72
+#: models/base.py:74
 #, python-format
 msgid "Moderator %(user)s of %(forum)s"
 msgstr ""
 
-#: models/base.py:127
+#: models/base.py:129
 msgid "Parent"
 msgstr ""
 
-#: models/base.py:128
+#: models/base.py:130
 msgid "Name"
 msgstr ""
 
-#: models/base.py:130
+#: models/base.py:132
 msgid "Position"
 msgstr ""
 
-#: models/base.py:131
+#: models/base.py:133
 msgid "Description"
 msgstr ""
 
-#: models/base.py:135
+#: models/base.py:137
 msgid "Topic count"
 msgstr ""
 
-#: models/base.py:138
+#: models/base.py:140
 msgid "Headline"
 msgstr ""
 
-#: models/base.py:139 templates/pybb/forum/_detail.html:47
+#: models/base.py:141 templates/pybb/forum/_detail.html:47
 msgid "Hidden"
 msgstr ""
 
-#: models/base.py:141
+#: models/base.py:143
 msgid "Staff only"
 msgstr ""
 
-#: models/base.py:144
+#: models/base.py:146
 msgid "Empty"
 msgstr ""
 
-#: models/base.py:147
+#: models/base.py:149
 msgid "If the forum is empty, you can't post into it"
 msgstr ""
 
-#: models/base.py:164
+#: models/base.py:166
 msgid "Forums"
 msgstr ""
 
-#: models/base.py:167
+#: models/base.py:169
 msgid "Can unstick topic"
 msgstr ""
 
-#: models/base.py:168
+#: models/base.py:170
 msgid "Can stick topic"
 msgstr ""
 
-#: models/base.py:169
+#: models/base.py:171
 msgid "Can open topic"
 msgstr ""
 
-#: models/base.py:170
+#: models/base.py:172
 msgid "Can close topic"
 msgstr ""
 
-#: models/base.py:171
+#: models/base.py:173
 msgid "Can merge topic"
 msgstr ""
 
-#: models/base.py:172
+#: models/base.py:174
 msgid "Can delete topic"
 msgstr ""
 
-#: models/base.py:173
+#: models/base.py:175
 msgid "Can edit topic"
 msgstr ""
 
-#: models/base.py:174
+#: models/base.py:176
 msgid "Can move topic"
 msgstr ""
 
-#: models/base.py:175
+#: models/base.py:177
 msgid "Can move post"
 msgstr ""
 
-#: models/base.py:176
+#: models/base.py:178
 msgid "Can edit a poll"
 msgstr ""
 
-#: models/base.py:177
+#: models/base.py:179
 msgid "Can publish an announce"
 msgstr ""
 
-#: models/base.py:178
+#: models/base.py:180
 msgid "Can edit post"
 msgstr ""
 
-#: models/base.py:179
+#: models/base.py:181
 msgid "Can delete post"
 msgstr ""
 
-#: models/base.py:180
+#: models/base.py:182
 msgid "Can see IP Address"
 msgstr ""
 
-#: models/base.py:181
+#: models/base.py:183
 msgid "Can moderate attachments"
 msgstr ""
 
-#: models/base.py:344
+#: models/base.py:346
 msgid "Permanent redirect"
 msgstr ""
 
-#: models/base.py:345
+#: models/base.py:347
 msgid "Leave no redirect"
 msgstr ""
 
-#: models/base.py:346
+#: models/base.py:348
 msgid "Expiring redirect"
 msgstr ""
 
-#: models/base.py:353 models/base.py:450 models/base.py:472 models/base.py:826
-#: models/base.py:838 models/base.py:1066 models/base.py:1194
+#: models/base.py:355 models/base.py:454 models/base.py:477 models/base.py:855
+#: models/base.py:867 models/base.py:1103 models/base.py:1231
 msgid "Created"
 msgstr ""
 
-#: models/base.py:357
+#: models/base.py:359
 msgid "Expired"
 msgstr ""
 
-#: models/base.py:360
+#: models/base.py:362
 msgid "Redirection"
 msgstr ""
 
-#: models/base.py:361
+#: models/base.py:363
 msgid "Redirections"
 msgstr ""
 
-#: models/base.py:442
+#: models/base.py:446
 msgid "No notifications"
 msgstr ""
 
-#: models/base.py:443
+#: models/base.py:447
 msgid "Send alerts by email"
 msgstr ""
 
-#: models/base.py:444
+#: models/base.py:448
 msgid "Daily reports by email"
 msgstr ""
 
-#: models/base.py:458
+#: models/base.py:462
 msgid "Subscription"
 msgstr ""
 
-#: models/base.py:459
+#: models/base.py:463
 msgid "Subscriptions"
 msgstr ""
 
-#: models/base.py:469
+#: models/base.py:473
 msgid "Cover"
 msgstr ""
 
-#: models/base.py:475
+#: models/base.py:480
 msgid "Views count"
 msgstr ""
 
-#: models/base.py:476 templates/pybb/forum/_detail.html:105
+#: models/base.py:481 templates/pybb/forum/_detail.html:105
 msgid "Sticky"
 msgstr ""
 
-#: models/base.py:479 models/base.py:846 templates/pybb/forum/_detail.html:107
+#: models/base.py:484 models/base.py:875 templates/pybb/forum/_detail.html:107
 msgid "Deleted"
 msgstr ""
 
-#: models/base.py:482 templates/pybb/topic/list.html:89
+#: models/base.py:487 templates/pybb/topic/list.html:89
 msgid "Subscribers"
 msgstr ""
 
-#: models/base.py:487 models/base.py:844
+#: models/base.py:492 models/base.py:873
 msgid "On moderation"
 msgstr ""
 
-#: models/base.py:511
+#: models/base.py:516
 msgid "Topics"
 msgstr ""
 
-#: models/base.py:725
+#: models/base.py:754
 msgid "HTML version"
 msgstr ""
 
-#: models/base.py:726
+#: models/base.py:755
 msgid "Text version"
 msgstr ""
 
-#: models/base.py:840 models/base.py:1359
+#: models/base.py:869 models/base.py:1396
 msgid "User IP"
 msgstr ""
 
-#: models/base.py:855 templates/pybb/forum/_detail.html:88
+#: models/base.py:884 templates/pybb/forum/_detail.html:88
 #: templates/pybb/topic/list.html:26 templates/pybb/topic/list.html.py:47
 msgid "Posts"
 msgstr ""
 
-#: models/base.py:1020
+#: models/base.py:1058
 msgid "image"
 msgstr ""
 
-#: models/base.py:1021
+#: models/base.py:1059
 msgid "application"
 msgstr ""
 
-#: models/base.py:1022
+#: models/base.py:1060
 msgid "archive"
 msgstr ""
 
-#: models/base.py:1023
+#: models/base.py:1061
 msgid "text"
 msgstr ""
 
-#: models/base.py:1024
+#: models/base.py:1062
 msgid "binary"
 msgstr ""
 
-#: models/base.py:1051
+#: models/base.py:1089
 msgid "Size"
 msgstr ""
 
-#: models/base.py:1052
+#: models/base.py:1090
 msgid "File"
 msgstr ""
 
-#: models/base.py:1070
+#: models/base.py:1107
 msgid "Attachment"
 msgstr ""
 
-#: models/base.py:1071 templates/pybb/post/form.html:36
+#: models/base.py:1108 templates/pybb/post/form.html:36
 msgid "Attachments"
 msgstr ""
 
-#: models/base.py:1125
+#: models/base.py:1162
 msgid "Topic read tracker"
 msgstr ""
 
-#: models/base.py:1126
+#: models/base.py:1163
 msgid "Topic read trackers"
 msgstr ""
 
-#: models/base.py:1165
+#: models/base.py:1202
 msgid "Forum read tracker"
 msgstr ""
 
-#: models/base.py:1166
+#: models/base.py:1203
 msgid "Forum read trackers"
 msgstr ""
 
-#: models/base.py:1183
+#: models/base.py:1220
 msgid "None"
 msgstr ""
 
-#: models/base.py:1184
+#: models/base.py:1221
 msgid "Single answer"
 msgstr ""
 
-#: models/base.py:1185
+#: models/base.py:1222
 msgid "Multiple answers"
 msgstr ""
 
-#: models/base.py:1201 models/base.py:1227
+#: models/base.py:1238 models/base.py:1264
 msgid "Poll"
 msgstr ""
 
-#: models/base.py:1202
+#: models/base.py:1239
 msgid "Polls"
 msgstr ""
 
-#: models/base.py:1229
+#: models/base.py:1266
 msgid "Text"
 msgstr ""
 
-#: models/base.py:1234 models/base.py:1279
+#: models/base.py:1271 models/base.py:1316
 msgid "Poll answer"
 msgstr ""
 
-#: models/base.py:1235
+#: models/base.py:1272
 msgid "Polls answers"
 msgstr ""
 
-#: models/base.py:1288
+#: models/base.py:1325
 msgid "Poll answer user"
 msgstr ""
 
-#: models/base.py:1289
+#: models/base.py:1326
 msgid "Polls answers users"
 msgstr ""
 
-#: models/base.py:1329
+#: models/base.py:1366
 msgid "addition"
 msgstr ""
 
-#: models/base.py:1330
+#: models/base.py:1367
 msgid "deletion"
 msgstr ""
 
-#: models/base.py:1331
+#: models/base.py:1368
 msgid "change"
 msgstr ""
 
-#: models/base.py:1332
+#: models/base.py:1369
 msgid "ban"
 msgstr ""
 
-#: models/base.py:1340
+#: models/base.py:1377
 msgid "low"
 msgstr ""
 
-#: models/base.py:1341
+#: models/base.py:1378
 msgid "medium"
 msgstr ""
 
-#: models/base.py:1342
+#: models/base.py:1379
 msgid "high"
 msgstr ""
 
-#: models/base.py:1345
+#: models/base.py:1382
 msgid "action time"
 msgstr ""
 
-#: models/base.py:1349
+#: models/base.py:1386
 msgid "object id"
 msgstr ""
 
-#: models/base.py:1351
+#: models/base.py:1388
 msgid "action flag"
 msgstr ""
 
-#: models/base.py:1354
+#: models/base.py:1391
 msgid "change message"
 msgstr ""
 
-#: models/base.py:1355
+#: models/base.py:1392
 msgid "level"
 msgstr ""
 
-#: models/base.py:1368
+#: models/base.py:1405
 msgid "Log moderation"
 msgstr ""
 
-#: models/base.py:1369
+#: models/base.py:1406
 msgid "Logs moderation"
 msgstr ""
 
-#: models/base.py:1400
+#: models/base.py:1437
 #, python-format
 msgid "Added %(target)s to \"%(object)s.\""
 msgstr ""
 
-#: models/base.py:1405
+#: models/base.py:1442
 #, python-format
 msgid "Added \"%(object)s\"."
 msgstr ""
 
-#: models/base.py:1411
+#: models/base.py:1448
 #, python-format
 msgid "Changed %(target)s to \"%(object)s.\""
 msgstr ""
 
-#: models/base.py:1415
+#: models/base.py:1452
 #, python-format
 msgid "Changed \"%(object)s\" - %(changes)s"
 msgstr ""
 
-#: models/base.py:1422
+#: models/base.py:1459
 #, python-format
 msgid "Deleted %(target)s from \"%(object)s.\""
 msgstr ""
 
-#: models/base.py:1427
+#: models/base.py:1464
 #, python-format
 msgid "Deleted \"%(object)s.\""
 msgstr ""
 
-#: models/base.py:1431
+#: models/base.py:1468
 msgid "LogModeration object"
 msgstr ""
 
@@ -1222,113 +1222,131 @@ msgstr ""
 msgid "yesterday, %s"
 msgstr ""
 
-#: views/base.py:56
+#: views/base.py:59
 msgid "Page is empty."
 msgstr ""
 
-#: views/base.py:230 views/base.py:386
+#: views/base.py:233 views/base.py:389
 #, python-format
 msgid "Empty list and '%(class_name)s.allow_empty' is False."
 msgstr ""
 
-#: views/base.py:356
+#: views/base.py:359
 #, python-format
 msgid "All messages from %(user)s has been deleted"
 msgstr ""
 
-#: views/base.py:736
+#: views/base.py:742
 #, python-format
 msgid "%s is now on moderation"
 msgstr ""
 
-#: views/base.py:771
+#: views/base.py:744
+#, python-format
+msgid "%s is not on moderation anymore"
+msgstr ""
+
+#: views/base.py:787
 msgid "Your post has been successfully deleted"
 msgstr ""
 
-#: views/base.py:773
+#: views/base.py:789
 msgid "Your post has been successfully restored"
 msgstr ""
 
-#: views/base.py:926
+#: views/base.py:943
 #, python-format
 msgid ""
 "<a href=\"%(old_topic_url)s\">%(old_topic)s</a> successfully merged to <a "
 "href=\"%(new_topic_url)s\">%(new_topic)s</a>"
 msgstr ""
 
-#: views/base.py:945
+#: views/base.py:962
 #, python-format
 msgid ""
 "<a href=\"%(old_topic_url)s\">%(old_topic)s</a> successfully moved to <a "
 "href=\"%(new_topic_url)s\">%(new_topic)s</a>"
 msgstr ""
 
-#: views/base.py:1035
+#: views/base.py:1019
+msgid "deleted"
+msgstr ""
+
+#: views/base.py:1020
+msgid "restored"
+msgstr ""
+
+#: views/base.py:1025
+#, python-format
+msgid "%(topics)s successfully %(action)s"
+msgstr ""
+
+#: views/base.py:1116
 #, python-format
 msgid "Stick topic %s"
 msgstr ""
 
-#: views/base.py:1047
+#: views/base.py:1128
 #, python-format
 msgid "Unstick topic %s"
 msgstr ""
 
-#: views/base.py:1059
+#: views/base.py:1140
 #, python-format
 msgid "Close topic %s"
 msgstr ""
 
-#: views/base.py:1105
+#: views/base.py:1186
 #, python-format
 msgid "Open topic %s"
 msgstr ""
 
-#: views/base.py:1235
+#: views/base.py:1316
 #, python-format
 msgid ""
 "Changed permissions:\n"
 " %s"
 msgstr ""
 
-#: views/base.py:1247
+#: views/base.py:1328
 #, python-format
 msgid "Permissions for moderator \"%(username)s\" successfully saved"
 msgstr ""
 
-#: views/base.py:1302
+#: views/base.py:1383
 #, python-format
 msgid "New moderator \"%(username)s\" created"
 msgstr ""
 
-#: views/base.py:1381
+#: views/base.py:1462
 #, python-format
 msgid "Your subscriptions has been updated: %(type)s"
 msgstr ""
 
-#: views/base.py:1414
+#: views/base.py:1495
 msgid "Your subscriptions has been deleted"
 msgstr ""
 
-#: views/base.py:1418
+#: views/base.py:1499
 #, python-format
 msgid "Your subscription to %(topic)s has been deleted"
 msgstr ""
 
-#: views/base.py:1497
+#: views/base.py:1578
 #, python-format
 msgid "Your subscription to %(topic)s has been created: %(type)s"
 msgstr ""
 
-#: views/base.py:1502
+#: views/base.py:1583
 #, python-format
 msgid "Your subscription to %(topic)s has been updated: %(type)s"
 msgstr ""
 
-#: views/base.py:1538
+#: views/base.py:1619
 msgid "All forums marked as read"
 msgstr ""
 
-#: views/base.py:1559
+#: views/base.py:1640
 #, python-format
 msgid "Forum %s has been marked as read"
 msgstr ""
