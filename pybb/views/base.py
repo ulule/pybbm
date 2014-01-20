@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
+from collections import defaultdict
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.contenttypes.models import ContentType
@@ -27,9 +28,10 @@ from pybb.models import (Forum, Topic, Post, Moderator, LogModeration, Attachmen
 from pybb.util import load_class, generic, queryset_to_dict, redirect_to_login
 from pybb.models.base import markup
 from pybb.forms import (PostForm, AdminPostForm, PostsMoveExistingTopicForm,
-                        PollAnswerFormSet, AttachmentFormSet,
-                        PollForm, ForumForm, ModerationForm, get_topic_move_formset,
-                        SearchUserForm, get_topic_merge_formset, PostsMoveNewTopicForm)
+                        PollAnswerFormSet, AttachmentFormSet, PollForm,
+                        ForumForm, ModerationForm, SearchUserForm,
+                        get_topic_move_formset, get_topic_merge_formset,
+                        get_topic_delete_formset, PostsMoveNewTopicForm)
 from pybb.templatetags.pybb_tags import pybb_topic_poll_not_voted
 from pybb.helpers import (lookup_users, lookup_post_attachments,
                           lookup_post_topics, lookup_topic_lastposts,
@@ -871,10 +873,11 @@ class TopicBatchView(generic.FormView):
     def get_initial(self):
         return {}
 
-    def get_form_class(self):
-        topic_ids = self.request.POST.getlist('topic_ids')
+    def get_queryset(self):
+        return Topic.objects.visible().filter(pk__in=self.request.POST.getlist('topic_ids'))
 
-        topics = Topic.objects.visible().filter(pk__in=topic_ids)
+    def get_form_class(self):
+        topics = self.get_queryset()
 
         if not len(topics):
             raise Http404
@@ -962,6 +965,70 @@ class TopicMoveView(TopicBatchView):
                 'new_topic_url': new_topic.get_absolute_url(),
                 'new_topic': new_topic
             })
+
+        return reverse('pybb:index')
+
+
+class TopicsDeleteView(TopicBatchView):
+    template_name = 'pybb/topic/delete.html'
+    permission_name = 'can_delete_topic'
+
+    def get_queryset(self):
+        return Topic.objects.filter(pk__in=self.request.POST.getlist('topic_ids'))
+
+    def get_context_data(self, **kwargs):
+        context = dict(super(TopicBatchView, self).get_context_data(**kwargs), **{
+            'topic_ids': self.request.POST.getlist('topic_ids'),
+        })
+
+        formset = context['form']
+
+        topics = defaultdict(list)
+
+        for form in formset.forms:
+            if form.topic.deleted:
+                topics['to_restore'].append(form)
+            else:
+                topics['to_delete'].append(form)
+
+        context['topics'] = dict(topics)
+
+        return context
+
+    def get_formset_class(self, **kwargs):
+        return get_topic_delete_formset(**kwargs)
+
+    def form_valid(self, formset):
+        topics = []
+
+        for form in formset:
+            topics.append(form.save())
+
+        return redirect(self.get_success_url(topics))
+
+    def get_success_url(self, topics):
+        sorted_topics = defaultdict(list)
+
+        for topic in topics:
+            if topic.deleted:
+                sorted_topics['deleted'].append(topic)
+            else:
+                sorted_topics['restored'].append(topic)
+
+        actions = {
+            'deleted': _('deleted'),
+            'restored': _('restored'),
+        }
+
+        for key in ('deleted', 'restored', ):
+            if key in sorted_topics:
+                messages.success(self.request, _(u'%(topics)s successfully %(action)s') % {
+                    'topics': ' '.join([u'<a href="%(topic_url)s">%(topic)s</a>' % {
+                        'topic_url': topic.get_absolute_url(),
+                        'topic': topic
+                    } for topic in sorted_topics[key]]),
+                    'action': actions[key]
+                })
 
         return reverse('pybb:index')
 

@@ -101,6 +101,7 @@ PYBB_USER_SEARCH_FORM = getattr(settings, 'PYBB_USER_SEARCH_FORM', 'pybb.forms.b
 PYBB_POLL_FORM = getattr(settings, 'PYBB_POLL_FORM', 'pybb.forms.base.PollForm')
 PYBB_TOPIC_MERGE_FORM = getattr(settings, 'PYBB_TOPIC_MERGE_FORM', 'pybb.forms.base.TopicMergeForm')
 PYBB_TOPIC_MOVE_FORM = getattr(settings, 'PYBB_TOPIC_MOVE_FORM', 'pybb.forms.base.TopicMoveForm')
+PYBB_TOPIC_DELETE_FORM = getattr(settings, 'PYBB_TOPIC_DELETE_FORM', 'pybb.forms.base.TopicDeleteForm')
 PYBB_FORUM_FORM = getattr(settings, 'PYBB_FORUM_FORM', 'pybb.forms.base.ForumForm')
 PYBB_MODERATION_FORM = getattr(settings, 'PYBB_MODERATION_FORM', 'pybb.forms.base.ModerationForm')
 PYBB_SEARCH_USER_FORM = getattr(settings, 'PYBB_SEARCH_USER_FORM', 'pybb.forms.base.SearchUserForm')
@@ -119,6 +120,7 @@ PYBB_FORUM_UPDATE_VIEW = getattr(settings, 'PYBB_FORUM_UPDATE_VIEW', 'pybb.views
 
 PYBB_TOPIC_DETAIL_VIEW = getattr(settings, 'PYBB_TOPIC_DETAIL_VIEW', 'pybb.views.base.TopicDetailView')
 PYBB_TOPIC_DELETE_VIEW = getattr(settings, 'PYBB_TOPIC_DELETE_VIEW', 'pybb.views.base.TopicDeleteView')
+PYBB_TOPICS_DELETE_VIEW = getattr(settings, 'PYBB_TOPICS_DELETE_VIEW', 'pybb.views.base.TopicsDeleteView')
 PYBB_TOPIC_STICK_VIEW = getattr(settings, 'PYBB_TOPIC_STICK_VIEW', 'pybb.views.base.TopicStickView')
 PYBB_TOPIC_UNSTICK_VIEW = getattr(settings, 'PYBB_TOPIC_UNSTICK_VIEW', 'pybb.views.base.TopicUnstickView')
 PYBB_TOPIC_CLOSE_VIEW = getattr(settings, 'PYBB_TOPIC_CLOSE_VIEW', 'pybb.views.base.TopicCloseView')

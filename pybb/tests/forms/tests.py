@@ -1,10 +1,12 @@
+from django.db.models.loading import cache
+cache._populate()
+
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
 
-
 from pybb.forms import (ModerationForm, SearchUserForm, ForumForm, TopicMoveForm,
                         TopicMergeForm, get_topic_merge_formset, PostsMoveNewTopicForm,
-                        PostsMoveExistingTopicForm)
+                        PostsMoveExistingTopicForm, TopicDeleteForm, get_topic_delete_formset)
 from pybb.models import Forum, Topic, Post, TopicRedirection
 from pybb.proxies import UserObjectPermission
 from pybb import defaults
@@ -298,3 +300,41 @@ class FormsTest(TestCase):
         form.save()
 
         self.assertEqual(self.topic.posts.count(), 2)
+
+    def test_topic_delete_form(self):
+        form = TopicDeleteForm(topic=self.topic, data={
+            'topic': self.topic.pk,
+            'confirm': True
+        })
+
+        self.assertTrue(form.is_valid())
+
+        form.save()
+
+        self.assertTrue(self.topic.deleted)
+
+    def test_topic_delete_formset(self):
+        topic2 = Topic.objects.create(name='Topic 2', forum=self.forum, user=self.superuser)
+
+        post2 = Post(topic=topic2, user=self.superuser, body='post on topic2')
+        post2.save()
+
+        topics = Topic.objects.filter(pk__in=[self.topic.pk, topic2.pk])
+
+        FormSet = get_topic_delete_formset(topics=topics)
+
+        formset = FormSet(data={
+            'form-TOTAL_FORMS': 2,
+            'form-INITIAL_FORMS': 0,
+            'form-0-topic': self.topic.pk,
+            'form-0-confirm': True,
+            'form-1-topic': topic2.pk,
+            'form-1-confirm': True,
+        })
+
+        self.assertTrue(formset.is_valid())
+
+        for form in formset:
+            topic = form.save()
+
+            self.assertTrue(topic.deleted)

@@ -621,3 +621,36 @@ def get_topic_merge_formset(topics, form=TopicMergeForm):
             return super(BaseTopicMergeFormSet, self)._construct_form(i, **kwargs)
 
     return formset_factory(extra=len(topics), form=load_class(defaults.PYBB_TOPIC_MERGE_FORM), formset=BaseTopicMergeFormSet)
+
+
+class TopicDeleteForm(forms.Form):
+    confirm = forms.BooleanField(required=False, initial=True)
+
+    def __init__(self, *args, **kwargs):
+        self.topic = kwargs.pop('topic', None)
+
+        super(TopicDeleteForm, self).__init__(*args, **kwargs)
+
+    def save(self):
+        if self.cleaned_data.get('confirm', True):
+            if not self.topic.deleted:
+                self.topic.mark_as_deleted()
+            else:
+                self.topic.mark_as_undeleted()
+
+        return self.topic
+
+
+def get_topic_delete_formset(topics, form=TopicDeleteForm):
+    class BaseTopicDeleteFormSet(BaseFormSet):
+        def __init__(self, *args, **kwargs):
+            self.topics = topics
+
+            super(BaseTopicDeleteFormSet, self).__init__(*args, **kwargs)
+
+        def _construct_form(self, i, **kwargs):
+            kwargs['topic'] = self.topics[i]
+
+            return super(BaseTopicDeleteFormSet, self)._construct_form(i, **kwargs)
+
+    return formset_factory(extra=len(topics), form=load_class(defaults.PYBB_TOPIC_DELETE_FORM), formset=BaseTopicDeleteFormSet)

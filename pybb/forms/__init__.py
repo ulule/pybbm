@@ -33,4 +33,6 @@ PostsMoveNewTopicForm = load_class(defaults.PYBB_POSTS_MOVE_NEW_TOPIC_FORM)
 
 PostsMoveExistingTopicForm = load_class(defaults.PYBB_POSTS_MOVE_EXISTING_TOPIC_FORM)
 
-from .base import (get_topic_merge_formset, get_topic_move_formset)  # NOQA
+TopicDeleteForm = load_class(defaults.PYBB_TOPIC_DELETE_FORM)
+
+from .base import (get_topic_merge_formset, get_topic_move_formset, get_topic_delete_formset)  # NOQA

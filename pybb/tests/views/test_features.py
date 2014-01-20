@@ -276,6 +276,58 @@ class FeaturesTest(TestCase):
 
         self.assertRedirects(response, reverse('pybb:index'))
 
+    def test_topics_delete_view(self):
+        topic2 = Topic.objects.create(name='Topic 2', forum=self.forum, user=self.superuser)
+
+        post2 = Post(topic=topic2, user=self.superuser, body='post on topic2')
+        post2.save()
+
+        topics_delete_url = reverse('pybb:topics_delete')
+
+        self.login_as(self.staff)
+
+        response = self.client.post(topics_delete_url, data={
+            'topic_ids': [self.topic.pk, topic2.pk],
+            'topic': topic2,
+            'confirm': True
+        })
+
+        topic2 = Topic.objects.get(pk=topic2.pk)
+
+        self.assertTrue(topic2.delete)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['form'].forms), 2)
+        self.assertTemplateUsed(response, 'pybb/topic/delete.html')
+
+    def test_topics_delete_complete(self):
+        topic2 = Topic.objects.create(name='Topic 2', forum=self.forum, user=self.superuser)
+
+        post2 = Post(topic=topic2, user=self.superuser, body='post on topic2')
+        post2.save()
+
+        topics_delete_url = reverse('pybb:topics_delete')
+
+        self.login_as(self.staff)
+
+        response = self.client.post(topics_delete_url, data={
+            'topic_ids': [self.topic.pk, topic2.pk],
+            'form-TOTAL_FORMS': 2,
+            'form-INITIAL_FORMS': 0,
+            'form-0-topic': self.topic.pk,
+            'form-0-confirm': True,
+            'form-1-topic': topic2.pk,
+            'form-1-confirm': True,
+            'submit': 1
+        })
+
+        topic2 = Topic.objects.get(pk=topic2.pk)
+
+        self.assertTrue(self.topic.delete)
+        self.assertTrue(topic2.delete)
+
+        self.assertRedirects(response, reverse('pybb:index'))
+
     def test_forum_updated(self):
         time.sleep(1)
         topic = Topic(name='xtopic', forum=self.forum, user=self.user)
