@@ -297,7 +297,7 @@ class FeaturesTest(TestCase):
         self.assertTrue(topic2.delete)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['form'].forms), 1)
+        self.assertEqual(len(response.context['form'].forms), 2)
         self.assertTemplateUsed(response, 'pybb/topic/delete.html')
 
     def test_topics_delete_complete(self):

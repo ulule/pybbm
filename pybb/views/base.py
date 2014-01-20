@@ -1021,8 +1021,10 @@ class TopicsDeleteView(TopicBatchView):
                     'topic': topic
                 }
 
-        messages.success(self.request, _(sorted_topics['deleted'] + u'successfully deleted'))
-        messages.success(self.request, _(sorted_topics['restored'] + u'successfully restored'))
+        if sorted_topics['deleted']:
+            messages.success(self.request, _(sorted_topics['deleted'] + u'successfully deleted'))
+        if sorted_topics['restored']:
+            messages.success(self.request, _(sorted_topics['restored'] + u'successfully restored'))
 
         return reverse('pybb:index')
 
