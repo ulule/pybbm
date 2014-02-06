@@ -552,6 +552,9 @@ class BaseTopic(ModelBase):
                                         type=redirection_type,
                                         expired=expired)
 
+        topic.update_counters()
+        self.update_counters()
+
     @property
     def head(self):
         return self.get_first_post()
