@@ -5,7 +5,7 @@ from django.db.models import signals
 from django.utils.translation import ugettext_lazy as _
 
 from pybb.base import ModelBase, ManagerBase
-from pybb.compat import User
+from pybb.compat import AUTH_USER_MODEL
 from pybb.contrib.quotes.signals import quoted
 from pybb.models import Post
 from pybb import defaults
@@ -43,14 +43,14 @@ class QuoteManager(ManagerBase):
 
 
 class Quote(ModelBase):
-    from_user = models.ForeignKey(User, verbose_name=_('From user'),
+    from_user = models.ForeignKey(AUTH_USER_MODEL, verbose_name=_('From user'),
                                   related_name='quotes_sent')
     from_post = models.ForeignKey(Post,
                                   related_name='quotes_sent')
     to_post = models.ForeignKey(Post, related_name='quotes_received',
                                 null=True,
                                 blank=True)
-    to_user = models.ForeignKey(User, verbose_name=_('To user'),
+    to_user = models.ForeignKey(AUTH_USER_MODEL, verbose_name=_('To user'),
                                 related_name='quoted_received')
     created = models.DateTimeField(auto_now_add=True)
 

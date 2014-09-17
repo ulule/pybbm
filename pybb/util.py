@@ -28,7 +28,6 @@ except ImportError:
 
 from django.core.files import File
 from django.core.files.uploadedfile import UploadedFile
-from django.contrib.auth.models import SiteProfileNotAvailable
 from django.conf import settings
 from django.db.models import get_model
 from django.core import exceptions
@@ -72,6 +71,8 @@ def rstrip_str(user, str):
 
 
 def get_profile_model():
+    from django.contrib.auth.models import SiteProfileNotAvailable
+
     """
     Return the model class for the currently-active user profile
     model, as defined by the ``AUTH_PROFILE_MODULE`` setting.

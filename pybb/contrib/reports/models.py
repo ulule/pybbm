@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 
 from pybb.util import tznow
-from pybb.compat import User
+from pybb.compat import AUTH_USER_MODEL
 from pybb.models import Post
 from pybb.base import ManagerBase, ModelBase
 
@@ -81,7 +81,7 @@ class Report(ModelBase):
 
 class ReportMessage(ModelBase):
     report = models.ForeignKey(Report, related_name='reported_messages')
-    user = models.ForeignKey(User, related_name='reported_messages')
+    user = models.ForeignKey(AUTH_USER_MODEL, related_name='reported_messages')
     message = models.TextField(blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
 

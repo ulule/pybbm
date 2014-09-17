@@ -24,7 +24,7 @@ from django.utils.functional import cached_property
 
 from sorl.thumbnail import ImageField
 
-from pybb.compat import User, update_fields
+from pybb.compat import update_fields, AUTH_USER_MODEL
 from pybb.util import unescape, get_model_string, tznow
 from pybb.base import ModelBase, ManagerBase, QuerySetBase
 from pybb.subscription import notify_topic_subscribers
@@ -60,7 +60,7 @@ class ModeratorManager(ManagerBase):
 
 class BaseModerator(ModelBase):
     forum = models.ForeignKey(get_model_string('Forum'))
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(AUTH_USER_MODEL)
 
     objects = ModeratorManager()
 
@@ -131,12 +131,12 @@ class BaseForum(ModelBase):
     slug = AutoSlugField(populate_from='name', max_length=80)
     position = models.IntegerField(_('Position'), blank=True, default=0, db_index=True)
     description = models.TextField(_('Description'), blank=True)
-    moderators = models.ManyToManyField(User, blank=True, null=True, verbose_name=_('Moderators'), through=get_model_string('Moderator'))
+    moderators = models.ManyToManyField(AUTH_USER_MODEL, blank=True, null=True, verbose_name=_('Moderators'), through=get_model_string('Moderator'))
     updated = models.DateTimeField(_('Updated'), blank=True, null=True)
     post_count = models.IntegerField(_('Post count'), blank=True, default=0, db_index=True)
     topic_count = models.IntegerField(_('Topic count'), blank=True, default=0, db_index=True)
     forum_count = models.PositiveIntegerField(default=0, db_index=True)
-    readed_by = models.ManyToManyField(User, through=get_model_string('ForumReadTracker'), related_name='readed_forums')
+    readed_by = models.ManyToManyField(AUTH_USER_MODEL, through=get_model_string('ForumReadTracker'), related_name='readed_forums')
     headline = models.TextField(_('Headline'), blank=True, null=True)
     hidden = models.BooleanField(_('Hidden'), blank=False, null=False,
                                  default=False, db_index=True)
@@ -380,7 +380,7 @@ class BaseTopicRedirection(ModelBase):
 
 class TopicQuerySetMixin(object):
     def filter_by_user(self, user, forum=None):
-        if not forum is None:
+        if forum is not None:
             if not forum.is_moderated_by(user):
                 if user.is_authenticated():
                     return (self.filter(Q(user=user) | Q(on_moderation=False))
@@ -448,7 +448,7 @@ class BaseSubscription(ModelBase):
         (TYPE_DAILY_ALERT, _('Daily reports by email')),
     )
 
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(AUTH_USER_MODEL)
     topic = models.ForeignKey(get_model_string('Topic'))
     type = models.PositiveSmallIntegerField(default=TYPE_NO_ALERT, db_index=True, choices=TYPE_CHOICES)
     created = models.DateTimeField(_('Created'), null=True, auto_now_add=True)
@@ -476,19 +476,19 @@ class BaseTopic(ModelBase):
 
     created = models.DateTimeField(_('Created'), null=True)
     updated = models.DateTimeField(_('Updated'), null=True)
-    user = models.ForeignKey(User, verbose_name=_('User'))
+    user = models.ForeignKey(AUTH_USER_MODEL, verbose_name=_('User'))
     views = models.IntegerField(_('Views count'), blank=True, default=0, db_index=True)
     sticky = models.BooleanField(_('Sticky'), blank=True, default=False, db_index=True)
     closed = models.BooleanField(_('Closed'), blank=True, default=False, db_index=True)
     redirect = models.BooleanField(_('Redirect'), blank=True, default=False, db_index=True)
     deleted = models.BooleanField(_('Deleted'), default=False)
-    subscribers = models.ManyToManyField(User,
+    subscribers = models.ManyToManyField(AUTH_USER_MODEL,
                                          related_name='subscriptions',
                                          verbose_name=_('Subscribers'),
                                          blank=True,
                                          through=get_model_string('Subscription'))
     post_count = models.IntegerField(_('Post count'), blank=True, default=0, db_index=True)
-    readed_by = models.ManyToManyField(User, through=get_model_string('TopicReadTracker'), related_name='readed_topics')
+    readed_by = models.ManyToManyField(AUTH_USER_MODEL, through=get_model_string('TopicReadTracker'), related_name='readed_topics')
     on_moderation = models.BooleanField(_('On moderation'), default=False, db_index=True)
     first_post = models.ForeignKey(get_model_string('Post'),
                                    blank=True,
@@ -853,7 +853,7 @@ class PostManager(ManagerBase):
 
 
 class PostDeletion(ModelBase):
-    user = models.ForeignKey(User, related_name='posts_deletion')
+    user = models.ForeignKey(AUTH_USER_MODEL, related_name='posts_deletion')
     post = models.OneToOneField(get_model_string('Post'), related_name='deletion')
     created = models.DateTimeField(_('Created'), auto_now_add=True)
 
@@ -866,7 +866,7 @@ class BasePost(RenderableItem):
     topic = models.ForeignKey(get_model_string('Topic'),
                               related_name='posts',
                               verbose_name=_('Topic'))
-    user = models.ForeignKey(User, related_name='posts', verbose_name=_('User'))
+    user = models.ForeignKey(AUTH_USER_MODEL, related_name='posts', verbose_name=_('User'))
     created = models.DateTimeField(_('Created'), blank=True)
     updated = models.DateTimeField(_('Updated'), blank=True, null=True)
     user_ip = models.IPAddressField(_('User IP'),
@@ -1107,7 +1107,7 @@ class BaseAttachment(ModelBase):
     visible = models.BooleanField(default=True)
     counter = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(_('Created'), auto_now_add=True)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(AUTH_USER_MODEL)
 
     class Meta(object):
         verbose_name = _('Attachment')
@@ -1170,7 +1170,7 @@ class BaseTopicReadTracker(ModelBase):
         app_label = 'pybb'
         abstract = True
 
-    user = models.ForeignKey(User, blank=False, null=False)
+    user = models.ForeignKey(AUTH_USER_MODEL, blank=False, null=False)
     topic = models.ForeignKey(get_model_string('Topic'),
                               blank=True,
                               null=True)
@@ -1186,7 +1186,7 @@ class ForumReadTrackerManager(ManagerBase):
         updated_ids = []
 
         for forum in forums:
-            if not forum.pk in forum_ids:
+            if forum.pk not in forum_ids:
                 trackers.append(self.model(forum=forum, user=user))
             else:
                 updated_ids.append(forum.pk)
@@ -1210,7 +1210,7 @@ class BaseForumReadTracker(ModelBase):
         app_label = 'pybb'
         abstract = True
 
-    user = models.ForeignKey(User, blank=False, null=False)
+    user = models.ForeignKey(AUTH_USER_MODEL, blank=False, null=False)
     forum = models.ForeignKey(get_model_string('Forum'), blank=True, null=True)
     time_stamp = models.DateTimeField(auto_now=True)
 
@@ -1320,7 +1320,7 @@ class BasePollAnswerUser(ModelBase):
     poll_answer = models.ForeignKey(get_model_string('PollAnswer'),
                                     related_name='users',
                                     verbose_name=_('Poll answer'))
-    user = models.ForeignKey(User,
+    user = models.ForeignKey(AUTH_USER_MODEL,
                              related_name='poll_answers',
                              verbose_name=_('User'))
     created = models.DateTimeField(auto_now_add=True)
@@ -1386,8 +1386,8 @@ class BaseLogModeration(ModelBase):
     )
 
     action_time = models.DateTimeField(_('action time'), auto_now=True)
-    user = models.ForeignKey(User, related_name='logs')
-    target = models.ForeignKey(User, blank=True, null=True, related_name='target_logs')
+    user = models.ForeignKey(AUTH_USER_MODEL, related_name='logs')
+    target = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True, related_name='target_logs')
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField(_('object id'), db_index=True)
     content_object = generic.GenericForeignKey(ct_field='content_type', fk_field='object_id')

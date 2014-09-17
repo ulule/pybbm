@@ -5,7 +5,7 @@ from django.db.models import signals
 from django.utils.translation import ugettext_lazy as _
 
 from pybb.models import Post
-from pybb.compat import User
+from pybb.compat import AUTH_USER_MODEL
 from pybb.base import ModelBase, ManagerBase
 
 from .signals import mentioned
@@ -41,9 +41,9 @@ class MentionManager(ManagerBase):
 
 
 class Mention(ModelBase):
-    from_user = models.ForeignKey(User, related_name='sent_mentions')
+    from_user = models.ForeignKey(AUTH_USER_MODEL, related_name='sent_mentions')
     post = models.ForeignKey(Post, related_name='mentions')
-    to_user = models.ForeignKey(User, related_name='received_mentions')
+    to_user = models.ForeignKey(AUTH_USER_MODEL, related_name='received_mentions')
     created = models.DateTimeField(auto_now_add=True)
 
     objects = MentionManager()

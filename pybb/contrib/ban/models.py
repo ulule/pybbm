@@ -1,3 +1,5 @@
+import django
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import signals
@@ -7,50 +9,56 @@ from pybb.base import ModelBase, ManagerBase
 from .util import get_ip
 from . import settings
 
-from pybb.compat import User
+from pybb.compat import AUTH_USER_MODEL
 
 
-class BannedUserManager(ManagerBase):
-    def contribute_to_class(self, cls, name):
-        signals.user_logged_in.connect(self.user_logged_in, sender=User)
-        return super(BannedUserManager, self).contribute_to_class(cls, name)
+def handle_user_logged_in(self, sender, request, user, **kwargs):
+    try:
+        self.model.objects.get(user=user)
+    except self.model.DoesNotExist:
+        value = request.COOKIES.get(settings.PYBB_BAN_COOKIE_NAME, None)
 
-    def user_logged_in(self, sender, request, user, **kwargs):
-        try:
-            self.model.objects.get(user=user)
-        except self.model.DoesNotExist:
-            value = request.COOKIES.get(settings.PYBB_BAN_COOKIE_NAME, None)
+        banned_user = None
 
-            banned_user = None
-
-            if value:
-                try:
-                    existing_user = User.objects.get(pk=int(value))
-                except (User.DoesNotExist, ValueError):
-                    banned_user = self.model(user=user,
-                                             reason=_(u'Cookie exists: user already banned from anonymous account'))
-                else:
-                    banned_user = self.model(user=user,
-                                             reason=_(u'Cookie exists: user already banned for the account %s') % existing_user)
-
-            ip_address = get_ip(request)
-
-            exists = IPAddress.objects.filter(ip_address=ip_address, banned=True).exists()
-
-            if exists:
+        if value:
+            try:
+                existing_user = User.objects.get(pk=int(value))
+            except (User.DoesNotExist, ValueError):
                 banned_user = self.model(user=user,
-                                         reason=_('IP Address %s is banned') % ip_address)
+                                         reason=_(u'Cookie exists: user already banned from anonymous account'))
+            else:
+                banned_user = self.model(user=user,
+                                         reason=_(u'Cookie exists: user already banned for the account %s') % existing_user)
 
-            if banned_user:
-                banned_user.save()
+        ip_address = get_ip(request)
+
+        exists = IPAddress.objects.filter(ip_address=ip_address, banned=True).exists()
+
+        if exists:
+            banned_user = self.model(user=user,
+                                     reason=_('IP Address %s is banned') % ip_address)
+
+        if banned_user:
+            banned_user.save()
+
+
+if django.VERSION < (1, 7):
+    from .compat import User
+
+    signals.user_logged_in.connect(handle_user_logged_in, sender=User)
+else:
+    from django.apps import apps
+
+    if apps.ready:
+        from .compat import User
+
+        signals.user_logged_in.connect(handle_user_logged_in, sender=User)
 
 
 class BannedUser(ModelBase):
-    user = models.OneToOneField(User, related_name='banned')
+    user = models.OneToOneField(AUTH_USER_MODEL, related_name='banned')
     reason = models.TextField(_('Reason'), null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
-
-    objects = BannedUserManager()
 
     class Meta:
         app_label = 'pybb'
@@ -80,7 +88,7 @@ class IPAddressManager(ManagerBase):
 
 
 class IPAddress(ModelBase):
-    user = models.ForeignKey(User,
+    user = models.ForeignKey(AUTH_USER_MODEL,
                              related_name='ip_addresses',
                              null=True, blank=True)
     ip_address = models.IPAddressField(_('IP Address'),
