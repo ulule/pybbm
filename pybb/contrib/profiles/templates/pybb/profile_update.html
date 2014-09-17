@@ -15,7 +15,7 @@
         <img src="{{ PYBB_DEFAULT_AVATAR_URL }}" alt="avatar">
     {% endthumbnail %}
     </div>
-    <p><a href="{% url 'auth_password_change' %}">{% trans "Change the password" %}</a></p>
+    <p><a href="">{% trans "Change the password" %}</a></p>
     <form method="post" enctype="multipart/form-data" class="profile-edit">
         {% csrf_token %}
         <fieldset>

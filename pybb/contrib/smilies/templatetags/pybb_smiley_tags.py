@@ -1,8 +1,8 @@
 from django import template
-from django.utils import simplejson
 
 from pybb.contrib.smilies.models import Smiley
 from pybb.contrib.smilies import settings
+from pybb.compat import json
 
 
 register = template.Library()
@@ -30,6 +30,7 @@ def smiley_full_list():
         'style_class': settings.PYBB_SMILIES_STYLE_CLASS
     }
 
+
 @register.simple_tag
 def smiley_json_list():
     dropdown = {}
@@ -39,7 +40,7 @@ def smiley_json_list():
             dropdown[smiley.pattern] = smiley.image.url
         else:
             more[smiley.pattern] = smiley.image.url
-    return simplejson.dumps({
+    return json.dumps({
         'dropdown': dropdown,
         'more': more
     })

@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from django.test.client import Client
 
 from pybb import defaults
-from pybb.compat import User
+from pybb.compat import get_user_model
 from pybb.models import (Post, Topic, Forum,
                          TopicRedirection, Subscription, PostDeletion)
 
@@ -27,7 +27,6 @@ class FeaturesTest(TestCase):
         self.post  # noqa
 
     def test_base(self):
-         # Check index page
         url = reverse('pybb:index')
         response = self.client.get(url)
         parser = html.HTMLParser(encoding='utf8')
@@ -38,7 +37,6 @@ class FeaturesTest(TestCase):
         self.assertEqual(len(response.context['forums']), 1)
 
     def test_forum_page(self):
-         # Check forum page
         response = self.client.get(self.forum.get_absolute_url())
         self.assertEqual(response.context['forum'], self.forum)
         tree = html.fromstring(response.content)
@@ -48,7 +46,6 @@ class FeaturesTest(TestCase):
         self.assertFalse(response.context['is_paginated'])
 
     def test_profile_edit(self):
-         # Self profile edit
         self.login()
         response = self.client.get(reverse('profile_update'))
         self.assertEqual(response.status_code, 200)
@@ -58,7 +55,6 @@ class FeaturesTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.client.get(self.post.get_absolute_url(), follow=True)
         self.assertContains(response, 'test signature')
-         # Test empty signature
         values['signature'] = ''
         response = self.client.post(reverse('profile_update'), data=values, follow=True)
         self.assertEqual(len(response.context['form'].errors), 0)
@@ -509,7 +505,6 @@ class FeaturesTest(TestCase):
 
         updated = post.updated
 
-         # Check admin form
         self.user.is_staff = True
         self.user.save()
         response = self.client.get(post_update_url)
@@ -553,11 +548,9 @@ class FeaturesTest(TestCase):
         self.login()
         response = self.client.post(reverse('pybb:post_delete', args=[post.id]), follow=True)
         self.assertEqual(response.status_code, 200)
-         # Check that topic and forum exists ;)
         self.assertEqual(Topic.objects.filter(id=self.topic.id).count(), 1)
         self.assertEqual(Forum.objects.filter(id=self.forum.id).count(), 1)
 
-         # Delete topic
         response = self.client.post(reverse('pybb:post_delete', args=[self.post.id]), follow=True)
         self.assertEqual(response.status_code, 200)
 
@@ -664,7 +657,7 @@ class FeaturesTest(TestCase):
         self.assertTrue(topic.deleted)
 
     def test_subscription(self):
-        user = User.objects.create_user(username='user2', password='user2', email='user2@example.com')
+        user = get_user_model().objects.create_user(username='user2', password='user2', email='user2@example.com')
         client = Client()
         client.login(username='user2', password='user2')
         response = client.post(reverse('pybb:subscription_create'), data={

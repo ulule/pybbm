@@ -1,8 +1,7 @@
 import re
 
-from django.contrib.auth.models import User
-
 from pybb.processors import BaseProcessor
+from pybb.compat import get_user_model
 
 from . import settings
 
@@ -11,7 +10,7 @@ class MentionProcessor(BaseProcessor):
     username_re = r'@([\w\-]+)'
     format = '@%(username)s'
     tag = '[mention=%(user_id)s]%(username)s[/mention]'
-    model = User
+    model = get_user_model()
 
     def get_user_url(self, user):
         return settings.PYBB_MENTIONS_USER_URL(user)

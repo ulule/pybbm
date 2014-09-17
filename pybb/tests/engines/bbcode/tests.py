@@ -42,14 +42,16 @@ class BBCodeMarkupEngineTest(TestCase):
 
         messages = (
             ('[left][url url="http://ulule.com" title="Ulule"][img alt="Ulule" class="link"]http://ulule.com/logo.png[/img][/url][/left]',
-             u'<div style="text-align: left;"><a href="http://ulule.com" rel="nofollow" target="_blank" title="Ulule"><img alt="Ulule" class="link" src="http://ulule.com/logo.png"></a></div>'),
+             u'<div style="text-align: left;"><a rel="nofollow" title="Ulule" target="_blank" href="http://ulule.com"><img src="http://ulule.com/logo.png" alt="Ulule" class="link"></a></div>'),
             ('[left]@thoas[/left]',
              u'<div style="text-align: left;">@<a class="mention" href="/users/thoas/">thoas</a></div>'),
             ('[left]@thoas [url url="http://ulule.com" title="Ulule"][img alt="Ulule" class="link"]http://ulule.com/logo.png[/img][/url][/left]',
-             u'<div style="text-align: left;">@<a class="mention" href="/users/thoas/">thoas</a> <a href="http://ulule.com" rel="nofollow" target="_blank" title="Ulule"><img alt="Ulule" class="link" src="http://ulule.com/logo.png"></a></div>'),
+             u'<div style="text-align: left;">@<a class="mention" href="/users/thoas/">thoas</a> <a rel="nofollow" title="Ulule" target="_blank" href="http://ulule.com"><img src="http://ulule.com/logo.png" alt="Ulule" class="link"></a></div>'),
             ('[center]this is a smiiiile! :D[/center]',
-             u'<div style="text-align: center;">this is a smiiiile! <img alt=":D" class="smiley" src="pybb/smilies/lol.png" title="lol"></div>'),
+             u'<div style="text-align: center;">this is a smiiiile! <img src="pybb/smilies/lol.png" alt=":D" class="smiley" title="lol"></div>'),
         )
 
         for bbcode, result in messages:
-            self.assertEqual(markup(bbcode, obj=self.post), result)
+            mark = markup(bbcode, obj=self.post)
+
+            self.assertEqual(mark, result)

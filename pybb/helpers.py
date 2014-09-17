@@ -1,6 +1,4 @@
-from django.contrib.auth.models import SiteProfileNotAvailable
-
-from pybb.compat import User
+from pybb.compat import get_user_model, SiteProfileNotAvailable
 from pybb.models import Post, Attachment, Topic
 from pybb.util import get_profile_model, queryset_to_dict
 
@@ -58,7 +56,7 @@ def lookup_post_topics(qs):
 def lookup_users(qs):
     user_ids = queryset_to_dict(qs, key='user_id', singular=False)
 
-    users = queryset_to_dict(User.objects.filter(id__in=user_ids.keys()))
+    users = queryset_to_dict(get_user_model().objects.filter(id__in=user_ids.keys()))
 
     try:
         Profile = get_profile_model()

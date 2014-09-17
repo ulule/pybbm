@@ -1,5 +1,7 @@
 from django.db import models
 
+from pybb.compat import queryset
+
 _on_change_callbacks = {}
 
 
@@ -131,6 +133,7 @@ class TransformQuerySet(models.query.QuerySet):
         return result_iter
 
 
+@queryset
 class TransformManager(models.Manager):
-    def get_query_set(self):
+    def get_queryset(self):
         return TransformQuerySet(self.model)

@@ -71,7 +71,7 @@ def rstrip_str(user, str):
 
 
 def get_profile_model():
-    from django.contrib.auth.models import SiteProfileNotAvailable
+    from .compat import SiteProfileNotAvailable
 
     """
     Return the model class for the currently-active user profile

@@ -22,7 +22,7 @@ from django.views.decorators.http import require_http_methods
 from pure_pagination import Paginator, EmptyPage
 
 from pybb import defaults
-from pybb.compat import User
+from pybb.compat import get_user_model
 from pybb.models import (Forum, Topic, Post, Moderator, LogModeration, Attachment, Poll,
                          TopicReadTracker, ForumReadTracker, PollAnswerUser, Subscription)
 from pybb.util import load_class, generic, queryset_to_dict, redirect_to_login
@@ -294,7 +294,7 @@ class UserPostsView(ListView):
     template_name = 'pybb/user/post_list.html'
 
     def get_queryset(self):
-        self.user = get_object_or_404(User,
+        self.user = get_object_or_404(get_user_model(),
                                       username=self.kwargs['username'])
 
         qs = (self.user.posts.all()
@@ -323,13 +323,15 @@ class UserPostsView(ListView):
 class UserPostsDeleteView(generic.DeleteView):
     template_name = 'pybb/user/posts_delete.html'
     context_object_name = 'post_user'
-    model = User
     slug_url_kwarg = 'username'
     slug_field = 'username'
 
     @method_decorator(staff_member_required)
     def dispatch(self, request, *args, **kwargs):
         return super(UserPostsDeleteView, self).dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return get_user_model().objects.all()
 
     def get_context_data(self, **kwargs):
         context = super(UserPostsDeleteView, self).get_context_data(**kwargs)
@@ -614,6 +616,8 @@ class PostCreateView(PostUpdateMixin, generic.CreateView):
             if not defaults.PYBB_ENABLE_ANONYMOUS_POST:
                 return redirect_to_login(request.get_full_path())
 
+            User = get_user_model()
+
             self.user, new = User.objects.get_or_create(username=defaults.PYBB_ANONYMOUS_USERNAME)
 
         self.forum = None
@@ -689,7 +693,7 @@ class PostsCreateView(generic.RedirectView):
     http_method_names = ['post']
 
     def get_redirect_url(self, **kwargs):
-        if not 'topic_id' in self.request.POST:
+        if 'topic_id' not in self.request.POST:
             raise Http404
 
         try:
@@ -707,7 +711,7 @@ class PostRedirectView(generic.RedirectView):
 
     def get_redirect_url(self, **kwargs):
         if self.request.method == 'POST':
-            if not 'post_id' in self.request.POST:
+            if 'post_id' not in self.request.POST:
                 raise Http404
 
             try:
@@ -1437,7 +1441,7 @@ class SubscriptionChangeView(generic.RedirectView):
         return super(SubscriptionChangeView, self).dispatch(request, *args, **kwargs)
 
     def get_redirect_url(self, **kwargs):
-        if not 'topic_ids' in self.request.POST or not 'type' in self.request.POST:
+        if 'topic_ids' not in self.request.POST or 'type' not in self.request.POST:
             raise Http404
 
         try:
@@ -1447,7 +1451,7 @@ class SubscriptionChangeView(generic.RedirectView):
 
         types = dict(Subscription.TYPE_CHOICES)
 
-        if not type in types:
+        if type not in types:
             raise Http404
 
         topic_ids = self.request.POST.getlist('topic_ids')
@@ -1475,7 +1479,7 @@ class SubscriptionDeleteView(generic.RedirectView):
         return super(SubscriptionDeleteView, self).dispatch(request, *args, **kwargs)
 
     def get_redirect_url(self, **kwargs):
-        if not 'topic_ids' in self.request.POST and not 'topic_id' in self.request.POST:
+        if 'topic_ids' not in self.request.POST and 'topic_id' not in self.request.POST:
             raise Http404
 
         topic = None

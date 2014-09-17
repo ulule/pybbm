@@ -1,11 +1,13 @@
-from django.contrib.auth.models import User
-
 from . import settings
 from .signals import mentioned
 
+from pybb.compat import get_user_model
+
 
 def mention(tag_name, value, options, parent, context):
-    if not 'mention' in options:
+    User = get_user_model()
+
+    if 'mention' not in options:
         return settings.PYBB_MENTIONS_MENTION_FORMAT_WITHOUT_USER % {
             'username': value
         }

@@ -11,7 +11,7 @@ from django.forms.formsets import BaseFormSet
 
 from pybb.models import (Topic, Post, Attachment, TopicRedirection,
                          PollAnswer, Forum, Poll)
-from pybb.compat import User
+from pybb.compat import get_user_model
 from pybb.proxies import UserObjectPermission
 from pybb import defaults
 from pybb.util import tznow, load_class
@@ -84,7 +84,6 @@ class PostForm(forms.ModelForm):
         self.actor = kwargs.pop('actor', None)
         self.pollformset = None
 
-            #Handle topic subject, poll type and question if editing topic head
         if ('instance' in kwargs) and kwargs['instance'] and (kwargs['instance'].topic.head == kwargs['instance']):
             kwargs.setdefault('initial', {})['name'] = kwargs['instance'].topic.name
 
@@ -249,7 +248,7 @@ class AdminPostForm(PostForm):
     Superusers can post messages from any user and from any time
     If no user with specified name - new user will be created
     """
-    login = forms.ModelChoiceField(label=_('User'), queryset=User.objects.all())
+    login = forms.ModelChoiceField(label=_('User'), queryset=get_user_model().objects.all())
 
     def __init__(self, *args, **kwargs):
         if args:
@@ -385,19 +384,17 @@ class SearchUserForm(forms.Form):
         'unknown_username': _('A user with that username does not exist.'),
     }
 
-    model_class = User
-
     def clean_username(self):
         username = self.cleaned_data['username']
         try:
             self.get_user(username)
-        except self.model_class.DoesNotExist:
+        except get_user_model().DoesNotExist:
             raise forms.ValidationError(self.error_messages['unknown_username'])
         else:
             return username
 
     def get_user(self, username):
-        return self.model_class.objects.get(username=username)
+        return get_user_model().objects.get(username=username)
 
 
 class PostsMoveExistingTopicForm(forms.Form):
@@ -507,7 +504,7 @@ class TopicMoveForm(forms.Form):
         redirection_type = cleaned_data['redirection_type']
 
         if (int(redirection_type) == TopicRedirection.TYPE_EXPIRING_REDIRECT and
-                (not 'expired' in cleaned_data or not cleaned_data['expired'])):
+                ('expired' not in cleaned_data or not cleaned_data['expired'])):
                 self._errors['expired'] = self.error_class([self.error_messages['expired_not_empty']])
 
         if not defaults.PYBB_DUPLICATE_TOPIC_SLUG_ALLOWED:

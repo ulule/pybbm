@@ -5,8 +5,8 @@ from django.views.generic.edit import FormMixin
 from django.core.urlresolvers import reverse
 
 from pybb.util import generic
-from pybb.compat import User
 from pybb import defaults
+from pybb.compat import get_user_model
 
 from .forms import BanForm
 from .models import BannedUser, IPAddress
@@ -15,11 +15,13 @@ from pure_pagination import Paginator
 
 
 class BanCreateView(generic.DetailView, FormMixin):
-    model = User
     slug_url_kwarg = 'username'
     slug_field = 'username'
     form_class = BanForm
     template_name = 'pybb/ban/create.html'
+
+    def get_queryset(self):
+        return get_user_model().objects.all()
 
     def get_form_kwargs(self, **kwargs):
         return dict(super(BanCreateView, self).get_form_kwargs(**kwargs), **{

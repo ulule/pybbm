@@ -2,12 +2,14 @@ from django.db import models
 
 from pybb.base import ModelBase, ManagerBase
 from . import settings
+from pybb.compat import queryset
 
 
+@queryset
 class SmileyManager(ManagerBase):
     def active(self):
         "Retrieves active smilies"
-        return self.get_query_set().filter(is_active=True)
+        return self.get_queryset().filter(is_active=True)
 
     def one_click(self):
         "Retrieves smilies that are both active and 'in one click'"

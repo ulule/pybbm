@@ -22,8 +22,8 @@ except ImportError:
 
 class ContentTypeRestrictedFileField(FileField):
     def __init__(self, *args, **kwargs):
-        self.content_types = kwargs.pop('content_types')
-        self.max_upload_size = kwargs.pop('max_upload_size')
+        self.content_types = kwargs.pop('content_types', None)
+        self.max_upload_size = kwargs.pop('max_upload_size', None)
 
         super(ContentTypeRestrictedFileField, self).__init__(*args, **kwargs)
 
@@ -33,7 +33,7 @@ class ContentTypeRestrictedFileField(FileField):
         file = data.file
         content_type = file.content_type
 
-        if not content_type in self.content_types:
+        if content_type not in self.content_types:
             raise forms.ValidationError(_(u'Filetype %(content_type)s not supported for %(filename)s.') % {
                 'content_type': content_type,
                 'filename': file.name

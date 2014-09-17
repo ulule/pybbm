@@ -3,7 +3,6 @@ import mimetypes
 
 from django.core.management import call_command
 from django import test
-from django.db.models.loading import cache; cache._populate()
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.importlib import import_module
 from django.http import HttpRequest
@@ -12,7 +11,7 @@ from django.conf import settings
 
 
 from pybb.models import Post, Topic, Forum
-from pybb.compat import User
+from pybb.compat import get_user_model
 
 from exam import Exam, fixture
 
@@ -25,11 +24,11 @@ except ImportError:
 class FixtureMixin(Exam):
     @fixture
     def user(self):
-        return User.objects.create_user('zeus', 'zeus@localhost', 'zeus')
+        return get_user_model().objects.create_user('zeus', 'zeus@localhost', 'zeus')
 
     @fixture
     def staff(self):
-        staff = User.objects.create_user('thoas', 'thoas@localhost', '$ecret')
+        staff = get_user_model().objects.create_user('thoas', 'thoas@localhost', '$ecret')
         staff.is_staff = True
         staff.save()
 
@@ -37,11 +36,11 @@ class FixtureMixin(Exam):
 
     @fixture
     def newbie(self):
-        return User.objects.create_user('newbie', 'newbie@localhost', 'newbie')
+        return get_user_model().objects.create_user('newbie', 'newbie@localhost', 'newbie')
 
     @fixture
     def superuser(self):
-        superuser = User.objects.create_user('oleiade', 'oleiade@localhost', '$ecret')
+        superuser = get_user_model().objects.create_user('oleiade', 'oleiade@localhost', '$ecret')
         superuser.is_superuser = True
         superuser.is_staff = True
         superuser.save()

@@ -1,3 +1,5 @@
+import django
+
 from django.db import models
 from django.contrib.auth.models import Permission
 from django.core.urlresolvers import reverse
@@ -10,7 +12,7 @@ from pybb import defaults
 from pybb.constants import TZ_CHOICES
 from pybb.base import ModelBase
 from pybb.processors import markup
-from pybb.compat import User
+from pybb.compat import AUTH_USER_MODEL
 from pybb.fields import CAStorage
 
 from annoying.fields import AutoOneToOneField
@@ -23,7 +25,7 @@ class Profile(ModelBase):
     Profile class that can be used if you doesn't have
     your site profile.
     """
-    user = AutoOneToOneField(User, related_name='pybb_profile', verbose_name=_('User'))
+    user = AutoOneToOneField(AUTH_USER_MODEL, related_name='pybb_profile', verbose_name=_('User'))
 
     signature = models.TextField(_('Signature'), blank=True,
                                  max_length=defaults.PYBB_SIGNATURE_MAX_LENGTH)
@@ -95,4 +97,14 @@ def user_saved(instance, created, **kwargs):
 
     Profile(user=instance).save()
 
-post_save.connect(user_saved, sender=User)
+if django.VERSION < (1, 7):
+    from pybb.compat import get_user_model
+
+    post_save.connect(user_saved, sender=get_user_model())
+else:
+    from django.apps import apps
+
+    if apps.ready:
+        from pybb.compat import get_user_model
+
+        post_save.connect(user_saved, sender=get_user_model())

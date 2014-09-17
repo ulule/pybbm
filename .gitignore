@@ -7,6 +7,5 @@ settings_local.py
 dist
 *.egg-info
 testdb.sqlite
-test/example/media/pybb_upload
-test/media/*
+pybb/tests/media/*
 docs/_build/

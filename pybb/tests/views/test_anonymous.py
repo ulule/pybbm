@@ -2,7 +2,7 @@ from django.contrib.auth.models import Permission
 from django.core.urlresolvers import reverse
 
 from pybb import defaults
-from pybb.compat import User
+from pybb.compat import get_user_model
 from pybb.tests.base import TestCase
 from pybb.models import Post, Topic, Forum
 
@@ -13,7 +13,7 @@ class AnonymousTest(TestCase):
         self.ORIG_PYBB_ANONYMOUS_USERNAME = defaults.PYBB_ANONYMOUS_USERNAME
         defaults.PYBB_ENABLE_ANONYMOUS_POST = True
         defaults.PYBB_ANONYMOUS_USERNAME = 'Anonymous'
-        self.user = User.objects.create_user('Anonymous', 'Anonymous@localhost', 'Anonymous')
+        self.user = get_user_model().objects.create_user('Anonymous', 'Anonymous@localhost', 'Anonymous')
 
         self.parent_forum = Forum.objects.create(name='foo')
 

@@ -15,7 +15,7 @@ class MentionsTest(TestCase):
         self.post = Post(topic=self.topic, user=self.user, body='@thoas is right!')
         processor = MentionProcessor(self.post.body, obj=self.post)
 
-        self.assertEqual(processor.render(), u'[mention=1]thoas[/mention] is right!')
+        self.assertEqual(processor.render(), u'[mention=%d]thoas[/mention] is right!' % self.staff.pk)
 
         self.post.save()
 
@@ -36,7 +36,11 @@ class MentionsTest(TestCase):
 
         processor = MentionProcessor(multiple_mentions.body, obj=multiple_mentions)
 
-        self.assertEqual(processor.render(), u'[mention=1]thoas[/mention] is right and [mention=2]oleiade[/mention] or [mention=0]zeus[/mention]!')
+        self.assertEqual(processor.render(), u'[mention=%d]thoas[/mention] is right and [mention=%d]oleiade[/mention] or [mention=%d]zeus[/mention]!' % (
+            self.staff.pk,
+            self.superuser.pk,
+            self.user.pk
+        ))
         multiple_mentions.save()
 
         self.assertEqual(Mention.objects.filter(post=multiple_mentions).count(), 3)

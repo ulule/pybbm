@@ -44,6 +44,17 @@ class UserObjectPermissionManager(BaseUserObjectPermissionManager):
                      content_type=ctype)
          .delete())
 
+    def get_for_object(self, user, obj):
+        if getattr(obj, 'pk', None) is None:
+            raise ObjectNotPersisted("Object %s needs to be persisted first"
+                                     % obj)
+        ctype = ContentType.objects.get_for_model(obj)
+        perms = self.filter(
+            content_type=ctype,
+            user=user,
+        )
+        return perms
+
 
 class UserObjectPermission(BaseUserObjectPermission):
     objects = UserObjectPermissionManager()

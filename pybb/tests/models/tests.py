@@ -4,7 +4,7 @@ import tempfile
 
 from pybb.models import Moderator, Post, Forum, Topic
 from pybb.tests.base import TestCase
-from pybb.compat import User
+from pybb.compat import get_user_model
 
 from mock import patch
 
@@ -49,7 +49,7 @@ class ModelsTest(TestCase):
         self.forum.hidden = True
         self.forum.save()
 
-        with patch.object(User, 'is_authenticated') as is_authenticated:
+        with patch.object(get_user_model(), 'is_authenticated') as is_authenticated:
             is_authenticated.return_value = False
 
             self.assertFalse(self.post.is_accessible_by(self.newbie))
@@ -62,12 +62,12 @@ class ModelsTest(TestCase):
         self.parent_forum.hidden = True
         self.parent_forum.save()
 
-        with patch.object(User, 'is_authenticated') as is_authenticated:
+        with patch.object(get_user_model(), 'is_authenticated') as is_authenticated:
             is_authenticated.return_value = False
 
             self.assertFalse(self.post.is_accessible_by(self.newbie))
 
-        with patch.object(User, 'is_authenticated') as is_authenticated:
+        with patch.object(get_user_model(), 'is_authenticated') as is_authenticated:
             is_authenticated.return_value = True
 
             self.assertTrue(self.post.is_accessible_by(self.user))
@@ -91,7 +91,7 @@ class ModelsTest(TestCase):
 
         self.post = Post.objects.get(pk=self.post.pk)
 
-        with patch.object(User, 'is_authenticated') as is_authenticated:
+        with patch.object(get_user_model(), 'is_authenticated') as is_authenticated:
             is_authenticated.return_value = True
 
             self.assertTrue(self.post.is_editable_by(self.newbie))
@@ -106,7 +106,7 @@ class ModelsTest(TestCase):
         self.topic.on_moderation = True
         self.topic.save()
 
-        with patch.object(User, 'is_authenticated') as is_authenticated:
+        with patch.object(get_user_model(), 'is_authenticated') as is_authenticated:
             is_authenticated.return_value = True
 
             self.assertTrue(self.post.is_accessible_by(self.user))

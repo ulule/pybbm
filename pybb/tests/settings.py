@@ -4,8 +4,13 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 import os
+import sys
 
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
+
+sys.path[0:0] = [
+    PROJECT_ROOT,
+]
 
 DATABASES = {
     'default': {
@@ -56,6 +61,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'pybb',
+    'users',
     'pybb.contrib.profiles',
     'pybb.contrib.mentions',
     'pybb.contrib.quotes',
@@ -64,7 +70,6 @@ INSTALLED_APPS = (
     'pybb.contrib.ban',
     'sorl.thumbnail',
     'pytils',
-    'registration',
     'guardian',
     'django.contrib.humanize',
 )
@@ -160,9 +165,11 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
-if django.VERSION <= (1, 6):
+if django.VERSION < (1, 6):
     TEST_RUNNER = 'discover_runner.DiscoverRunner'
 
 AUTH_PROFILE_MODULE = 'pybb.Profile'
 
 MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'media')
+
+AUTH_USER_MODEL = 'users.User'

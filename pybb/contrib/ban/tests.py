@@ -1,9 +1,8 @@
 from django.core.urlresolvers import reverse
-from django.db.models.loading import cache; cache._populate()
 from django.test.client import RequestFactory
 
 from .forms import BanForm
-from .models import BannedUser, IPAddress
+from .models import BannedUser, IPAddress, handle_user_logged_in
 from . import settings
 from .middleware import PybbBanMiddleware
 
@@ -143,7 +142,7 @@ class BanTest(TestCase):
         factory = RequestFactory(REMOTE_ADDR='199.59.149.230')
         request = factory.get('/post/1')
 
-        BannedUser.objects.user_logged_in(self.newbie.__class__, request, self.newbie)
+        handle_user_logged_in(self.newbie.__class__, request, self.newbie)
 
         self.assertEqual(BannedUser.objects.filter(user=self.newbie).count(), 1)
 
@@ -154,7 +153,7 @@ class BanTest(TestCase):
         factory.cookies[settings.PYBB_BAN_COOKIE_NAME] = self.user.pk
         request = factory.get('/post/1')
 
-        BannedUser.objects.user_logged_in(self.newbie.__class__, request, self.newbie)
+        handle_user_logged_in(self.newbie.__class__, request, self.newbie)
 
         self.assertEqual(BannedUser.objects.filter(user=self.newbie).count(), 1)
 
@@ -165,7 +164,7 @@ class BanTest(TestCase):
         factory.cookies[settings.PYBB_BAN_COOKIE_NAME] = self.user.pk
         request = factory.get('/post/1')
 
-        BannedUser.objects.user_logged_in(self.newbie.__class__, request, self.newbie)
+        handle_user_logged_in(self.newbie.__class__, request, self.newbie)
 
         self.assertEqual(BannedUser.objects.filter(user=self.newbie).count(), 1)
 
@@ -176,14 +175,14 @@ class BanTest(TestCase):
         factory.cookies[settings.PYBB_BAN_COOKIE_NAME] = 'h4ck0r'
         request = factory.get('/post/1')
 
-        BannedUser.objects.user_logged_in(self.newbie.__class__, request, self.newbie)
+        handle_user_logged_in(self.newbie.__class__, request, self.newbie)
 
         self.assertEqual(BannedUser.objects.filter(user=self.user).count(), 1)
 
     def test_ban_middelware(self):
-        from pybb.compat import User
+        from pybb.compat import get_user_model
 
-        with patch.object(User, 'is_authenticated') as is_authenticated:
+        with patch.object(get_user_model(), 'is_authenticated') as is_authenticated:
             is_authenticated.return_value = True
 
             factory = RequestFactory(REMOTE_ADDR='199.59.149.230')

@@ -1,5 +1,7 @@
 from django.core.urlresolvers import reverse
 
+from django.utils.html import strip_spaces_between_tags as minify_html
+
 from pybb.tests.base import TestCase
 
 from .models import Quote
@@ -14,7 +16,7 @@ class QuotesTest(TestCase):
         post = Post(user=self.staff, body='[quote="zeus;%d"]Super quote[/quote]' % self.post.pk, topic=self.topic)
         post.save()
 
-        self.assertEqual(post.body_html, u'<blockquote>    <div class="quote-author">        Posted by <a class="quote-author-name" href="/users/zeus/">zeus</a>        <a class="quote-message-link" href="/xfoo/1-etopic#post1" rel="nofollow"></a>    </div>    <div class="quote-message">        Super quote    </div></blockquote>')
+        self.assertEqual(minify_html(post.body_html), u'<blockquote><div class="quote-author">        Posted by <a class="quote-author-name" href="/users/zeus/">zeus</a><a rel="nofollow" class="quote-message-link" href="/xfoo/1-etopic#post1"></a></div><div class="quote-message">        Super quote    </div></blockquote>')
 
         self.assertEqual(Quote.objects.filter(from_post=post).count(), 1)
 
@@ -30,7 +32,7 @@ class QuotesTest(TestCase):
                                                                              post.body), topic=self.topic)
         post.save()
 
-        self.assertEqual(post.body_html, u'<blockquote>    <div class="quote-author">        Posted by <a class="quote-author-name" href="/users/thoas/">thoas</a>        <a class="quote-message-link" href="/xfoo/1-etopic#post2" rel="nofollow"></a>    </div>    <div class="quote-message">        <blockquote>    <div class="quote-author">        Posted by <a class="quote-author-name" href="/users/zeus/">zeus</a>        <a class="quote-message-link" href="/xfoo/1-etopic#post1" rel="nofollow"></a>    </div>    <div class="quote-message">        bbcode <strong>test</strong>    </div></blockquote>    </div></blockquote>')
+        self.assertEqual(minify_html(post.body_html), u'<blockquote><div class="quote-author">        Posted by <a class="quote-author-name" href="/users/thoas/">thoas</a><a rel="nofollow" class="quote-message-link" href="/xfoo/1-etopic#post2"></a></div><div class="quote-message"><blockquote><div class="quote-author">        Posted by <a class="quote-author-name" href="/users/zeus/">zeus</a><a rel="nofollow" class="quote-message-link" href="/xfoo/1-etopic#post1"></a></div><div class="quote-message">        bbcode <strong>test</strong></div></blockquote></div></blockquote>')
 
         self.assertEqual(Quote.objects.filter(from_post=post).count(), 2)
 
@@ -66,7 +68,7 @@ class QuotesTest(TestCase):
 
         response = self.client.get(reverse('pybb:post_create',
                                            kwargs={'topic_id': self.topic.id}))
-        self.assertTrue(not 'body' in response.context['form'].initial)
+        self.assertTrue('body' not in response.context['form'].initial)
         self.assertEqual(response.status_code, 200)
 
     def test_emmbedded_quotes_preprocessor(self):

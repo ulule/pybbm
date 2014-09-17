@@ -24,7 +24,7 @@ from django.utils.functional import cached_property
 
 from sorl.thumbnail import ImageField
 
-from pybb.compat import update_fields, AUTH_USER_MODEL
+from pybb.compat import update_fields, AUTH_USER_MODEL, queryset
 from pybb.util import unescape, get_model_string, tznow
 from pybb.base import ModelBase, ManagerBase, QuerySetBase
 from pybb.subscription import notify_topic_subscribers
@@ -103,6 +103,7 @@ class ForumQuerySet(QuerySetBase):
         return self.filter(staff=False)
 
 
+@queryset
 class ForumManager(ManagerBase):
     def contribute_to_class(self, cls, name):
         signals.post_save.connect(self.post_save, sender=cls)
@@ -117,11 +118,11 @@ class ForumManager(ManagerBase):
         if instance.forum_id:
             instance.forum.compute()
 
-    def get_query_set(self):
+    def get_queryset(self):
         return ForumQuerySet(self.model)
 
     def filter_by_user(self, *args, **kwargs):
-        return self.get_query_set().filter_by_user(*args, **kwargs)
+        return self.get_queryset().filter_by_user(*args, **kwargs)
 
 
 class BaseForum(ModelBase):
@@ -412,15 +413,16 @@ class TopicQuerySet(TopicQuerySetMixin, QuerySetBase):
     pass
 
 
+@queryset
 class TopicManager(ManagerBase):
-    def get_query_set(self):
+    def get_queryset(self):
         return TopicQuerySet(self.model)
 
     def filter_by_user(self, user, forum=None):
-        return self.get_query_set().filter_by_user(user, forum=forum)
+        return self.get_queryset().filter_by_user(user, forum=forum)
 
     def visible(self):
-        return self.get_query_set().visible()
+        return self.get_queryset().visible()
 
 
 class SubscriptionQuerySet(QuerySetBase):
@@ -430,12 +432,13 @@ class SubscriptionQuerySet(QuerySetBase):
                            topic__redirect=False)
 
 
+@queryset
 class SubscriptionManager(ManagerBase):
-    def get_query_set(self):
+    def get_queryset(self):
         return SubscriptionQuerySet(self.model)
 
     def visible(self):
-        return self.get_query_set().visible()
+        return self.get_queryset().visible()
 
 
 class BaseSubscription(ModelBase):
@@ -828,15 +831,16 @@ class PostQuerySet(PostQuerySetMixin, QuerySetBase):
     pass
 
 
+@queryset
 class PostManager(ManagerBase):
-    def get_query_set(self):
+    def get_queryset(self):
         return PostQuerySet(self.model)
 
     def filter_by_user(self, topic, user):
-        return self.get_query_set().filter_by_user(topic, user)
+        return self.get_queryset().filter_by_user(topic, user)
 
     def visible(self, join=True):
-        return self.get_query_set().visible(join)
+        return self.get_queryset().visible(join)
 
     def contribute_to_class(self, cls, name):
         signals.post_save.connect(self.post_save, sender=cls)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pybb.compat import User
+from pybb.compat import get_user_model
 from pybb.models import Post
 
 from .signals import quoted
@@ -7,7 +7,7 @@ from . import settings
 
 
 def quote(tag_name, value, options, parent, context):
-    if not 'quote' in options:
+    if 'quote' not in options:
         return value
 
     splits = options['quote'].split(';')
@@ -30,7 +30,7 @@ def quote(tag_name, value, options, parent, context):
     try:
         post = Post.objects.get(pk=post_id)
         user = post.user
-    except (Post.DoesNotExist, User.DoesNotExist):
+    except (Post.DoesNotExist, get_user_model().DoesNotExist):
         return settings.PYBB_QUOTES_QUOTE_MINIMAL_FORMAT % {
             'message': value,
             'username': splits[0],

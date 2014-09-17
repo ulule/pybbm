@@ -2,7 +2,7 @@ from django.core.urlresolvers import reverse
 from django.test.client import Client
 
 from pybb.models import ForumReadTracker, TopicReadTracker, Topic, Post, Forum
-from pybb.compat import User
+from pybb.compat import get_user_model
 
 from pybb.tests.base import TestCase
 
@@ -17,40 +17,40 @@ class TrackersTest(TestCase):
 
         Post(topic=topic_2, user=self.user, body='one').save()
 
-        user_ann = User.objects.create_user('ann', 'ann@localhost', 'ann')
+        user_ann = get_user_model().objects.create_user('ann', 'ann@localhost', 'ann')
         client_ann = Client()
         client_ann.login(username='ann', password='ann')
 
-        user_bob = User.objects.create_user('bob', 'bob@localhost', 'bob')
+        user_bob = get_user_model().objects.create_user('bob', 'bob@localhost', 'bob')
         client_bob = Client()
         client_bob.login(username='bob', password='bob')
 
-         # Two topics, each with one post. everything is unread, so the db should reflect that:
+        #  Two topics, each with one post. everything is unread, so the db should reflect that:
         self.assertEqual(TopicReadTracker.objects.all().count(), 0)
         self.assertEqual(ForumReadTracker.objects.all().count(), 0)
 
-         # user_ann reads topic_1, she should get one topic read tracker, there should be no forum read trackers
+        #  user_ann reads topic_1, she should get one topic read tracker, there should be no forum read trackers
         client_ann.get(topic_1.get_absolute_url())
         self.assertEqual(TopicReadTracker.objects.all().count(), 1)
         self.assertEqual(TopicReadTracker.objects.filter(user=user_ann).count(), 1)
         self.assertEqual(TopicReadTracker.objects.filter(user=user_ann, topic=topic_1).count(), 1)
         self.assertEqual(ForumReadTracker.objects.all().count(), 0)
 
-         # user_bob reads topic_1, he should get one topic read tracker, there should be no forum read trackers
+        #  user_bob reads topic_1, he should get one topic read tracker, there should be no forum read trackers
         client_bob.get(topic_1.get_absolute_url())
         self.assertEqual(TopicReadTracker.objects.all().count(), 2)
         self.assertEqual(TopicReadTracker.objects.filter(user=user_bob).count(), 1)
         self.assertEqual(TopicReadTracker.objects.filter(user=user_bob, topic=topic_1).count(), 1)
 
-         # user_bob reads topic_2, he should get a forum read tracker,
-         #  there should be no topic read trackers for user_bob
+        #  user_bob reads topic_2, he should get a forum read tracker,
+        #  there should be no topic read trackers for user_bob
         client_bob.get(topic_2.get_absolute_url())
         self.assertEqual(TopicReadTracker.objects.all().count(), 1)
         self.assertEqual(ForumReadTracker.objects.all().count(), 1)
         self.assertEqual(ForumReadTracker.objects.filter(user=user_bob).count(), 1)
         self.assertEqual(ForumReadTracker.objects.filter(user=user_bob, forum=self.forum).count(), 1)
 
-         # user_ann creates topic_3, they should get a new topic read tracker in the db
+        #  user_ann creates topic_3, they should get a new topic read tracker in the db
         topic_create_url = reverse('pybb:topic_create', kwargs={'forum_id': self.forum.id})
         response = client_ann.get(topic_create_url)
         values = self.get_form_values(response)
@@ -66,7 +66,7 @@ class TrackersTest(TestCase):
         topic_3 = Topic.objects.order_by('-updated')[0]
         self.assertEqual(topic_3.name, 'topic_3')
 
-         # user_ann posts to topic_1, a topic they've already read, no new trackers should be created
+        #  user_ann posts to topic_1, a topic they've already read, no new trackers should be created
         post_create_url = reverse('pybb:post_create', kwargs={'topic_id': topic_1.id})
         response = client_ann.get(post_create_url)
         values = self.get_form_values(response)
@@ -110,18 +110,18 @@ class TrackersTest(TestCase):
 
         self.login_as(self.user)
 
-         # everything starts unread
+        #  everything starts unread
         self.assertEqual(ForumReadTracker.objects.count(), 0)
         self.assertEqual(TopicReadTracker.objects.count(), 0)
 
-         # user reads topic_1, they should get one topic read tracker, there should be no forum read trackers
+        #  user reads topic_1, they should get one topic read tracker, there should be no forum read trackers
         self.client.get(topic_1.get_absolute_url())
         self.assertEqual(TopicReadTracker.objects.count(), 1)
         self.assertEqual(TopicReadTracker.objects.filter(user=self.user).count(), 1)
         self.assertEqual(TopicReadTracker.objects.filter(user=self.user, topic=topic_1).count(), 1)
 
-         # user reads topic_2, they should get a forum read tracker,
-         #  there should be no topic read trackers for the user
+        #  user reads topic_2, they should get a forum read tracker,
+        #  there should be no topic read trackers for the user
         self.client.get(topic_2.get_absolute_url())
         self.assertEqual(TopicReadTracker.objects.count(), 0)
         self.assertEqual(ForumReadTracker.objects.count(), 1)
