@@ -25,7 +25,6 @@ In the wild
 
 This forum engine is used by:
 
-- `Madmoizelle <http://forums.madmoizelle.com>`_
 - `Ulule <http://ulule.com>`_
 
 .. _GitHub: https://github.com/thoas/pybbm
