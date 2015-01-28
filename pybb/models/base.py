@@ -21,8 +21,12 @@ from django.db.models import Q, signals, F
 from django.contrib.contenttypes import generic
 from django.db.models import ObjectDoesNotExist
 from django.utils.functional import cached_property
+from django.conf import settings
 
-from sorl.thumbnail import ImageField
+if 'sorl.thumbnail' in settings.INSTALLED_APPS:
+    from sorl.thumbnail import ImageField
+else:
+    from django.db.models import ImageField
 
 from pybb.compat import update_fields, AUTH_USER_MODEL, queryset
 from pybb.util import unescape, get_model_string, tznow
