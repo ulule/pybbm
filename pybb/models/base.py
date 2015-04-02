@@ -877,10 +877,10 @@ class BasePost(RenderableItem):
     user = models.ForeignKey(AUTH_USER_MODEL, related_name='posts', verbose_name=_('User'))
     created = models.DateTimeField(_('Created'), blank=True)
     updated = models.DateTimeField(_('Updated'), blank=True, null=True)
-    user_ip = models.IPAddressField(_('User IP'),
-                                    blank=True,
-                                    default='0.0.0.0',
-                                    null=True)
+    user_ip = models.GenericIPAddressField(_('User IP'),
+                                           blank=True,
+                                           default='0.0.0.0',
+                                           null=True)
     on_moderation = models.BooleanField(_('On moderation'), default=False, db_index=True)
 
     deleted = models.BooleanField(_('Deleted'), default=False, db_index=True)
@@ -1407,10 +1407,10 @@ class BaseLogModeration(ModelBase):
                                              choices=LEVEL_CHOICES,
                                              default=LEVEL_LOW,
                                              db_index=True)
-    user_ip = models.IPAddressField(_('User IP'),
-                                    blank=True,
-                                    default='0.0.0.0',
-                                    null=True)
+    user_ip = models.GenericIPAddressField(_('User IP'),
+                                           blank=True,
+                                           default='0.0.0.0',
+                                           null=True)
 
     objects = LogModerationManager()
 
