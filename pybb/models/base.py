@@ -136,7 +136,7 @@ class BaseForum(ModelBase):
     slug = AutoSlugField(populate_from='name', max_length=80)
     position = models.IntegerField(_('Position'), blank=True, default=0, db_index=True)
     description = models.TextField(_('Description'), blank=True)
-    moderators = models.ManyToManyField(AUTH_USER_MODEL, blank=True, null=True, verbose_name=_('Moderators'), through=get_model_string('Moderator'))
+    moderators = models.ManyToManyField(AUTH_USER_MODEL, blank=True, verbose_name=_('Moderators'), through=get_model_string('Moderator'))
     updated = models.DateTimeField(_('Updated'), blank=True, null=True)
     post_count = models.IntegerField(_('Post count'), blank=True, default=0, db_index=True)
     topic_count = models.IntegerField(_('Topic count'), blank=True, default=0, db_index=True)
