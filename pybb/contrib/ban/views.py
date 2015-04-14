@@ -11,7 +11,7 @@ from pybb.compat import get_user_model
 from .forms import BanForm
 from .models import BannedUser, IPAddress
 
-from pure_pagination import Paginator
+from pure_pagination.paginator import Paginator
 
 
 class BanCreateView(generic.DetailView, FormMixin):

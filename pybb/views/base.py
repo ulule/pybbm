@@ -19,7 +19,7 @@ from django.views.generic.edit import FormMixin
 from django.views.generic.base import TemplateResponseMixin
 from django.views.decorators.http import require_http_methods
 
-from pure_pagination import Paginator, EmptyPage
+from pure_pagination.paginator import Paginator, EmptyPage
 
 from pybb import defaults
 from pybb.compat import get_user_model
@@ -528,7 +528,9 @@ class PostUpdateMixin(object):
     def form_valid(self, form):
         success = True
 
-        with transaction.commit_manually():
+        with getattr(transaction, 'atomic', getattr(transaction, 'commit_manually', None))():
+            sid = transaction.savepoint()
+
             try:
                 self.object = form.save()
 
@@ -544,11 +546,11 @@ class PostUpdateMixin(object):
                         success = True
 
                 if success:
-                    transaction.commit()
-
-                transaction.rollback()
+                    transaction.savepoint_commit(sid)
+                else:
+                    transaction.savepoint_rollback(sid)
             except Exception, e:
-                transaction.rollback()
+                transaction.savepoint_rollback(sid)
                 raise e
 
         if success:

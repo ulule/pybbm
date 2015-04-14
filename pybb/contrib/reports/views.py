@@ -12,7 +12,7 @@ from .models import ReportMessage, Report
 from .forms import ReportMessageForm
 from pybb.models import Post
 
-from pure_pagination import Paginator
+from pure_pagination.paginator import Paginator
 
 
 class ReportCreateView(generic.DetailView, FormMixin):

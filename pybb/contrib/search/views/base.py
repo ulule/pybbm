@@ -1,7 +1,7 @@
 from django.shortcuts import render_to_response
 from django.http import Http404, QueryDict
 
-from pure_pagination import Paginator, InvalidPage
+from pure_pagination.paginator import Paginator, InvalidPage
 
 from haystack.views import SearchView as BaseSearchView
 

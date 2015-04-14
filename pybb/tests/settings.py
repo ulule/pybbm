@@ -167,6 +167,8 @@ HAYSTACK_CONNECTIONS = {
 
 if django.VERSION < (1, 6):
     TEST_RUNNER = 'discover_runner.DiscoverRunner'
+else:
+    TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 AUTH_PROFILE_MODULE = 'pybb.Profile'
 

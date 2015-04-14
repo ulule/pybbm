@@ -17,7 +17,10 @@ from pybb.fields import CAStorage
 
 from annoying.fields import AutoOneToOneField
 
-from sorl.thumbnail import ImageField
+try:
+    from sorl.thumbnail import ImageField
+except ImportError:
+    ImageField = models.ImageField
 
 
 class Profile(ModelBase):
