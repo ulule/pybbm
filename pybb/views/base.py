@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 from datetime import datetime
 from collections import defaultdict
 
@@ -56,7 +58,7 @@ class ListView(generic.ListView):
         try:
             return super(ListView, self).paginate_queryset(queryset, page_size)
         except EmptyPage:
-            raise Http404(ugettext(u'Page is empty.'))
+            raise Http404(ugettext('Page is empty.'))
 
 
 class IndexView(generic.ListView):
@@ -358,7 +360,7 @@ class UserPostsDeleteView(generic.DeleteView):
         for topic in Topic.objects.filter(first_post__user=self.object):
             topic.mark_as_deleted()
 
-        messages.success(self.request, _(u'All messages from %(user)s has been deleted') % {
+        messages.success(self.request, _('All messages from %(user)s has been deleted') % {
             'user': self.object
         })
 
@@ -950,7 +952,7 @@ class TopicMergeView(TopicBatchView):
 
     def get_success_url(self, topics):
         for old_topic, new_topic in topics:
-            messages.success(self.request, _(u'<a href="%(old_topic_url)s">%(old_topic)s</a> successfully merged to <a href="%(new_topic_url)s">%(new_topic)s</a>') % {
+            messages.success(self.request, _('<a href="%(old_topic_url)s">%(old_topic)s</a> successfully merged to <a href="%(new_topic_url)s">%(new_topic)s</a>') % {
                 'old_topic_url': old_topic.get_absolute_url(),
                 'old_topic': old_topic,
                 'new_topic_url': new_topic.get_absolute_url(),
@@ -969,7 +971,7 @@ class TopicMoveView(TopicBatchView):
 
     def get_success_url(self, topics):
         for old_topic, new_topic in topics:
-            messages.success(self.request, _(u'<a href="%(old_topic_url)s">%(old_topic)s</a> successfully moved to <a href="%(new_topic_url)s">%(new_topic)s</a>') % {
+            messages.success(self.request, _('<a href="%(old_topic_url)s">%(old_topic)s</a> successfully moved to <a href="%(new_topic_url)s">%(new_topic)s</a>') % {
                 'old_topic_url': old_topic.get_absolute_url(),
                 'old_topic': old_topic,
                 'new_topic_url': new_topic.get_absolute_url(),
@@ -1032,8 +1034,8 @@ class TopicsDeleteView(TopicBatchView):
 
         for key in ('deleted', 'restored', ):
             if key in sorted_topics:
-                messages.success(self.request, _(u'%(topics)s successfully %(action)s') % {
-                    'topics': ' '.join([u'<a href="%(topic_url)s">%(topic)s</a>' % {
+                messages.success(self.request, _('%(topics)s successfully %(action)s') % {
+                    'topics': ' '.join(['<a href="%(topic_url)s">%(topic)s</a>' % {
                         'topic_url': topic.get_absolute_url(),
                         'topic': topic
                     } for topic in sorted_topics[key]]),
@@ -1336,7 +1338,7 @@ class ModeratorDetailView(generic.DetailView, FormMixin):
             change_message=change_message
         )
 
-        messages.success(self.request, _(u'Permissions for moderator "%(username)s" successfully saved') % {
+        messages.success(self.request, _('Permissions for moderator "%(username)s" successfully saved') % {
             'username': self.object.user.username
         })
 
@@ -1391,7 +1393,7 @@ class ModeratorCreateView(ModeratorDetailView):
             level=LogModeration.LEVEL_HIGH
         )
 
-        messages.success(self.request, _(u'New moderator "%(username)s" created') % {
+        messages.success(self.request, _('New moderator "%(username)s" created') % {
             'username': moderator.user.username
         })
 
@@ -1470,7 +1472,7 @@ class SubscriptionChangeView(generic.RedirectView):
 
         subscriptions.update(type=type)
 
-        messages.success(self.request, _(u'Your subscriptions has been updated: %(type)s') % {
+        messages.success(self.request, _('Your subscriptions has been updated: %(type)s') % {
             'type': types[type]
         })
 
@@ -1503,11 +1505,11 @@ class SubscriptionDeleteView(generic.RedirectView):
         Subscription.objects.filter(topic__in=topic_ids, user=self.request.user).delete()
 
         if not topic:
-            messages.success(self.request, _(u'Your subscriptions has been deleted'))
+            messages.success(self.request, _('Your subscriptions has been deleted'))
 
             return reverse('pybb:subscription_list')
 
-        messages.success(self.request, _(u'Your subscription to %(topic)s has been deleted') % {
+        messages.success(self.request, _('Your subscription to %(topic)s has been deleted') % {
             'topic': topic
         })
 
@@ -1586,12 +1588,12 @@ def create_subscription(request):
     subscription.save()
 
     if created:
-        messages.success(request, _(u'Your subscription to %(topic)s has been created: %(type)s') % {
+        messages.success(request, _('Your subscription to %(topic)s has been created: %(type)s') % {
             'topic': topic,
             'type': subscription.get_type_display()
         })
     else:
-        messages.success(request, _(u'Your subscription to %(topic)s has been updated: %(type)s') % {
+        messages.success(request, _('Your subscription to %(topic)s has been updated: %(type)s') % {
             'topic': topic,
             'type': subscription.get_type_display()
         })
@@ -1648,7 +1650,7 @@ class ForumMarkAsReadView(generic.View):
 
                 Subscription.objects.filter(user=request.user, topic__forum=forum).update(sent=False)
 
-            messages.success(request, _(u'Forum %s has been marked as read') % parent_forum, fail_silently=True)
+            messages.success(request, _('Forum %s has been marked as read') % parent_forum, fail_silently=True)
 
             return redirect(parent_forum.get_absolute_url())
 
