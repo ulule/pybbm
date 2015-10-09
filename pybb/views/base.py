@@ -84,7 +84,7 @@ class IndexView(generic.ListView):
     def get_queryset(self):
         qs = filter_hidden(self.request, (Forum.objects.filter(forum__forum__isnull=True, forum__isnull=False)
                                           .select_related('last_post__topic__forum',
-                                                          'last_post__user__profile')
+                                                          'last_post__user')
                                           .order_by('forum', 'position')))
 
         return qs
@@ -174,7 +174,7 @@ class ForumDetailView(ListView):
 
         qs = filter_hidden(self.request,
                            self.forum.forums.select_related('last_post__topic__forum',
-                                                            'last_post__user__profile'))
+                                                            'last_post__user'))
         self.forum.forums_accessed = qs
 
         lookup_topic_lastposts(ctx[self.context_object_name])
@@ -587,7 +587,7 @@ class PostCreateView(PostUpdateMixin, generic.CreateView):
 
         if self.topic:
             qs = (self.topic.posts.all()
-                  .select_related('user__profile')
+                  .select_related('user')
                   .order_by('-created')
                   .filter_by_user(self.topic, self.request.user))
 
