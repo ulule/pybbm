@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import math
 import os.path
 import uuid
 import magic
 import urllib
 import logging
+
 from datetime import date
 from BeautifulSoup import BeautifulSoup
 from urlparse import urlparse
 
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import AnonymousUser
 from django.utils.encoding import smart_unicode
@@ -23,11 +27,6 @@ from django.db.models import ObjectDoesNotExist
 from django.utils.functional import cached_property
 from django.conf import settings
 
-if 'sorl.thumbnail' in settings.INSTALLED_APPS:
-    from sorl.thumbnail import ImageField
-else:
-    from django.db.models import ImageField
-
 from pybb.compat import update_fields, AUTH_USER_MODEL, queryset
 from pybb.util import unescape, get_model_string, tznow
 from pybb.base import ModelBase, ManagerBase, QuerySetBase
@@ -38,6 +37,12 @@ from pybb.tasks import generate_markup, sync_cover
 from pybb.processors import markup
 
 from autoslug import AutoSlugField
+
+if 'sorl.thumbnail' in settings.INSTALLED_APPS:
+    from sorl.thumbnail import ImageField
+else:
+    from django.db.models import ImageField
+
 
 try:
     from south.modelsinspector import add_introspection_rules
@@ -62,6 +67,7 @@ class ModeratorManager(ManagerBase):
          .delete())
 
 
+@python_2_unicode_compatible
 class BaseModerator(ModelBase):
     forum = models.ForeignKey(get_model_string('Forum'))
     user = models.ForeignKey(AUTH_USER_MODEL)
@@ -74,8 +80,8 @@ class BaseModerator(ModelBase):
         verbose_name_plural = _('Moderators')
         abstract = True
 
-    def __unicode__(self):
-        return _(u'Moderator %(user)s of %(forum)s') % {
+    def __str__(self):
+        return _('Moderator %(user)s of %(forum)s') % {
             'user': self.user,
             'forum': self.forum
         }
@@ -129,6 +135,7 @@ class ForumManager(ManagerBase):
         return self.get_queryset().filter_by_user(*args, **kwargs)
 
 
+@python_2_unicode_compatible
 class BaseForum(ModelBase):
     forum = models.ForeignKey('Forum', related_name='forums',
                               verbose_name=_('Parent'), null=True, blank=True)
@@ -246,7 +253,7 @@ class BaseForum(ModelBase):
 
         return True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def update_counters(self, commit=True):
@@ -472,6 +479,7 @@ class BaseSubscription(ModelBase):
         abstract = True
 
 
+@python_2_unicode_compatible
 class BaseTopic(ModelBase):
     forum = models.ForeignKey(get_model_string('Forum'), related_name='topics', verbose_name=_('Forum'))
     name = models.CharField(_('Subject'), max_length=255)
@@ -527,7 +535,7 @@ class BaseTopic(ModelBase):
     def get_last_page(self):
         return int(math.ceil(self.post_count / float(defaults.PYBB_TOPIC_PAGE_SIZE)))
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def absorb(self, topic, redirection_type=None, expired=None):
@@ -870,6 +878,7 @@ class PostDeletion(ModelBase):
         app_label = 'pybb'
 
 
+@python_2_unicode_compatible
 class BasePost(RenderableItem):
     topic = models.ForeignKey(get_model_string('Topic'),
                               related_name='posts',
@@ -904,7 +913,7 @@ class BasePost(RenderableItem):
 
         return ''
 
-    __unicode__ = summary
+    __str__ = summary
 
     def get_attachments(self):
         if hasattr(self, '_attachments'):
@@ -1272,6 +1281,7 @@ class BasePoll(ModelBase):
             update_fields(topic, fields=('updated', ))
 
 
+@python_2_unicode_compatible
 class BasePollAnswer(ModelBase):
     poll = models.ForeignKey(get_model_string('Poll'),
                              related_name='answers',
@@ -1287,7 +1297,7 @@ class BasePollAnswer(ModelBase):
         app_label = 'pybb'
         abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.text
 
     def votes(self):
@@ -1324,6 +1334,7 @@ class PollAnswerUserManager(ManagerBase):
         instance.poll_answer.compute()
 
 
+@python_2_unicode_compatible
 class BasePollAnswerUser(ModelBase):
     poll_answer = models.ForeignKey(get_model_string('PollAnswer'),
                                     related_name='users',
@@ -1342,8 +1353,8 @@ class BasePollAnswerUser(ModelBase):
         abstract = True
         ordering = ['-created']
 
-    def __unicode__(self):
-        return u'%s - %s' % (self.poll_answer.topic, self.user)
+    def __str__(self):
+        return '%s - %s' % (self.poll_answer.topic, self.user)
 
     def save(self, *args, **kwargs):
         super(BasePollAnswerUser, self).save(*args, **kwargs)
@@ -1370,6 +1381,7 @@ class LogModerationManager(ManagerBase):
             e.save()
 
 
+@python_2_unicode_compatible
 class BaseLogModeration(ModelBase):
     ACTION_FLAG_ADDITION = 1
     ACTION_FLAG_CHANGE = 2
@@ -1445,7 +1457,7 @@ class BaseLogModeration(ModelBase):
     def is_level_high(self):
         return self.level == self.LEVEL_HIGH
 
-    def __unicode__(self):
+    def __str__(self):
         if self.is_action_flag_addition():
             if self.target:
                 return _('Added %(target)s to "%(object)s."') % {

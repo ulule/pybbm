@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+
+from django.utils.encoding import python_2_unicode_compatible
+
 import django
 
 from django.db import models
@@ -12,6 +16,7 @@ from . import settings
 from pybb.compat import AUTH_USER_MODEL
 
 
+@python_2_unicode_compatible
 class BannedUser(ModelBase):
     user = models.OneToOneField(AUTH_USER_MODEL, related_name='banned')
     reason = models.TextField(_('Reason'), null=True, blank=True)
@@ -22,8 +27,8 @@ class BannedUser(ModelBase):
         verbose_name = _('Banned user')
         verbose_name_plural = _('Banned users')
 
-    def __unicode__(self):
-        return _(u'User %(user)s banned for %(reason)s') % {
+    def __str__(self):
+        return _('User %(user)s banned for %(reason)s') % {
             'user': self.user,
             'reason': self.reason
         }
@@ -44,6 +49,7 @@ class IPAddressManager(ManagerBase):
         return ip
 
 
+@python_2_unicode_compatible
 class IPAddress(ModelBase):
     user = models.ForeignKey(AUTH_USER_MODEL,
                              related_name='ip_addresses',
@@ -60,7 +66,7 @@ class IPAddress(ModelBase):
         verbose_name = _('IP')
         verbose_name_plural = _('IPs')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.ip_address
 
 
@@ -81,10 +87,10 @@ def handle_user_logged_in(sender, request, user, **kwargs):
                 existing_user = User.objects.get(pk=int(value))
             except (User.DoesNotExist, ValueError):
                 banned_user = BannedUser(user=user,
-                                         reason=_(u'Cookie exists: user already banned from anonymous account'))
+                                         reason=_('Cookie exists: user already banned from anonymous account'))
             else:
                 banned_user = BannedUser(user=user,
-                                         reason=_(u'Cookie exists: user already banned for the account %s') % existing_user)
+                                         reason=_('Cookie exists: user already banned for the account %s') % existing_user)
 
         ip_address = get_ip(request)
 

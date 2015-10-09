@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+
+from django.utils.encoding import python_2_unicode_compatible
 from django.db import models
 from django.db.models import signals
 from django.utils.translation import ugettext_lazy as _
@@ -28,6 +31,7 @@ class ReportManager(ManagerBase):
         return self.get_query_set().filter(status=self.model.STATUS_NEW)
 
 
+@python_2_unicode_compatible
 class Report(ModelBase):
     STATUS_NEW = 0
     STATUS_CLOSED = 1
@@ -75,7 +79,7 @@ class Report(ModelBase):
     def get_absolute_url(self):
         return reverse('report_detail', args=[self.pk])
 
-    def __unicode__(self):
+    def __str__(self):
         return _('Reports for %s') % self.post
 
 

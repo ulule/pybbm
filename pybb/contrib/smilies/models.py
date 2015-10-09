@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+
+from django.utils.encoding import python_2_unicode_compatible
 from django.db import models
 
 from pybb.base import ModelBase, ManagerBase
@@ -24,6 +27,7 @@ class SmileyManager(ManagerBase):
         return self.active().order_by('match_order', 'pk')
 
 
+@python_2_unicode_compatible
 class Smiley(ModelBase):
     pattern = models.CharField(max_length=25)
     title = models.CharField(max_length=25, blank=True)
@@ -35,7 +39,7 @@ class Smiley(ModelBase):
 
     objects = SmileyManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title or self.pattern
 
     class Meta:
