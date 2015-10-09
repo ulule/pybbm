@@ -1283,10 +1283,11 @@ class ModeratorDetailView(generic.DetailView, FormMixin):
     def get_forms(self, form_class):
         return [form_class(permissions=self.get_permissions(defaults.PYBB_FORUM_PERMISSIONS, Forum),
                            obj=self.forum,
-                           user=self.object.user),
-                form_class(form_class,
-                           permissions=self.get_permissions(defaults.PYBB_USER_PERMISSIONS),
-                           user=self.object.user)]
+                           user=self.object.user,
+                           **self.form_kwargs()),
+                form_class(permissions=self.get_permissions(defaults.PYBB_USER_PERMISSIONS),
+                           user=self.object.user,
+                           **self.form_kwargs())]
 
     def get_form(self, form_class, **kwargs):
         return form_class(**dict(self.get_form_kwargs(), **kwargs))
@@ -1357,12 +1358,13 @@ class ModeratorCreateView(ModeratorDetailView):
         return super(ModeratorCreateView, self).get_context_data(**kwargs)
 
     def get_forms(self, form_class):
-        forms = [self.get_form(SearchUserForm),
-                 self.get_form(form_class,
-                               permissions=self.get_permissions(defaults.PYBB_FORUM_PERMISSIONS, Forum),
-                               obj=self.forum),
-                 self.get_form(form_class,
-                               permissions=self.get_permissions(defaults.PYBB_USER_PERMISSIONS))]
+        forms = [SearchUserForm(**self.get_form_kwargs()),
+                 self.form_class(permissions=self.get_permissions(defaults.PYBB_FORUM_PERMISSIONS, Forum),
+                                 obj=self.forum,
+                                 **self.get_form_kwargs()),
+                 self.form_class(form_class,
+                                 permissions=self.get_permissions(defaults.PYBB_USER_PERMISSIONS),
+                                 **self.get_form_kwargs())]
 
         return forms
 
