@@ -1,6 +1,5 @@
 {% extends "pybb/base.html" %}
 {% load i18n pybb_tags %}
-{% load url from future %}
 
 {% block content %}
     <h2>{% blocktrans with username=banned.user.username %}Are you sure to unban {{ username }}?{% endblocktrans %}</h2>

@@ -472,7 +472,7 @@ class TopicDetailView(ListView):
             self.topic.mark_as_read(self.request.user)
 
             if (self.topic.poll_id and
-                    pybb_topic_poll_not_voted(self.topic, self.request.user)):
+                    pybb_topic_poll_not_voted(self.topic.poll, self.request.user)):
                 try:
                     ctx['poll_form'] = PollForm(self.topic.poll)
                 except Poll.DoesNotExist:
