@@ -693,6 +693,7 @@ class PostUpdateView(PostUpdateMixin, generic.UpdateView):
 
 class PostsCreateView(generic.RedirectView):
     http_method_names = ['post']
+    permanent = True
 
     def get_redirect_url(self, **kwargs):
         if 'topic_id' not in self.request.POST:
@@ -710,6 +711,7 @@ class PostsCreateView(generic.RedirectView):
 
 class PostRedirectView(generic.RedirectView):
     http_method_names = ['post', 'get']
+    permanent = True
 
     def get_redirect_url(self, **kwargs):
         if self.request.method == 'POST':
@@ -735,6 +737,8 @@ class PostRedirectView(generic.RedirectView):
 
 
 class PostModerateView(generic.RedirectView):
+    permanent = False
+
     def get_redirect_url(self, **kwargs):
         post = get_object_or_404(Post, pk=self.kwargs['pk'])
 
@@ -772,8 +776,8 @@ class PostDeleteView(generic.DeleteView):
         self.topic = post.topic
         self.forum = post.topic.forum
 
-        if (not self.topic.is_moderated_by(self.request.user, 'can_delete_post')
-                and not post.user == self.request.user):
+        if (not self.topic.is_moderated_by(self.request.user, 'can_delete_post') and
+                not post.user == self.request.user):
             raise PermissionDenied
 
         return post
@@ -1148,6 +1152,7 @@ class TopicCloseView(TopicActionBaseView):
 
 class TopicTrackerRedirectView(generic.RedirectView):
     http_method_names = ['get']
+    permanent = True
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):

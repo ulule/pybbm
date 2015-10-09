@@ -18,7 +18,7 @@ from django.core.files import File
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import Q, signals, F
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db.models import ObjectDoesNotExist
 from django.utils.functional import cached_property
 from django.conf import settings
@@ -1398,7 +1398,7 @@ class BaseLogModeration(ModelBase):
     target = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True, related_name='target_logs')
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField(_('object id'), db_index=True)
-    content_object = generic.GenericForeignKey(ct_field='content_type', fk_field='object_id')
+    content_object = GenericForeignKey(ct_field='content_type', fk_field='object_id')
     action_flag = models.PositiveSmallIntegerField(_('action flag'),
                                                    choices=ACTION_FLAG_CHOICES,
                                                    db_index=True)

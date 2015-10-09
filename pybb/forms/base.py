@@ -79,8 +79,8 @@ class PostForm(forms.ModelForm):
 
         self.user = kwargs.pop('user', None)
         self.ip = kwargs.pop('ip', None)
-        self.topic = kwargs.pop('topic', None)
-        self.forum = kwargs.pop('forum', None)
+        self._topic = kwargs.pop('topic', None)
+        self._forum = kwargs.pop('forum', None)
         self.actor = kwargs.pop('actor', None)
         self.pollformset = None
 
@@ -104,15 +104,15 @@ class PostForm(forms.ModelForm):
                                                            required=False,
                                                            widget=forms.Textarea(attrs={'class': 'no-markitup'}))
 
-        if not (self.forum or self.topic or self.instance.pk):
+        if not (self._forum or self._topic or self.instance.pk):
             self.fields['forum'] = forms.ModelChoiceField(label=_('Forum'),
                                                           queryset=Forum.objects.all().order_by('name'),
                                                           required=True)
 
         # remove topic specific fields
-        if not (self.forum or (self.instance.pk and (self.instance.topic.head == self.instance))):
+        if not (self._forum or (self.instance.pk and (self.instance.topic.head == self.instance))):
 
-            if (self.instance.pk and not self.instance.topic.head == self.instance) or self.topic:
+            if (self.instance.pk and not self.instance.topic.head == self.instance) or self._topic:
                 del self.fields['name']
 
             if not defaults.PYBB_DISABLE_POLLS:
@@ -122,12 +122,12 @@ class PostForm(forms.ModelForm):
     def clean_name(self):
         name = self.cleaned_data['name']
 
-        if self.topic:
+        if self._topic:
             return name
 
         if not defaults.PYBB_DUPLICATE_TOPIC_SLUG_ALLOWED:
             try:
-                Topic.objects.get(slug=slugify(name), forum=self.forum)
+                Topic.objects.get(slug=slugify(name), forum=self._forum)
             except Topic.DoesNotExist:
                 return name
             raise forms.ValidationError(self.error_messages['duplicate'])
@@ -206,12 +206,12 @@ class PostForm(forms.ModelForm):
         if defaults.PYBB_PREMODERATION:
             allow_post = defaults.PYBB_PREMODERATION(self.user, self.cleaned_data['body'])
 
-        if 'forum' in self.cleaned_data and not self.forum:
-            self.forum = self.cleaned_data['forum']
+        if 'forum' in self.cleaned_data and not self._forum:
+            self._forum = self.cleaned_data['forum']
 
-        if self.forum:
+        if self._forum:
             topic = Topic(
-                forum=self.forum,
+                forum=self._forum,
                 user=self.user,
                 name=self.cleaned_data['name'],
             )
@@ -230,7 +230,7 @@ class PostForm(forms.ModelForm):
 
                     topic.poll = poll
         else:
-            topic = self.topic
+            topic = self._topic
 
         post = Post(topic=topic, user=self.user, user_ip=self.ip,
                     body=self.cleaned_data['body'], hash=self.cleaned_data['hash'])

@@ -1,4 +1,3 @@
-
 from django.utils.html import urlize
 
 from pybb import defaults

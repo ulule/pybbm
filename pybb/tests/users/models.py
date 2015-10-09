@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser, UserManager as BaseUserManager
 from django.core.exceptions import ImproperlyConfigured
-from django.db import models
+from django.apps import apps
 
 from pybb.compat import SiteProfileNotAvailable
 
@@ -29,7 +29,7 @@ class User(AbstractUser):
                     'app_label and model_name should be separated by a dot in '
                     'the AUTH_PROFILE_MODULE setting')
             try:
-                model = models.get_model(app_label, model_name)
+                model = apps.get_model(app_label, model_name)
                 if model is None:
                     raise SiteProfileNotAvailable(
                         'Unable to load the profile model, check '

@@ -29,12 +29,13 @@ except ImportError:
 from django.core.files import File
 from django.core.files.uploadedfile import UploadedFile
 from django.conf import settings
-from django.db.models import get_model
+from django.apps import apps
 from django.core import exceptions
-from django.utils.importlib import import_module
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.http import QueryDict
 from django.shortcuts import redirect
+
+from importlib import import_module
 
 from . import defaults
 
@@ -83,7 +84,7 @@ def get_profile_model():
     if (not hasattr(settings, 'AUTH_PROFILE_MODULE')) or (not settings.AUTH_PROFILE_MODULE):
         raise SiteProfileNotAvailable
 
-    profile_mod = get_model(*settings.AUTH_PROFILE_MODULE.split('.'))
+    profile_mod = apps.get_model(*settings.AUTH_PROFILE_MODULE.split('.'))
 
     if profile_mod is None:
         raise SiteProfileNotAvailable

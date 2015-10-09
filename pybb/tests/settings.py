@@ -175,3 +175,14 @@ AUTH_PROFILE_MODULE = 'pybb.Profile'
 MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'media')
 
 AUTH_USER_MODEL = 'users.User'
+
+
+class DisableMigrations(object):
+    def __contains__(self, item):
+        return True
+
+    def __getitem__(self, item):
+        return "notmigrations"
+
+
+MIGRATION_MODULES = DisableMigrations()

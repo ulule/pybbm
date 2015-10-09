@@ -1,13 +1,11 @@
 import re
 
-from django.utils.functional import memoize
+from django.utils.lru_cache import lru_cache
 
 from pybb.processors import BaseProcessor
 
 from . import settings
 from .models import Smiley
-
-_cache = {}
 
 
 def _get_smilies_re():
@@ -19,12 +17,15 @@ def _get_smilies_re():
 
     return re.compile('|'.join(escaped_patterns)), replacements
 
-get_smilies_re = memoize(_get_smilies_re, _cache, 0)
+
+@lru_cache()
+def get_smilies_re():
+    return _get_smilies_re()
 
 
 class SmileyProcessor(BaseProcessor):
     def render(self, use_cache=True):
-        smilies_re, replacements = get_smilies_re() if use_cache and settings.PYBB_SMILIES_USE_CACHE else _get_smilies_re()
+        smilies_re, replacements = get_smilies_re() if use_cache and settings.PYBB_SMILIES_USE_CACHE else get_smilies_re()
 
         def replace_func(matched):
             res = '[img class="%s" alt="%s" title="%s"]%s[/img]' % \

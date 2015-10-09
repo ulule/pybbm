@@ -4,10 +4,11 @@ import mimetypes
 from django.core.management import call_command
 from django import test
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.utils.importlib import import_module
 from django.http import HttpRequest
 from django.contrib.auth import login
 from django.conf import settings
+
+from importlib import import_module
 
 
 from pybb.models import Post, Topic, Forum
