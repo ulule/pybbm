@@ -1362,8 +1362,7 @@ class ModeratorCreateView(ModeratorDetailView):
                  self.form_class(permissions=self.get_permissions(defaults.PYBB_FORUM_PERMISSIONS, Forum),
                                  obj=self.forum,
                                  **self.get_form_kwargs()),
-                 self.form_class(form_class,
-                                 permissions=self.get_permissions(defaults.PYBB_USER_PERMISSIONS),
+                 self.form_class(permissions=self.get_permissions(defaults.PYBB_USER_PERMISSIONS),
                                  **self.get_form_kwargs())]
 
         return forms
