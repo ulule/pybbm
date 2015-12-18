@@ -1,10 +1,9 @@
-import django
+import os
+import sys
+
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-
-import os
-import sys
 
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 
@@ -42,15 +41,10 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'pybb.contrib.profiles.middleware.PybbMiddleware',
     'pybb.contrib.ban.middleware.PybbBanMiddleware',
 )
 
 ROOT_URLCONF = 'pybb.tests.urls'
-
-TEMPLATE_DIRS = (
-    os.path.join(PROJECT_ROOT, 'templates'),
-)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -62,11 +56,11 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'pybb',
     'users',
-    'pybb.contrib.profiles',
     'pybb.contrib.mentions',
     'pybb.contrib.quotes',
     'pybb.contrib.smilies',
     'pybb.contrib.reports',
+    'pybb.contrib.profiles',
     'pybb.contrib.ban',
     'sorl.thumbnail',
     'pytils',
@@ -88,8 +82,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
     'pybb.context_processors.processor',
 )
-
-AUTH_PROFILE_MODULE = 'pybb.Profile'
 
 
 LOGGING = {
@@ -157,21 +149,6 @@ PYBB_BODY_CLEANERS = [
     'pybb.util.filter_blanks',
 ]
 
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'http://127.0.0.1:9200/',
-        'INDEX_NAME': 'public_forums',
-    },
-}
-
-if django.VERSION < (1, 6):
-    TEST_RUNNER = 'discover_runner.DiscoverRunner'
-else:
-    TEST_RUNNER = 'django.test.runner.DiscoverRunner'
-
-AUTH_PROFILE_MODULE = 'pybb.Profile'
-
 MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'media')
 
 AUTH_USER_MODEL = 'users.User'
@@ -186,3 +163,24 @@ class DisableMigrations(object):
 
 
 MIGRATION_MODULES = DisableMigrations()
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(PROJECT_ROOT, 'templates'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.template.context_processors.i18n',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+AUTH_PROFILE_MODULE = 'pybb.Profile'

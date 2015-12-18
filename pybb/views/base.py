@@ -1286,13 +1286,10 @@ class ModeratorDetailView(generic.DetailView, FormMixin):
         return [form_class(permissions=self.get_permissions(defaults.PYBB_FORUM_PERMISSIONS, Forum),
                            obj=self.forum,
                            user=self.object.user,
-                           **self.form_kwargs()),
+                           **self.get_form_kwargs()),
                 form_class(permissions=self.get_permissions(defaults.PYBB_USER_PERMISSIONS),
                            user=self.object.user,
-                           **self.form_kwargs())]
-
-    def get_form(self, form_class, **kwargs):
-        return form_class(**dict(self.get_form_kwargs(), **kwargs))
+                           **self.get_form_kwargs())]
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()

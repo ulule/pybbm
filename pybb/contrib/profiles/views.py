@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from pybb.models import Topic
 from pybb.compat import get_user_model
 
+from .models import get_profile
 from .forms import EditProfileForm
 
 
@@ -16,7 +17,7 @@ class ProfileUpdateView(generic.UpdateView):
     form_class = EditProfileForm
 
     def get_object(self, queryset=None):
-        return self.request.user.get_profile()
+        return get_profile(self.request.user)
 
     @method_decorator(login_required)
     @method_decorator(csrf_protect)

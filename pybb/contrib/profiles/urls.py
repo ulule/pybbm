@@ -1,10 +1,9 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
 from .views import ProfileUpdateView, UserDetailView
 
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     # Profile
     url('^profile/edit/$',
         ProfileUpdateView.as_view(),
@@ -12,4 +11,4 @@ urlpatterns = patterns(
     url('^users/(?P<username>[^/]+)/$',
         UserDetailView.as_view(),
         name='user_detail'),
-)
+]

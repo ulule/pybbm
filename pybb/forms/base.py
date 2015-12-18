@@ -327,7 +327,7 @@ class ForumForm(forms.ModelForm):
 
 
 class ModerationForm(forms.Form):
-    def __init__(self, permissions, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.obj = kwargs.pop('obj', None)
         self.user = kwargs.pop('user', None)
         self.permissions = kwargs.pop('permissions', [])

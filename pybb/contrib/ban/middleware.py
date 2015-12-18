@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from django.template import RequestContext
-from django.template.loader import render_to_string
 from django.http import HttpResponseForbidden
 from django.core.cache import cache
 
@@ -22,9 +20,7 @@ def forbid(request, context=None):
     if context is None:
         context = {}
 
-    return HttpResponseForbidden(render_to_string('pybb/ban/access_denied.html',
-                                                  context,
-                                                  context_instance=RequestContext(request)))
+    return HttpResponseForbidden()
 
 
 class PybbBanMiddleware(object):

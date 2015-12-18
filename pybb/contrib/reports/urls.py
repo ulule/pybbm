@@ -1,11 +1,10 @@
-from django.conf.urls import url, patterns
+from django.conf.urls import url
 
 from .views import (ReportCreateView, ReportListView,
                     ReportDetailView, ReportCloseView)
 
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url('^reports/(?P<pk>\d+)/create/$',
         ReportCreateView.as_view(),
         name='report_create'),
@@ -18,4 +17,4 @@ urlpatterns = patterns(
     url('^reports/list/$',
         ReportListView.as_view(),
         name='report_list'),
-)
+]

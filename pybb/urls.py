@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url, patterns
+from django.conf.urls import url
 
 from pybb import defaults, views, feeds
 
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     # Syndication feeds
     url('^feeds/posts/$',
         feeds.LastPosts(),
@@ -15,11 +14,7 @@ urlpatterns = patterns(
     url('^feeds/topics/$',
         feeds.LastTopics(),
         name='feed_topics'),
-)
 
-urlpatterns += patterns(
-    'pybb.views',
-    # Index, Category, Forum
     url('^$',
         views.IndexView.as_view(),
         name='index'),
@@ -151,11 +146,10 @@ urlpatterns += patterns(
     url(views.ForumDetailView.url,
         views.ForumDetailView.as_view(),
         name='forum_detail'),
-)
+]
 
 if defaults.PYBB_ATTACHMENT_ENABLE:
-    urlpatterns += patterns(
-        '',
+    urlpatterns += [
         url('^post/attachment/list/$',
             views.AttachmentListView.as_view(),
             name='attachment_list'),
@@ -163,4 +157,4 @@ if defaults.PYBB_ATTACHMENT_ENABLE:
         url('^post/attachment/(?P<pk>\d+)/delete/$',
             views.AttachmentDeleteView.as_view(),
             name='attachment_delete'),
-    )
+    ]

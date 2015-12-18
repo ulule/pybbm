@@ -5,9 +5,9 @@ import django
 from django.db import models
 from django.contrib.auth.models import Permission
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
-from django.db.models import ObjectDoesNotExist
 from django.db.models.signals import post_save
 
 from pybb import defaults
@@ -16,8 +16,6 @@ from pybb.base import ModelBase
 from pybb.processors import markup
 from pybb.compat import AUTH_USER_MODEL
 from pybb.fields import CAStorage
-
-from annoying.fields import AutoOneToOneField
 
 try:
     from sorl.thumbnail import ImageField
@@ -30,7 +28,7 @@ class Profile(ModelBase):
     Profile class that can be used if you doesn't have
     your site profile.
     """
-    user = AutoOneToOneField(AUTH_USER_MODEL, related_name='pybb_profile', verbose_name=_('User'))
+    user = models.OneToOneField(AUTH_USER_MODEL, related_name='pybb_profile', verbose_name=_('User'))
 
     signature = models.TextField(_('Signature'), blank=True,
                                  max_length=defaults.PYBB_SIGNATURE_MAX_LENGTH)
@@ -84,7 +82,7 @@ class Profile(ModelBase):
 
 
 def get_user_timezone(user):
-    return user.get_profile().timezone or defaults.PYBB_DEFAULT_TIME_ZONE
+    return user.pybb_profile.timezone or defaults.PYBB_DEFAULT_TIME_ZONE
 
 
 def user_saved(instance, created, **kwargs):
@@ -100,7 +98,15 @@ def user_saved(instance, created, **kwargs):
     instance.user_permissions.add(add_post_permission, add_topic_permission)
     instance.save()
 
-    Profile(user=instance).save()
+    get_profile(instance)
+
+
+def get_profile(user):
+    try:
+        return user.pybb_profile
+    except ObjectDoesNotExist:
+        return Profile(user=user).save()
+
 
 if django.VERSION < (1, 7):
     from pybb.compat import get_user_model
