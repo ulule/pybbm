@@ -29,11 +29,8 @@ class FeaturesTest(TestCase):
     def test_base(self):
         url = reverse('pybb:index')
         response = self.client.get(url)
-        parser = html.HTMLParser(encoding='utf8')
-        tree = html.fromstring(response.content, parser=parser)
         self.assertContains(response, u'foo')
         self.assertContains(response, self.forum.get_absolute_url())
-        self.assertTrue(defaults.PYBB_DEFAULT_TITLE in tree.xpath('//title')[0].text_content())
         self.assertEqual(len(response.context['forums']), 1)
 
     def test_forum_page(self):

@@ -1,7 +1,6 @@
 import os
 import mimetypes
 
-from django.core.management import call_command
 from django import test
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpRequest
@@ -94,9 +93,6 @@ class FixtureMixin(Exam):
     @fixture
     def post(self):
         return Post.objects.create(topic=self.topic, user=self.user, body='bbcode [b]test[/b]')
-
-    def create_smilies(self):
-        call_command('loaddata', 'smilies.json', verbosity=0)
 
     def get_form_values(self, response, form='post-form', attr=None):
         if not attr:

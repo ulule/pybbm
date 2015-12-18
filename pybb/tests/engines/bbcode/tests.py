@@ -38,7 +38,6 @@ class BBCodeMarkupEngineTest(TestCase):
 
     def test_multiple_formatters(self):
         self.staff
-        self.create_smilies()
 
         messages = (
             ('[left][url url="http://ulule.com" title="Ulule"][img alt="Ulule" class="link"]http://ulule.com/logo.png[/img][/url][/left]',
@@ -47,8 +46,6 @@ class BBCodeMarkupEngineTest(TestCase):
              u'<div style="text-align: left;">@<a class="mention" href="/users/thoas/">thoas</a></div>'),
             ('[left]@thoas [url url="http://ulule.com" title="Ulule"][img alt="Ulule" class="link"]http://ulule.com/logo.png[/img][/url][/left]',
              u'<div style="text-align: left;">@<a class="mention" href="/users/thoas/">thoas</a> <a rel="nofollow" title="Ulule" target="_blank" href="http://ulule.com"><img src="http://ulule.com/logo.png" alt="Ulule" class="link"></a></div>'),
-            ('[center]this is a smiiiile! :D[/center]',
-             u'<div style="text-align: center;">this is a smiiiile! <img src="pybb/smilies/lol.png" alt=":D" class="smiley" title="lol"></div>'),
         )
 
         for bbcode, result in messages:

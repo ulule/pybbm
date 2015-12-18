@@ -58,7 +58,6 @@ INSTALLED_APPS = (
     'users',
     'pybb.contrib.mentions',
     'pybb.contrib.quotes',
-    'pybb.contrib.smilies',
     'pybb.contrib.reports',
     'pybb.contrib.profiles',
     'pybb.contrib.ban',
@@ -110,8 +109,6 @@ LOGGING = {
 
 PYBB_ATTACHMENT_ENABLE = True
 
-PYBB_SMILIES_USE_CACHE = False
-
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.eggs.Loader',
@@ -135,7 +132,6 @@ PYBB_POST_CREATE_VIEW = 'pybb.contrib.quotes.views.PostCreateView'
 PYBB_MARKUP_PREPROCESSORS = (
     'pybb.sanitizer.BleachProcessor',
     'pybb.contrib.mentions.processors.MentionProcessor',
-    'pybb.contrib.smilies.processors.SmileyProcessor',
 )
 
 PYBB_NOTIFICATION_ENABLE = True
