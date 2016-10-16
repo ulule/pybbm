@@ -7,9 +7,10 @@ def generate_markup(post_id):
 
     logger = generate_markup.get_logger()
 
-    Post.objects.get(pk=post_id).render(commit=True)
+    post = Post.objects.get(pk=post_id)
+    post.render(commit=True)
 
-    logger.info('Text generated for Post[pk=%s]' % post_id)
+    logger.info('Text generated for %r' % post)
 
 
 @task
@@ -18,6 +19,7 @@ def sync_cover(topic_id):
 
     logger = sync_cover.get_logger()
 
-    Topic.objects.get(pk=topic_id).sync_cover()
+    topic = Topic.objects.get(pk=topic_id)
+    topic.sync_cover()
 
-    logger.info('Syncing cover for Topic[pk=%s]' % topic_id)
+    logger.info('Syncing cover for %r' % topic)

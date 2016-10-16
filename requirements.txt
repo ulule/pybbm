@@ -5,6 +5,7 @@ postmarkup
 pytils
 bbcode
 django-pure-pagination
+requests
 lxml
 django-autoslug
 django-guardian

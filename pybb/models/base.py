@@ -5,14 +5,13 @@ import math
 import os.path
 import uuid
 import magic
-import logging
+import requests
 
 from datetime import date
 
 from bs4 import BeautifulSoup
 
 from six.moves.urllib.parse import urlparse, urlencode
-from six.moves.urllib.request import urlretrieve
 
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
@@ -20,7 +19,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import AnonymousUser
 from django.utils.encoding import smart_text
 from django.core.urlresolvers import reverse
-from django.core.files import File
+from django.core.files.base import ContentFile
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import Q, signals, F
@@ -745,20 +744,16 @@ class BaseTopic(ModelBase):
             return False
 
         for url in self.first_post.images:
-            try:
-                path, response = urlretrieve(url)
-            except Exception as e:
-                logging.error(e)
-            else:
+            response = requests.get(url)
+
+            if response.status_code == 200:
                 file_ext = urlparse(url).path.split('.')[-1]
 
                 self.cover.save("%s.%s" % (self.id, file_ext),
-                                File(open(path)), save=True)
+                                ContentFile(response.content), save=True)
 
                 if commit:
                     update_fields(self, fields=('cover', ))
-
-                os.remove(path)
 
                 return True
 

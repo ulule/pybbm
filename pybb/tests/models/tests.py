@@ -1,7 +1,5 @@
-from six.moves.urllib import request as urllib
-
 import os
-import tempfile
+import requests
 
 from pybb.models import Moderator, Post, Forum, Topic
 from pybb.tests.base import TestCase
@@ -34,13 +32,12 @@ class ModelsTest(TestCase):
         for index, image in enumerate(self.post.images):
             self.assertEqual(image, images[index])
 
-        with patch.object(urllib, 'urlretrieve') as urlretrieve:
+        with patch.object(requests, 'get') as get_method:
             file = os.path.join(os.path.dirname(__file__), '..', 'static', 'pybb', 'img', 'attachment.png')
 
-            tmp = tempfile.NamedTemporaryFile()
-            tmp.write(open(file, 'rb').read())
+            content = open(file, 'rb').read()
 
-            urlretrieve.return_value = (tmp.name, None)
+            get_method.return_value = type('response', (object, ), {'content': content, 'status_code': 200})
 
             self.post.topic.sync_cover()
 
