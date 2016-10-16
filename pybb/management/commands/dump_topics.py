@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim:fileencoding=utf-8
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from django.core import serializers
 
 from pybb.models import Topic, Post
