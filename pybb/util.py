@@ -1,29 +1,15 @@
 # -*- coding: utf-8 -*-
 import re
-import urlparse
-from collections import defaultdict
 import hashlib
+import six
 
-try:
-    from hashlib import sha1
-except ImportError:
-    from sha import sha as sha1  # NOQA
+from collections import defaultdict
 
-try:
-    from django.utils.timezone import timedelta
-    from django.utils.timezone import now as tznow
-except ImportError:
-    import datetime
-    from datetime import timedelta  # NOQA
-    tznow = datetime.datetime.now  # NOQA
+from six.moves.urllib.parse import urlparse, urlunparse
 
-try:
-    from django.views import generic
-except ImportError:
-    try:
-        from cbv import generic  # NOQA
-    except ImportError:
-        raise ImportError('If you using django version < 1.3 you should install django-cbv for pybb')
+from django.utils.timezone import now as tznow  # noqa
+
+from django.views import generic  # noqa
 
 
 from django.core.files import File
@@ -34,6 +20,7 @@ from django.core import exceptions
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.http import QueryDict
 from django.shortcuts import redirect
+from django.utils.timezone import timedelta, now as tznow  # noqa
 
 from importlib import import_module
 
@@ -100,7 +87,7 @@ def load_class(class_path, setting_name=None):
     The setting_name parameter is only there for pretty error output, and
     therefore is optional
     """
-    if not isinstance(class_path, basestring):
+    if not isinstance(class_path, six.string_types):
         try:
             class_path, app_label = class_path
         except:
@@ -123,7 +110,7 @@ def load_class(class_path, setting_name=None):
 
     try:
         mod = import_module(class_module)
-    except ImportError, e:
+    except ImportError as e:
         if setting_name:
             txt = 'Error importing backend %s: "%s". Check your %s setting' % (
                 class_module, e, setting_name)
@@ -158,7 +145,7 @@ def get_model_string(model_name):
 
     if not class_path:
         return 'pybb.%s' % model_name
-    elif isinstance(class_path, basestring):
+    elif isinstance(class_path, six.string_types):
         parts = class_path.split('.')
         try:
             index = parts.index('models') - 1
@@ -212,13 +199,13 @@ def redirect_to_login(next, login_url=None,
     if not login_url:
         login_url = get_login_url()
 
-    login_url_parts = list(urlparse.urlparse(login_url))
+    login_url_parts = list(urlparse(login_url))
     if redirect_field_name:
         querystring = QueryDict(login_url_parts[4], mutable=True)
         querystring[redirect_field_name] = next
         login_url_parts[4] = querystring.urlencode(safe='/')
 
-    return redirect(urlparse.urlunparse(login_url_parts))
+    return redirect(urlunparse(login_url_parts))
 
 
 def hash_filename(filename, digestmod=hashlib.sha1,
@@ -289,7 +276,7 @@ def shard(string, width, depth, rest_only=False):
 
     """
 
-    for i in xrange(depth):
+    for i in range(depth):
         yield string[(width * i):(width * (i + 1))]
 
     if rest_only:

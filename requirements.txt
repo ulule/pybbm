@@ -12,6 +12,7 @@ celery
 mock
 python-magic
 bleach
-BeautifulSoup
+beautifulsoup4
 exam
 coverage
+six

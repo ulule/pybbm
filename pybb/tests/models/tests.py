@@ -1,4 +1,5 @@
-import urllib
+from six.moves.urllib import request as urllib
+
 import os
 import tempfile
 
@@ -37,7 +38,7 @@ class ModelsTest(TestCase):
             file = os.path.join(os.path.dirname(__file__), '..', 'static', 'pybb', 'img', 'attachment.png')
 
             tmp = tempfile.NamedTemporaryFile()
-            tmp.write(open(file).read())
+            tmp.write(open(file, 'rb').read())
 
             urlretrieve.return_value = (tmp.name, None)
 

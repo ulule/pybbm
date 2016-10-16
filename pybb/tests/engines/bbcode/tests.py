@@ -28,11 +28,11 @@ class BBCodeMarkupEngineTest(TestCase):
             markup_engine = BBCodeMarkupEngine(bbcode)
             self.assertEqual(markup_engine.render(), result)
 
-        for label, family in FONT_FAMILIES.iteritems():
+        for label, family in FONT_FAMILIES.items():
             markup_engine = BBCodeMarkupEngine('[font font=%s]test[/font]' % label)
             self.assertEqual(markup_engine.render(), '<span style="font-family:%s">test</span>' % family)
 
-        for label, size in FONT_SIZES.iteritems():
+        for label, size in FONT_SIZES.items():
             markup_engine = BBCodeMarkupEngine('[size size=%s]test[/font]' % label)
             self.assertEqual(markup_engine.render(), '<span style="font-size:%s">test</span>' % size)
 

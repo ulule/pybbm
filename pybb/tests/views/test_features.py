@@ -65,7 +65,7 @@ class FeaturesTest(TestCase):
         self.assertEqual(len(response.context['topic_list']), defaults.PYBB_FORUM_PAGE_SIZE)
         self.assertTrue(response.context['is_paginated'])
         self.assertEqual(response.context['paginator'].num_pages,
-                         ((defaults.PYBB_FORUM_PAGE_SIZE + 3) / defaults.PYBB_FORUM_PAGE_SIZE) + 1)
+                         (int((defaults.PYBB_FORUM_PAGE_SIZE + 3) / defaults.PYBB_FORUM_PAGE_SIZE) + 1))
 
     def test_bbcode_and_topic_title(self):
         response = self.client.get(self.topic.get_absolute_url())

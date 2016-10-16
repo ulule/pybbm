@@ -43,7 +43,7 @@ def lookup_post_topics(qs):
 
     topics = queryset_to_dict(Topic.objects.filter(id__in=topic_ids.keys()).select_related('forum'))
 
-    for topic_id, posts in topic_ids.iteritems():
+    for topic_id, posts in topic_ids.items():
         topic = None
 
         if topic_id in topics:
@@ -64,7 +64,7 @@ def lookup_users(qs):
     except SiteProfileNotAvailable:
         profiles = {}
 
-    for user_id, objs in user_ids.iteritems():
+    for user_id, objs in user_ids.items():
         if user_id in users:
             user = users[user_id]
 
@@ -85,7 +85,7 @@ def lookup_post_attachments(qs):
 
     attachments = queryset_to_dict(Attachment.objects.filter(post__in=post_ids.keys()), key='post_id', singular=False)
 
-    for post_id, post in post_ids.iteritems():
+    for post_id, post in post_ids.items():
         if post_id in attachments:
             post_ids[post_id]._attachments = attachments[post_id]
         else:

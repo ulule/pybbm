@@ -551,7 +551,7 @@ class PostUpdateMixin(object):
                     transaction.savepoint_commit(sid)
                 else:
                     transaction.savepoint_rollback(sid)
-            except Exception, e:
+            except Exception as e:
                 transaction.savepoint_rollback(sid)
                 raise e
 

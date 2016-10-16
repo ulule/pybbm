@@ -4,7 +4,7 @@ import time
 
 from django import template
 from django.utils.safestring import mark_safe
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
 from django.utils import dateformat
@@ -94,8 +94,7 @@ def pybb_link(object, anchor=u''):
     """
 
     url = hasattr(object, 'get_absolute_url') and object.get_absolute_url() or None
-    #noinspection PyRedeclaration
-    anchor = anchor or smart_unicode(object)
+    anchor = anchor or smart_text(object)
     return mark_safe('<a href="%s">%s</a>' % (url, escape(anchor)))
 
 

@@ -40,7 +40,7 @@ class BBCodeMarkupEngine(BaseMarkupEngine):
         self.init_formatters()
 
     def init_formatters(self):
-        simple_formatters = self.simple_formatters.items() + list(defaults.PYBB_BBCODE_MARKUP_SIMPLE_FORMATTERS)
+        simple_formatters = list(self.simple_formatters.items()) + list(defaults.PYBB_BBCODE_MARKUP_SIMPLE_FORMATTERS)
 
         for tag_name, (format_str, context) in simple_formatters:
             if context:
@@ -48,7 +48,7 @@ class BBCodeMarkupEngine(BaseMarkupEngine):
             else:
                 self.parser.add_simple_formatter(tag_name, format_str)
 
-        formatters = self.formatters.items() + list(defaults.PYBB_BBCODE_MARKUP_FORMATTERS)
+        formatters = list(self.formatters.items()) + list(defaults.PYBB_BBCODE_MARKUP_FORMATTERS)
 
         for tag_name, (formatter_name, context) in formatters:
             if context:

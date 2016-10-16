@@ -77,7 +77,7 @@ class PostCreateView(BasePostCreateView):
 
             if len(post_quoted.keys()):
                 body = '\n'.join([quote(post, post.user.username)
-                                  for post_id, post in post_quoted.iteritems()])
+                                  for post_id, post in post_quoted.items()])
                 while not body.endswith('\n\n'):
                     body = '%s\n' % body
                 form_kwargs['initial']['body'] = body
@@ -95,7 +95,7 @@ class PostCreateView(BasePostCreateView):
                     del self.request.session[session_key]
 
             return response
-        except QuoteException, e:
+        except QuoteException as e:
             messages.error(self.request, e.message)
 
         return self.form_invalid(form)

@@ -5,18 +5,20 @@ import math
 import os.path
 import uuid
 import magic
-import urllib
 import logging
 
 from datetime import date
-from BeautifulSoup import BeautifulSoup
-from urlparse import urlparse
+
+from bs4 import BeautifulSoup
+
+from six.moves.urllib.parse import urlparse, urlencode
+from six.moves.urllib.request import urlretrieve
 
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import AnonymousUser
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
 from django.core.urlresolvers import reverse
 from django.core.files import File
 from django.utils.html import strip_tags
@@ -744,7 +746,7 @@ class BaseTopic(ModelBase):
 
         for url in self.first_post.images:
             try:
-                path, response = urllib.urlretrieve(url)
+                path, response = urlretrieve(url)
             except Exception as e:
                 logging.error(e)
             else:
@@ -994,7 +996,7 @@ class BasePost(RenderableItem):
     def get_anchor_url(self, user=None, params=None):
         return '%s%s#post%d' % (
             self.topic.get_absolute_url(int(self.get_page_index(user))),
-            '?%s' % urllib.urlencode(params) if params else '',
+            '?%s' % urlencode(params) if params else '',
             self.id
         )
 
@@ -1064,7 +1066,7 @@ class BasePost(RenderableItem):
     @property
     def images(self):
         if self.body_html:
-            soup = BeautifulSoup(self.body_html)
+            soup = BeautifulSoup(self.body_html, 'lxml')
 
             for img in soup.findAll('img'):
                 if img.get('src'):
@@ -1148,7 +1150,7 @@ class BaseAttachment(ModelBase):
         super(BaseAttachment, self).save(*args, **kwargs)
 
     def get_type_by_extension(self, ext):
-        results = filter(lambda ind: ext in ind[1], self.TYPE_EXTENSIONS.iteritems())
+        results = list(filter(lambda ind: ext in ind[1], self.TYPE_EXTENSIONS.items()))
 
         if len(results):
             return results[0][0]
@@ -1494,7 +1496,7 @@ class BaseLogModeration(ModelBase):
         return _('LogModeration object')
 
     def __repr__(self):
-        return smart_unicode(self.action_time)
+        return smart_text(self.action_time)
 
 
 def get_user_timezone(user):
