@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    version='0.13.4',
+    version='0.13.5',
     description='PyBB Modified. Django forum application',
     long_description=open('README.rst').read(),
     author='Pavel Zhukov',

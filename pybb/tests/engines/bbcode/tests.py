@@ -51,4 +51,4 @@ class BBCodeMarkupEngineTest(TestCase):
         for bbcode, result in messages:
             mark = markup(bbcode, obj=self.post)
 
-            self.assertEqual(mark, result)
+            self.assertHTMLEqual(mark, result)

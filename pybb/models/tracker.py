@@ -1,4 +1,4 @@
-from pybb.models.base import BaseTopicReadTracker, BaseForumReadTracker
+from pybb.models.base import BaseTopicReadTracker, BaseForumReadTracker, ForumReadTrackerManager
 
 
 class TopicReadTracker(BaseTopicReadTracker):
@@ -9,3 +9,5 @@ class TopicReadTracker(BaseTopicReadTracker):
 class ForumReadTracker(BaseForumReadTracker):
     class Meta(BaseForumReadTracker.Meta):
         abstract = False
+
+    objects = ForumReadTrackerManager()

@@ -53,6 +53,7 @@ class FeaturesTest(TestCase):
         self.client.get(self.post.get_absolute_url(), follow=True)
         self.assertContains(response, 'test signature')
         values['signature'] = ''
+        values['language'] = 'fr'
         response = self.client.post(reverse('profile_update'), data=values, follow=True)
         self.assertEqual(len(response.context['form'].errors), 0)
 

@@ -1733,6 +1733,8 @@ class AttachmentListView(TemplateResponseMixin, generic.View):
 
                     if self.object:
                         instance.post = self.object
+                    else:
+                        instance.post = None
 
                     instance.user = self.request.user
                     instance.save()

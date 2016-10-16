@@ -1,4 +1,4 @@
-from pybb.models.base import BasePoll, BasePollAnswer, BasePollAnswerUser
+from pybb.models.base import BasePoll, BasePollAnswer, BasePollAnswerUser, PollAnswerUserManager
 
 
 class Poll(BasePoll):
@@ -14,3 +14,5 @@ class PollAnswer(BasePollAnswer):
 class PollAnswerUser(BasePollAnswerUser):
     class Meta(BasePollAnswerUser.Meta):
         abstract = False
+
+    objects = PollAnswerUserManager()

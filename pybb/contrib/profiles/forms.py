@@ -10,8 +10,8 @@ from pybb.util import get_profile_model
 class EditProfileForm(forms.ModelForm):
     class Meta(object):
         model = get_profile_model()
-        fields = ['signature', 'time_zone', 'language',
-                  'show_signature', 'avatar']
+        fields = ('signature', 'time_zone', 'language',
+                  'show_signature', 'avatar', )
 
     signature = forms.CharField(widget=forms.Textarea(attrs={'rows': 2, 'cols:': 60}), required=False)
 

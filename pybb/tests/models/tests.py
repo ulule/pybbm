@@ -87,7 +87,7 @@ class ModelsTest(TestCase):
 
         self.assertFalse(self.post.is_editable_by(self.newbie, 'can_change_post'))
 
-        UserObjectPermission.objects.assign_perm('can_change_post', user=self.newbie, obj=self.post.topic.forum)
+        UserObjectPermission.objects.assign_perm('can_change_post', self.newbie, obj=self.post.topic.forum)
 
         self.post = Post.objects.get(pk=self.post.pk)
 
