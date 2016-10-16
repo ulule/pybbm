@@ -2,10 +2,10 @@ from setuptools import setup, find_packages
 
 setup(
     version='0.13.5',
-    description='PyBB Modified. Django forum application',
+    description='PyBB modified. Django forum application',
     long_description=open('README.rst').read(),
-    author='Pavel Zhukov',
-    author_email='gelios@gmail.com',
+    author='Florent Messa',
+    author_email='florent.messa@gmail.com',
     name='pybbm-fork',
     packages=find_packages(),
     include_package_data=True,
