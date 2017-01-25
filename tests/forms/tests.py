@@ -7,7 +7,7 @@ from pybb.forms import (ModerationForm, SearchUserForm, ForumForm, TopicMoveForm
 from pybb.models import Forum, Topic, Post, TopicRedirection
 from pybb.proxies import UserObjectPermission
 from pybb import defaults
-from pybb.tests.base import TestCase
+from tests.base import TestCase
 
 
 class FormsTest(TestCase):

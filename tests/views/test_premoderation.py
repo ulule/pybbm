@@ -2,17 +2,21 @@
 from django.core import mail
 from django.core.urlresolvers import reverse
 
-from pybb.tests.base import TestCase
-from pybb import defaults
+from tests.base import TestCase
+from tests.filters import premoderate
+
 from pybb.models import Post, Topic
+from pybb import defaults
+
+from mock import patch
 
 
 class PreModerationTest(TestCase):
     def setUp(self):
-        self.ORIG_PYBB_PREMODERATION = defaults.PYBB_PREMODERATION
-        defaults.PYBB_PREMODERATION = 'pybb.tests.filters.premoderate'
         mail.outbox = []
+        defaults.PYBB_PREMODERATION = 'tests.filters.premoderate'
 
+    @patch('pybb.forms.base.pybb_premoderation', premoderate)
     def test_premoderation(self):
         self.login_as(self.user)
 
@@ -115,4 +119,4 @@ class PreModerationTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def tearDown(self):
-        defaults.PYBB_PREMODERATION = self.ORIG_PYBB_PREMODERATION
+        defaults.PYBB_PREMODERATION = False

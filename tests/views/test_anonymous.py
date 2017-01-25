@@ -3,8 +3,9 @@ from django.core.urlresolvers import reverse
 
 from pybb import defaults
 from pybb.compat import get_user_model
-from pybb.tests.base import TestCase
 from pybb.models import Post, Topic, Forum
+
+from tests.base import TestCase
 
 
 class AnonymousTest(TestCase):

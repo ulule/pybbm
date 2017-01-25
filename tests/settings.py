@@ -44,7 +44,7 @@ MIDDLEWARE_CLASSES = (
     'pybb.contrib.ban.middleware.PybbBanMiddleware',
 )
 
-ROOT_URLCONF = 'pybb.tests.urls'
+ROOT_URLCONF = 'tests.urls'
 
 INSTALLED_APPS = (
     'django.contrib.auth',

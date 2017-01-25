@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.core.urlresolvers import reverse
 
-from pybb.tests.base import TransactionTestCase
+from tests.base import TransactionTestCase
 from pybb import defaults
 from pybb.models import PollAnswer, Topic, Poll
 

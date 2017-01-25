@@ -2,7 +2,7 @@ import os
 import requests
 
 from pybb.models import Moderator, Post, Forum, Topic
-from pybb.tests.base import TestCase
+from tests.base import TestCase
 from pybb.compat import get_user_model
 
 from mock import patch

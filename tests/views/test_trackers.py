@@ -4,7 +4,7 @@ from django.test.client import Client
 from pybb.models import ForumReadTracker, TopicReadTracker, Topic, Post, Forum
 from pybb.compat import get_user_model
 
-from pybb.tests.base import TestCase
+from tests.base import TestCase
 
 
 class TrackersTest(TestCase):

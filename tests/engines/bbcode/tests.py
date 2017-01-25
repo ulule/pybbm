@@ -1,4 +1,4 @@
-from pybb.tests.base import TestCase
+from tests.base import TestCase
 from pybb.engines.bbcode import BBCodeMarkupEngine
 from pybb.engines.bbcode.formatters import FONT_FAMILIES, FONT_SIZES
 

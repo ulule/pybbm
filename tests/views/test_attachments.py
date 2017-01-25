@@ -1,6 +1,6 @@
 from django.core.urlresolvers import reverse
 
-from pybb.tests.base import TestCase, get_uploaded_file
+from tests.base import TestCase, get_uploaded_file
 from pybb import defaults
 from pybb.models import Post, Attachment
 

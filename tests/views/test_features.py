@@ -11,7 +11,7 @@ from pybb.compat import get_user_model
 from pybb.models import (Post, Topic, Forum,
                          TopicRedirection, Subscription, PostDeletion)
 
-from pybb.tests.base import html, TestCase
+from tests.base import html, TestCase
 
 from mock import patch
 

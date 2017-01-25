@@ -1,6 +1,6 @@
 from django.core.urlresolvers import reverse
 
-from pybb.tests.base import TestCase
+from tests.base import TestCase
 from pybb.forms import ForumForm, ModerationForm
 from pybb.models import Forum, Moderator
 from pybb import defaults

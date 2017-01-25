@@ -1,4 +1,4 @@
-from pybb.tests.base import TestCase
+from tests.base import TestCase
 from pybb.tasks import generate_markup
 
 
