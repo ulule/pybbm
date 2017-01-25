@@ -17,4 +17,4 @@ beautifulsoup4
 exam
 coverage
 six
-py.test
+pytest
