@@ -109,14 +109,6 @@ class TransactionTestCase(test.TransactionTestCase, FixtureMixin):
     pass
 
 
-def premoderate(user, post):
-    """
-    Test premoderate function
-    Allow post without moderation for staff users only
-    """
-    return user.is_staff
-
-
 def get_image_path(name):
     return os.path.join(os.path.dirname(__file__), 'static', 'pybb', 'img',
                         name)

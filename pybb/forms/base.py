@@ -56,6 +56,11 @@ PollAnswerFormSet = inlineformset_factory(Poll, PollAnswer, extra=2, max_num=def
                                           form=PollAnswerForm, formset=BasePollAnswerFormset)
 
 
+pybb_premoderation = None
+if defaults.PYBB_PREMODERATION:
+    pybb_premoderation = load_class(defaults.PYBB_PREMODERATION)
+
+
 class PostForm(forms.ModelForm):
     error_messages = {
         'duplicate': _("A topic with that name already exists."),
@@ -203,8 +208,8 @@ class PostForm(forms.ModelForm):
 
         allow_post = True
 
-        if defaults.PYBB_PREMODERATION:
-            allow_post = defaults.PYBB_PREMODERATION(self.user, self.cleaned_data['body'])
+        if pybb_premoderation is not None:
+            allow_post = pybb_premoderation(self.user, self.cleaned_data)
 
         if 'forum' in self.cleaned_data and not self._forum:
             self._forum = self.cleaned_data['forum']

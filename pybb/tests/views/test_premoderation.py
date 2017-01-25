@@ -2,7 +2,7 @@
 from django.core import mail
 from django.core.urlresolvers import reverse
 
-from pybb.tests.base import TestCase, premoderate
+from pybb.tests.base import TestCase
 from pybb import defaults
 from pybb.models import Post, Topic
 
@@ -10,7 +10,7 @@ from pybb.models import Post, Topic
 class PreModerationTest(TestCase):
     def setUp(self):
         self.ORIG_PYBB_PREMODERATION = defaults.PYBB_PREMODERATION
-        defaults.PYBB_PREMODERATION = premoderate
+        defaults.PYBB_PREMODERATION = 'pybb.tests.filters.premoderate'
         mail.outbox = []
 
     def test_premoderation(self):
