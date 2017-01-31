@@ -8,6 +8,7 @@ from django.forms.models import inlineformset_factory, BaseInlineFormSet
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext as _
 from django.forms.formsets import BaseFormSet
+from pybb.models.base import BaseTopic
 
 from pybb.models import (Topic, Post, Attachment, TopicRedirection,
                          PollAnswer, Forum, Poll)
@@ -222,7 +223,7 @@ class PostForm(forms.ModelForm):
             )
 
             if not allow_post:
-                topic.on_moderation = True
+                topic.on_moderation = BaseTopic.MODERATION_IS_IN_MODERATION
             topic.save()
 
             if not defaults.PYBB_DISABLE_POLLS:
