@@ -396,29 +396,28 @@ class TopicQuerySetMixin(object):
         if forum is not None:
             if not forum.is_moderated_by(user):
                 if user.is_authenticated():
-                    return (self.filter(Q(user=user) | Q(on_moderation=BaseTopic.MODERATION_IS_CLEAN))
+                    return (self.filter(Q(user=user) | ~Q(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION))
                             .exclude(deleted=True))
             else:
                 return self
 
-            return self.filter(on_moderation=BaseTopic.MODERATION_IS_CLEAN).exclude(deleted=True)
+            return self.exclude(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION).exclude(deleted=True)
 
         if user.is_staff or user.is_superuser:
             return self
 
         if user.is_authenticated():
-            return (self.filter(Q(user=user) | Q(on_moderation=BaseTopic.MODERATION_IS_CLEAN))
+            return (self.filter(Q(user=user) | ~Q(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION))
                     .filter(forum__staff=False)
                     .exclude(deleted=True))
 
         return (self.filter(forum__hidden=False, forum__staff=False)
-                .filter(on_moderation=BaseTopic.MODERATION_IS_CLEAN)
+                .exclude(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION)
                 .exclude(deleted=True))
 
     def visible(self):
         return self.filter(deleted=False,
-                           on_moderation=BaseTopic.MODERATION_IS_CLEAN,
-                           redirect=False)
+                           redirect=False).exclude(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION)
 
 
 class TopicQuerySet(TopicQuerySetMixin, QuerySetBase):
@@ -440,8 +439,7 @@ class TopicManager(ManagerBase):
 class SubscriptionQuerySet(QuerySetBase):
     def visible(self):
         return self.filter(topic__deleted=False,
-                           topic__on_moderation=BaseTopic.MODERATION_IS_CLEAN,
-                           topic__redirect=False)
+                           topic__redirect=False).exclude(topic__on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION)
 
 
 @queryset
