@@ -112,32 +112,12 @@ class PreModerationTestTopicModeration(TestCase):
         mail.outbox = []
         defaults.PYBB_PREMODERATION = 'tests.filters.premoderate'
 
-    def add_on_moderation_post_to_topic(self, topic):
-        self.login_as(topic.user)
-
-        post_create_url = reverse('pybb:post_create', kwargs={'topic_id': topic.id})
-        response = self.client.get(post_create_url)
-        self.assertEqual(response.status_code, 200)
-
-        values = self.get_form_values(response)
-        values['body'] = 'test premoderation'
-        response = self.client.post(post_create_url, values, follow=True)
-        self.assertEqual(response.status_code, 200)
-
-        post = Post.objects.get(body='test premoderation', deleted=False)
-        self.assertEqual(post.on_moderation, True)
-        return post
-
     def moderate_post(self, user,  post):
         self.login_as(user)
         response = self.client.get(reverse('pybb:post_moderate',
                                            kwargs={'pk': post.id}),
                                    follow=True)
         return response
-
-    def delete_post(self, post):
-        response = self.client.post(reverse('pybb:post_delete', kwargs={'pk': post.id}))
-        self.assertEqual(response.status_code, 302)
 
     @fixture
     def pre_moderation_topic(self):
@@ -212,32 +192,6 @@ class PreModerationTestTopicModeration(TestCase):
 
         response = self.moderate_post(self.newbie, Post.objects.get(body='new topic test'))
         self.assertEqual(response.status_code, 403)
-
-    @patch('pybb.forms.base.pybb_premoderation', premoderate)
-    def test_premoderation_topic_moderation_status_lifecycle(self):
-        topic = self.pre_moderation_topic
-        self.assertEqual(topic.on_moderation, BaseTopic.MODERATION_IS_IN_MODERATION)
-
-        original_post = Post.objects.get(body='new topic test')
-        response = self.moderate_post(self.superuser, original_post)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(Topic.objects.get(pk=topic.id).on_moderation, BaseTopic.MODERATION_IS_CLEAN)
-
-        new_post = self.add_on_moderation_post_to_topic(topic)
-        self.assertEqual(Topic.objects.get(pk=topic.id).on_moderation, BaseTopic.MODERATION_HAS_POSTS_IN_MODERATION)
-
-        response = self.moderate_post(self.superuser, new_post)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(Topic.objects.get(pk=topic.id).on_moderation, BaseTopic.MODERATION_IS_CLEAN)
-
-        self.delete_post(new_post)
-        self.assertEqual(Topic.objects.get(pk=topic.id).on_moderation, BaseTopic.MODERATION_IS_CLEAN)
-
-        self.add_on_moderation_post_to_topic(topic)
-        self.assertEqual(Topic.objects.get(pk=topic.id).on_moderation, BaseTopic.MODERATION_HAS_POSTS_IN_MODERATION)
-
-        self.delete_post(original_post)
-        self.assertEqual(Topic.objects.get(pk=topic.id).on_moderation, BaseTopic.MODERATION_IS_IN_MODERATION)
 
     def tearDown(self):
         defaults.PYBB_PREMODERATION = False

@@ -588,7 +588,7 @@ class BaseTopic(ModelBase):
         """
         Get first post and cache it for request
         """
-        if not hasattr(self, '_head'):
+        if not getattr(self, '_head', None):
             self._head = self.posts.visible().order_by('created')
             self._head.topic = self
 
@@ -981,11 +981,6 @@ class BasePost(RenderableItem):
         if new:
             self.topic.updated = created_at
             self.topic.forum.updated = created_at
-
-        # # If post is topic head and moderated, moderate topic too
-        # if (self.topic.head == self and self.on_moderation is False and
-        #         self.topic.on_moderation == BaseTopic.MODERATION_IS_IN_MODERATION):
-        #     self.topic.on_moderation = BaseTopic.MODERATION_IS_CLEAN
 
         self.topic.update_counters()
 
