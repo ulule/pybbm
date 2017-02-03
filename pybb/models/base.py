@@ -4,12 +4,15 @@ from __future__ import unicode_literals
 import math
 import os.path
 import uuid
+from collections import defaultdict
+
 import magic
 import requests
 
 from datetime import date
 
 from bs4 import BeautifulSoup
+from django.utils.lru_cache import lru_cache
 
 from six.moves.urllib.parse import urlparse, urlencode
 
@@ -136,6 +139,17 @@ class ForumManager(ManagerBase):
         return self.get_queryset().filter_by_user(*args, **kwargs)
 
 
+@lru_cache()
+def get_moderator_ids_by_forum():
+    from pybb.models import Moderator
+
+    result = defaultdict(list)
+    for moderator in Moderator.objects.all():
+        result[moderator.forum_id].append(moderator.user_id)
+
+    return result
+
+
 @python_2_unicode_compatible
 class BaseForum(ModelBase):
     forum = models.ForeignKey('Forum', related_name='forums',
@@ -230,7 +244,7 @@ class BaseForum(ModelBase):
             return True
 
         if (user.is_authenticated() and
-                user.pk in self.moderators.values_list('id', flat=True)):
+                user.pk in get_moderator_ids_by_forum()[self.pk]):
 
             if permission:
                 return user.has_perm(permission, self)

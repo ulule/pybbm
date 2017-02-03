@@ -26,3 +26,5 @@ Subscription = load_class(defaults.PYBB_SUBSCRIPTION_MODEL)
 Forum.on_change(Forum.watch_forum)
 
 Post.on_change(Post.watch_topic)
+
+from pybb.receivers import *
