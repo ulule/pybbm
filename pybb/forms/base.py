@@ -222,7 +222,7 @@ class PostForm(forms.ModelForm):
             )
 
             if not allow_post:
-                topic.on_moderation = True
+                topic.on_moderation = topic.MODERATION_IS_IN_MODERATION
             topic.save()
 
             if not defaults.PYBB_DISABLE_POLLS:

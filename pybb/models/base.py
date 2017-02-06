@@ -4,12 +4,15 @@ from __future__ import unicode_literals
 import math
 import os.path
 import uuid
+from collections import defaultdict
+
 import magic
 import requests
 
 from datetime import date
 
 from bs4 import BeautifulSoup
+from django.utils.lru_cache import lru_cache
 
 from six.moves.urllib.parse import urlparse, urlencode
 
@@ -136,6 +139,17 @@ class ForumManager(ManagerBase):
         return self.get_queryset().filter_by_user(*args, **kwargs)
 
 
+@lru_cache()
+def get_moderator_ids_by_forum():
+    from pybb.models import Moderator
+
+    result = defaultdict(list)
+    for moderator in Moderator.objects.all():
+        result[moderator.forum_id].append(moderator.user_id)
+
+    return result
+
+
 @python_2_unicode_compatible
 class BaseForum(ModelBase):
     forum = models.ForeignKey('Forum', related_name='forums',
@@ -230,7 +244,7 @@ class BaseForum(ModelBase):
             return True
 
         if (user.is_authenticated() and
-                user.pk in self.moderators.values_list('id', flat=True)):
+                user.pk in get_moderator_ids_by_forum()[self.pk]):
 
             if permission:
                 return user.has_perm(permission, self)
@@ -396,29 +410,28 @@ class TopicQuerySetMixin(object):
         if forum is not None:
             if not forum.is_moderated_by(user):
                 if user.is_authenticated():
-                    return (self.filter(Q(user=user) | Q(on_moderation=False))
+                    return (self.filter(Q(user=user) | ~Q(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION))
                             .exclude(deleted=True))
             else:
                 return self
 
-            return self.filter(on_moderation=False).exclude(deleted=True)
+            return self.exclude(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION).exclude(deleted=True)
 
         if user.is_staff or user.is_superuser:
             return self
 
         if user.is_authenticated():
-            return (self.filter(Q(user=user) | Q(on_moderation=False))
+            return (self.filter(Q(user=user) | ~Q(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION))
                     .filter(forum__staff=False)
                     .exclude(deleted=True))
 
         return (self.filter(forum__hidden=False, forum__staff=False)
-                .filter(on_moderation=False)
+                .exclude(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION)
                 .exclude(deleted=True))
 
     def visible(self):
         return self.filter(deleted=False,
-                           on_moderation=False,
-                           redirect=False)
+                           redirect=False).exclude(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION)
 
 
 class TopicQuerySet(TopicQuerySetMixin, QuerySetBase):
@@ -440,8 +453,7 @@ class TopicManager(ManagerBase):
 class SubscriptionQuerySet(QuerySetBase):
     def visible(self):
         return self.filter(topic__deleted=False,
-                           topic__on_moderation=False,
-                           topic__redirect=False)
+                           topic__redirect=False).exclude(topic__on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION)
 
 
 @queryset
@@ -482,6 +494,15 @@ class BaseSubscription(ModelBase):
 
 @python_2_unicode_compatible
 class BaseTopic(ModelBase):
+    MODERATION_IS_CLEAN = 0
+    MODERATION_IS_IN_MODERATION = 1
+    MODERATION_HAS_POSTS_IN_MODERATION = 2
+    MODERATION_CHOICES = (
+        (MODERATION_IS_CLEAN, _('Topic is clean')),
+        (MODERATION_IS_IN_MODERATION, _('Topic is in moderation')),
+        (MODERATION_HAS_POSTS_IN_MODERATION, _('Topic has posts in moderation')),
+    )
+
     forum = models.ForeignKey(get_model_string('Forum'), related_name='topics', verbose_name=_('Forum'))
     name = models.CharField(_('Subject'), max_length=255)
     slug = AutoSlugField(populate_from='name', max_length=255)
@@ -505,7 +526,7 @@ class BaseTopic(ModelBase):
                                          through=get_model_string('Subscription'))
     post_count = models.IntegerField(_('Post count'), blank=True, default=0, db_index=True)
     readed_by = models.ManyToManyField(AUTH_USER_MODEL, through=get_model_string('TopicReadTracker'), related_name='readed_topics')
-    on_moderation = models.BooleanField(_('On moderation'), default=False, db_index=True)
+    on_moderation = models.IntegerField(_('On moderation'), default=MODERATION_IS_CLEAN, db_index=True)
     first_post = models.ForeignKey(get_model_string('Post'),
                                    blank=True,
                                    null=True,
@@ -579,7 +600,7 @@ class BaseTopic(ModelBase):
         """
         Get first post and cache it for request
         """
-        if not hasattr(self, '_head'):
+        if not getattr(self, '_head', None):
             self._head = self.posts.visible().order_by('created')
             self._head.topic = self
 
@@ -688,6 +709,14 @@ class BaseTopic(ModelBase):
         if first_post:
             self.first_post = first_post
 
+        if self.posts.filter(on_moderation=True, deleted=False).count():
+            if not self.post_count or first_post.on_moderation is True:
+                self.on_moderation = self.MODERATION_IS_IN_MODERATION
+            else:
+                self.on_moderation = self.MODERATION_HAS_POSTS_IN_MODERATION
+        else:
+            self.on_moderation = self.MODERATION_IS_CLEAN
+
         if commit:
             self.save()
 
@@ -720,7 +749,7 @@ class BaseTopic(ModelBase):
         return self.forum.is_moderated_by(user, permission=permission)
 
     def is_accessible_by(self, user):
-        if ((self.on_moderation or self.deleted) and
+        if ((self.on_moderation == self.MODERATION_IS_IN_MODERATION or self.deleted) and
             not self.is_moderated_by(user) and
                 (not user.is_authenticated() or
                  (user.is_authenticated() and
@@ -964,11 +993,6 @@ class BasePost(RenderableItem):
         if new:
             self.topic.updated = created_at
             self.topic.forum.updated = created_at
-
-        # If post is topic head and moderated, moderate topic too
-        if (self.topic.head == self and self.on_moderation is False and
-                self.topic.on_moderation is True):
-            self.topic.on_moderation = False
 
         self.topic.update_counters()
 
