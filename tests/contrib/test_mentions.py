@@ -1,10 +1,11 @@
-from pybb.tests.base import TestCase
 from pybb.models.base import markup
 
-from .processors import MentionProcessor
-from .models import Mention
+from pybb.contrib.mentions.processors import MentionProcessor
+from pybb.contrib.mentions.models import Mention
 
 from pybb.models import Post
+
+from tests.base import TestCase
 
 
 class MentionsTest(TestCase):
