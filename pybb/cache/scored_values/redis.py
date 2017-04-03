@@ -7,10 +7,11 @@ from ..exception import ClientException
 
 class RedisScoredValueCache(ScoredValueCache):
 
-    def __init__(self, client=None, cache_alias=None, prefix=None):
+    def __init__(self, client=None, cache_alias=None, prefix=None, default_timeout=None):
         self.prefix = prefix
         self._key_pattern = '{}:*'.format(self.prefix)
         self.client = client
+        self.default_timeout = default_timeout
 
         if not self.client and cache_alias:
             self.client = get_redis_connection(cache_alias)
@@ -54,17 +55,34 @@ class RedisScoredValueCache(ScoredValueCache):
             return {self._dimension_x_from_redis_key(key): result for key, result in izip(keys, results)}
 
     def set_score(self, dimension_x, dimension_y, score):
-        self.client.zadd(self._format_cache_key(dimension_x), **{dimension_y: score})
+        key = self._format_cache_key(dimension_x)
+        pipe = self.client.pipeline(transaction=True)
+
+        pipe.zadd(key, **{dimension_y: score})
+        if self.default_timeout:
+            pipe.expire(key, self.default_timeout)
+
+        pipe.execute()
 
     def set_bulk(self, dimension_x=None, **kwargs):
-        if dimension_x is not None:
-            self.client.zadd(self._format_cache_key(dimension_x), **kwargs)
-        else:
-            pipe = self.client.pipeline(transaction=True)
-            for dimension_x, dim2_score_tuple_list in kwargs.iteritems():
-                pipe.zadd(self._format_cache_key(dimension_x), **dim2_score_tuple_list)
+        pipe = self.client.pipeline(transaction=True)
 
-            pipe.execute()
+        if dimension_x is not None:
+            key = self._format_cache_key(dimension_x)
+
+            pipe.zadd(key, **kwargs)
+            if self.default_timeout:
+                pipe.expire(key, self.default_timeout)
+
+        else:
+            for dimension_x, dim_y_score_tuple_list in kwargs.iteritems():
+                key = self._format_cache_key(dimension_x)
+
+                pipe.zadd(key, **dim_y_score_tuple_list)
+                if self.default_timeout:
+                    pipe.expire(key, self.default_timeout)
+
+        pipe.execute()
 
     def count(self, dimension_x=None, minimum=None, maximum=None):
         if dimension_x is not None:
