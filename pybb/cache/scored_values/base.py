@@ -1,19 +1,30 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 
 class ScoredValueCache(object):
     __metaclass__ = ABCMeta
+
+    @abstractproperty
+    def dimension_xs(self):
+        """
+        :rtype: collections.Iterable
+        """
+        pass
 
     @abstractmethod
     def get_score(self, dimension_x, dimension_y):
         pass
 
     @abstractmethod
-    def get_range_by_index(self, start=0, end=-1, dimension_x=None):
+    def get_range_by_index(self, *args, **kwargs):
         """
+        :param args: ('x1', ...)
+        :param kwargs: {'x2': (start_index, end_index), ...}
+        :return: {'x1': {'y1': score1, 'y2': score2, ...}, 'x2': {'z1': score1, 'z2': score2, ...}, ...}
+
         Indexes are semi-inclusive, the same as everywhere else in Python
 
-        get_range_by_index(start=0, end=1) will return 1 element (assuming it exists), just like ``my_array[0: 1]`` would
+        get_range_by_index(x=(0,1)) will return 1 element (assuming it exists), just like ``my_array[0: 1]`` would
 
         If you want the full set or indexes up-to-and-including the end, leave the ``end`` parameter to its default (0),
         the same as you would do in Python:
@@ -24,7 +35,13 @@ class ScoredValueCache(object):
         pass
 
     @abstractmethod
-    def get_range_by_score(self, from_score, to_score, dimension_x=None):
+    def get_range_by_score(self, **kwargs):
+        """
+        :param kwargs: {'x1': (start_score, end_score), 'x2': (start_score, end_score), ...}
+        :return: {'x1': {'y1': score1, 'y2': score2, ...}, 'x2': {'z1': score1, 'z2': score2, ...}, ...}
+
+        Scores are inclusive
+        """
         pass
 
     @abstractmethod
@@ -32,11 +49,20 @@ class ScoredValueCache(object):
         pass
 
     @abstractmethod
-    def set_bulk(self, dimension_x=None, **kwargs):
+    def set_bulk(self, **kwargs):
+        """
+        :param kwargs: {'x1': {'y1': score1, 'y2': score2, ...}, 'x2': {'z1': score1, 'z2': score2, ...}, ...}
+        :return: None
+        """
         pass
 
     @abstractmethod
-    def count(self, dimension_x=None, minimum=None, maximum=None):
+    def count(self, *args, **kwargs):
+        """
+        :param args: ('x1', 'x2', 'x3')
+        :param kwargs: {'x4': (start_score, end_score), 'x5': (start_score, end_score), ...}
+        :return: int
+        """
         pass
 
     @abstractmethod
@@ -44,5 +70,9 @@ class ScoredValueCache(object):
         pass
 
     @abstractmethod
-    def invalidate_bulk(self, *args):
+    def invalidate_bulk(self, **kwargs):
+        """
+        :param kwargs: {'x1': ('y1', 'y2', ...), 'x2': ('z1', 'z2', ...), ...}
+        :return: None
+        """
         pass

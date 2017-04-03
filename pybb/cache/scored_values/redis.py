@@ -28,35 +28,36 @@ class RedisScoredValueCache(ScoredValueCache):
     def _dimension_x_from_redis_key(self, redis_key):
         return redis_key[len('{}:'.format(self.prefix)):]
 
+    @property
+    def dimension_xs(self):
+        return [self._dimension_x_from_redis_key(key) for key in self.client.scan_iter(match=self._key_pattern)]
+
     def get_score(self, dimension_x, dimension_y):
         return self.client.zscore(self._format_cache_key(dimension_x), dimension_y)
 
-    def get_range_by_index(self, start=0, end=0, dimension_x=None):
-        end -= 1
-        if dimension_x is not None:
-            return self.client.zrange(self._format_cache_key(dimension_x), start, end, withscores=True)
-        else:
-            keys = [key for key in self.client.scan_iter(match=self._key_pattern)]
-            pipe = self.client.pipeline(transaction=True)
+    def get_range_by_index(self, *args, **kwargs):
+        pipe = self.client.pipeline(transaction=True)
 
-            for key in keys:
-                pipe.zrange(key, start, end, withscores=True)
-            results = pipe.execute()
+        keys = list(args) + list(kwargs.keys())
+        for key in keys:
+            start, end = kwargs.get(key, (0, 0))
+            pipe.zrange(self._format_cache_key(key), start, end - 1, withscores=True)
 
-            return {self._dimension_x_from_redis_key(key): result for key, result in izip(keys, results)}
+        results = pipe.execute()
 
-    def get_range_by_score(self, from_score, to_score, dimension_x=None):
-        if dimension_x is not None:
-            return self.client.zrangebyscore(self._format_cache_key(dimension_x), from_score, to_score, withscores=True)
-        else:
-            keys = [key for key in self.client.scan_iter(match=self._key_pattern)]
-            pipe = self.client.pipeline(transaction=True)
+        return {key: dict(result) for key, result in izip(keys, results)}
 
-            for key in keys:
-                pipe.zrangebyscore(key, from_score, to_score, withscores=True)
-            results = pipe.execute()
+    def get_range_by_score(self, **kwargs):
+        pipe = self.client.pipeline(transaction=True)
 
-            return {self._dimension_x_from_redis_key(key): result for key, result in izip(keys, results)}
+        keys = list(kwargs.keys())
+        for key in keys:
+            minimum, maximum = kwargs[key]
+            pipe.zrangebyscore(self._format_cache_key(key), minimum, maximum, withscores=True)
+
+        results = pipe.execute()
+
+        return {key: dict(result) for key, result in izip(keys, results)}
 
     def set_score(self, dimension_x, dimension_y, score):
         key = self._format_cache_key(dimension_x)
@@ -68,59 +69,38 @@ class RedisScoredValueCache(ScoredValueCache):
 
         pipe.execute()
 
-    def set_bulk(self, dimension_x=None, **kwargs):
+    def set_bulk(self, **kwargs):
         pipe = self.client.pipeline(transaction=True)
 
-        if dimension_x is not None:
+        for dimension_x, score_by_dim_y in kwargs.iteritems():
             key = self._format_cache_key(dimension_x)
 
-            pipe.zadd(key, **kwargs)
+            pipe.zadd(key, **score_by_dim_y)
             if self.default_timeout:
                 pipe.expire(key, self.default_timeout)
 
-        else:
-            for dimension_x, dim_y_score_tuple_list in kwargs.iteritems():
-                key = self._format_cache_key(dimension_x)
-
-                pipe.zadd(key, **dim_y_score_tuple_list)
-                if self.default_timeout:
-                    pipe.expire(key, self.default_timeout)
-
         pipe.execute()
 
-    def count(self, dimension_x=None, minimum=None, maximum=None):
-        if dimension_x is not None:
-            if minimum is None or maximum is None:
-                return self.client.zcard(self._format_cache_key(dimension_x))
-            return self.client.zcount(self._format_cache_key(dimension_x), minimum, maximum)
-        else:
-            keys = [key for key in self.client.scan_iter(match=self._key_pattern)]
-            pipe = self.client.pipeline(transaction=True)
+    def count(self, *args, **kwargs):
+        pipe = self.client.pipeline(transaction=True)
 
-            if minimum is None or maximum is None:
-                for key in keys:
-                    pipe.zcard(key)
-            else:
-                for key in keys:
-                    pipe.zcount(key, minimum, maximum)
+        for key in args:
+            pipe.zcard(self._format_cache_key(key))
 
-            results = pipe.execute()
+        for key, (minimum, maximum) in kwargs.iteritems():
+            pipe.zcount(self._format_cache_key(key), minimum, maximum)
 
-            return sum(results)
+        results = pipe.execute()
+
+        return sum(results)
 
     def invalidate(self, dimension_x, dimension_y):
         self.client.zrem(self._format_cache_key(dimension_x), dimension_y)
 
-    def invalidate_bulk(self, dimension_x=None, dimensions_y=()):
-        """
-        :type dimension_x: basestring
-        :type dimensions_y: Iterable
-        """
-        if dimension_x is not None:
-            self.client.zrem(self._format_cache_key(dimension_x), *dimensions_y)
-        else:
-            pipe = self.client.pipeline(transaction=True)
-            for key in self.client.scan_iter(match=self._key_pattern):
-                pipe.zrem(key, *dimensions_y)
+    def invalidate_bulk(self, **kwargs):
+        pipe = self.client.pipeline(transaction=True)
 
-            pipe.execute()
+        for key, values in kwargs.iteritems():
+            pipe.zrem(self._format_cache_key(key), *values)
+
+        pipe.execute()

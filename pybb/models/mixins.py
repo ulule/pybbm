@@ -67,41 +67,45 @@ class ReadTrackerManagerWithCache(_ReadTrackerManagerMixin, ManagerBase):
     # TODO: We should lock on the user key here,
     # we don't want to accidentally overwrite the user's write cache with old data from the db
     def latest_reads(self, user, objects):
-        cached = {int(obj_id): timestamp_to_datetime(score)
-                  for obj_id, score in self._scored_cache.get_range_by_index(dimension_1=str(user.pk))}
+        cached = self._scored_cache.get_range_by_index(str(user.pk))
+        cached_result = {int(obj_id): timestamp_to_datetime(score)
+                         for obj_id, score in cached[str(user.pk)].iteritems()}
 
-        missing_data = [obj for obj in objects if obj.pk not in cached.keys()]
+        missing_data = [obj for obj in objects if obj.pk not in cached_result.keys()]
 
         if not missing_data:
-            return cached
+            return cached_result
 
         result = super(ReadTrackerManagerWithCache, self).latest_reads(user, missing_data)
 
         if result:
-            self._scored_cache.set_score(user.pk, **result)
-            result.update(cached)
+            self._scored_cache.set_bulk(**{str(user.pk): result})
+            result.update(cached_result)
             return result
 
-        return cached
+        return cached_result
 
     # TODO: If we acquire lock for reads, we should do so for writes too
     def mark_as_read(self, user, objects):
         timestamp = datetime_to_timestamp(tznow())
         self._kv_store.set_if_not_exist(self._savepoint_key, str(timestamp))
-        self._scored_cache.set_bulk(dimension_1=user.id, **{str(obj.id): timestamp for obj in objects})
+        self._scored_cache.set_bulk(**{
+            str(user.pk): {
+                str(obj.pk): timestamp for obj in objects}})
 
     def save_bulk(self):
         previous_savepoint = float(self._kv_store.get(self._savepoint_key))
         now = datetime_to_timestamp(tznow())
 
-        cached_writes = self._scored_cache.get_range_by_score(previous_savepoint, now)
+        cached_writes = self._scored_cache.get_range_by_score(**{user_id: (previous_savepoint, now)
+                                                                 for user_id in self._scored_cache.dimension_xs})
 
         trackers = [
             self.model(**{
                 self._object_id_field: int(object_id),
                 self._user_id_field: int(user_id),
                 self._timestamp_field: timestamp_to_datetime(timestamp)
-            }) for user_id, values in cached_writes.iteritems() for object_id, timestamp in values]
+            }) for user_id, values in cached_writes.iteritems() for object_id, timestamp in values.iteritems()]
 
         if trackers:
             with transaction.atomic():
