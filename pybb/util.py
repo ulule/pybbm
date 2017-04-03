@@ -5,13 +5,14 @@ import six
 
 from collections import defaultdict
 
+from datetime import datetime
 from six.moves.urllib.parse import urlparse, urlunparse
 
 from django.utils.timezone import now as tznow  # noqa
 
 from django.views import generic  # noqa
 
-
+from django.core.cache import caches
 from django.core.files import File
 from django.core.files.uploadedfile import UploadedFile
 from django.conf import settings
@@ -20,7 +21,7 @@ from django.core import exceptions
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.http import QueryDict
 from django.shortcuts import redirect
-from django.utils.timezone import timedelta, now as tznow  # noqa
+from django.utils.timezone import timedelta, make_aware, utc, now as tznow  # noqa
 
 from importlib import import_module
 
@@ -30,6 +31,8 @@ from . import defaults
 CLASS_PATH_ERROR = 'pybb is unable to interpret settings value for %s. '\
                    '%s should be in the form of a tupple: '\
                    '(\'path.to.models.Class\', \'app_label\').'
+
+CLIENT_ERROR = "The client you're trying to load is not there or not responding"
 
 
 def unescape(text):
@@ -283,3 +286,48 @@ def shard(string, width, depth, rest_only=False):
         yield string[(width * depth):]
     else:
         yield string
+
+
+def datetime_to_timestamp(value):
+    if settings.USE_TZ:
+        return (value - make_aware(datetime.utcfromtimestamp(0), timezone=utc)).total_seconds()
+    else:
+        return (value - datetime.fromtimestamp(0)).total_seconds()
+
+
+def timestamp_to_datetime(timestamp):
+    if settings.USE_TZ:
+        return make_aware(datetime.utcfromtimestamp(timestamp), timezone=utc)
+    else:
+        return datetime.fromtimestamp(timestamp)
+
+
+def get_redis_connection(alias='default'):
+    cache = caches[alias]
+
+    client = getattr(cache, '_client', None)
+
+    if not client:
+        client = list(cache.client_list)[0]
+
+    return client
+
+
+def get_scored_value_cache(prefix):
+    """
+    :rtype:pybb.cache.ScoredValueCacheInterface
+    """
+    cache_class = load_class(settings.PYBB_READ_TRACKER_CACHE['data_cache']['class_path'])
+    options = dict(settings.PYBB_READ_TRACKER_CACHE['data_cache']['options'])
+    options['prefix'] = '{}:{}'.format(options.get('prefix', ''), prefix)
+    return cache_class(**options)
+
+
+def get_kv_store(prefix):
+    """
+    :rtype:pybb.cache.KeyValueCacheInterface
+    """
+    cache_class = load_class(settings.PYBB_READ_TRACKER_CACHE['metadata_cache']['class_path'])
+    options = dict(settings.PYBB_READ_TRACKER_CACHE['metadata_cache']['options'])
+    options['prefix'] = '{}:{}'.format(options.get('prefix', ''), prefix)
+    return cache_class(**options)

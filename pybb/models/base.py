@@ -1214,28 +1214,49 @@ class BaseTopicReadTracker(ModelBase):
                               null=True)
     time_stamp = models.DateTimeField(auto_now=True)
 
+from pybb.cache import ClientException
+from pybb.util import get_scored_value_cache, get_kv_store
+from pybb.models.mixins import ReadTrackerManager, ReadTrackerManagerWithCache
 
-class ForumReadTrackerManager(ManagerBase):
-    def mark_as_read(self, user, forums):
-        forum_ids = [tracker[0]
-                     for tracker in self.filter(user=user).values_list('forum_id')]
 
-        trackers = []
-        updated_ids = []
+def get_forum_read_tracker_manager():
 
-        for forum in forums:
-            if forum.pk not in forum_ids:
-                trackers.append(self.model(forum=forum, user=user))
-            else:
-                updated_ids.append(forum.pk)
+    class ForumReadTrackerManagerRegular(ReadTrackerManager):
+        _object_id_field = 'forum_id'
+        _user_id_field = 'user_id'
+        _timestamp_field = 'time_stamp'
 
-        if len(trackers):
-            trackers = self.bulk_create(trackers)
+        class Meta:
+            abstract = True
 
-        if len(updated_ids):
-            self.filter(forum__in=updated_ids, user=user).update(time_stamp=tznow())
+    manager = ForumReadTrackerManagerRegular
 
-        return trackers
+    if getattr(settings, 'PYBB_READ_TRACKER_CACHE', None):
+        try:
+            cache = get_scored_value_cache('forums_read_by')
+            kv_store = get_kv_store('savepoint')
+
+        except ClientException:
+            pass
+        else:
+            class ForumReadTrackerManagerWithCache(ReadTrackerManagerWithCache):
+                _object_id_field = 'forum_id'
+                _user_id_field = 'user_id'
+                _timestamp_field = 'time_stamp'
+
+                _scored_cache = cache
+                _kv_store = kv_store
+
+                _savepoint_key = 'forum'
+
+                class Meta:
+                    abstract = True
+
+            manager = ForumReadTrackerManagerWithCache
+    return manager
+
+
+ForumReadTrackerManager = get_forum_read_tracker_manager()
 
 
 class BaseForumReadTracker(ModelBase):
