@@ -1227,7 +1227,7 @@ def get_forum_read_tracker_manager():
         _timestamp_field = 'time_stamp'
 
         class Meta:
-            abstract = True
+            abstract = False
 
     manager = ForumReadTrackerManagerRegular
 
@@ -1250,7 +1250,7 @@ def get_forum_read_tracker_manager():
                 _savepoint_key = 'forum'
 
                 class Meta:
-                    abstract = True
+                    abstract = False
 
             manager = ForumReadTrackerManagerWithCache
     return manager

@@ -27,13 +27,13 @@ class RedisKeyValueCache(KeyValueCache):
         self.client.hsetnx(self.prefix, key, value)
 
     def set_bulk(self, **kwargs):
-        self.client.hmset(self.prefix, *kwargs)
+        self.client.hmset(self.prefix, kwargs)
 
     def count(self):
         return self.client.hlen(self.prefix)
 
     def invalidate(self, key):
-        self.client.hdel(key)
+        self.client.hdel(self.prefix, key)
 
     def invalidate_bulk(self, *keys):
-        self.client.hdel(*keys)
+        self.client.hdel(self.prefix, *keys)

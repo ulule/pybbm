@@ -1,4 +1,7 @@
-from itertools import izip
+try:
+    from itertools import izip
+except ImportError:
+    izip = zip
 
 from pybb.util import get_redis_connection
 from .base import ScoredValueCache
@@ -28,7 +31,8 @@ class RedisScoredValueCache(ScoredValueCache):
     def get_score(self, dimension_x, dimension_y):
         return self.client.zscore(self._format_cache_key(dimension_x), dimension_y)
 
-    def get_range_by_index(self, dimension_x=None, start=0, end=-1):
+    def get_range_by_index(self, start=0, end=0, dimension_x=None):
+        end -= 1
         if dimension_x is not None:
             return self.client.zrange(self._format_cache_key(dimension_x), start, end, withscores=True)
         else:
@@ -86,13 +90,20 @@ class RedisScoredValueCache(ScoredValueCache):
 
     def count(self, dimension_x=None, minimum=None, maximum=None):
         if dimension_x is not None:
+            if minimum is None or maximum is None:
+                return self.client.zcard(self._format_cache_key(dimension_x))
             return self.client.zcount(self._format_cache_key(dimension_x), minimum, maximum)
         else:
             keys = [key for key in self.client.scan_iter(match=self._key_pattern)]
             pipe = self.client.pipeline(transaction=True)
 
-            for key in keys:
-                pipe.zcount(key, minimum, maximum)
+            if minimum is None or maximum is None:
+                for key in keys:
+                    pipe.zcard(key)
+            else:
+                for key in keys:
+                    pipe.zcount(key, minimum, maximum)
+
             results = pipe.execute()
 
             return sum(results)

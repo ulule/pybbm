@@ -105,6 +105,29 @@ class TestCase(test.TestCase, FixtureMixin):
     pass
 
 
+def requires_redis():
+    try:
+        from redis import StrictRedis
+    except ImportError:
+        skip = True
+    else:
+        skip = False
+    return test.utils.skipIf(skip, "Can't import redis module")
+
+
+@requires_redis()
+class RedisTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        from redis import StrictRedis
+        super(RedisTestCase, cls).setUpClass()
+        cls.redis = StrictRedis(db=10)
+
+    def tearDown(self):
+        self.redis.flushdb()
+        super(RedisTestCase, self).tearDown()
+
+
 class TransactionTestCase(test.TransactionTestCase, FixtureMixin):
     pass
 
