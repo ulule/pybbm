@@ -32,8 +32,6 @@ CLASS_PATH_ERROR = 'pybb is unable to interpret settings value for %s. '\
                    '%s should be in the form of a tupple: '\
                    '(\'path.to.models.Class\', \'app_label\').'
 
-CLIENT_ERROR = "The client you're trying to load is not there or not responding"
-
 
 def unescape(text):
     """
