@@ -564,12 +564,12 @@ class PostUpdateMixin(object):
         return self.render_to_response(context)
 
 
-class PostCreateView(PostUpdateMixin, generic.CreateView):
+class BasePostCreateView(PostUpdateMixin, generic.CreateView):
     template_name = 'pybb/post/create.html'
 
     def get_form_kwargs(self):
         ip = self.request.META.get('REMOTE_ADDR', '')
-        form_kwargs = super(PostCreateView, self).get_form_kwargs()
+        form_kwargs = super(BasePostCreateView, self).get_form_kwargs()
         form_kwargs.update(dict(topic=self.topic, forum=self.forum, user=self.user,
                                 ip=ip, initial={}))
 
@@ -579,29 +579,9 @@ class PostCreateView(PostUpdateMixin, generic.CreateView):
         return form_kwargs
 
     def get_context_data(self, **kwargs):
-        ctx = super(PostCreateView, self).get_context_data(**kwargs)
-
+        ctx = super(BasePostCreateView, self).get_context_data(**kwargs)
         ctx['forum'] = self.forum
-
         ctx['topic'] = self.topic
-
-        ctx['post_list'] = []
-
-        if self.topic:
-            qs = (self.topic.posts.all()
-                  .select_related('user')
-                  .order_by('-created')
-                  .filter_by_user(self.topic, self.request.user))
-
-            ctx['post_count'] = qs.count()
-
-            posts = qs[:defaults.PYBB_POST_LIST_SIZE]
-
-            for post in posts:
-                post.topic = self.topic
-
-            ctx['post_list'] = posts
-            ctx['post_page_size'] = defaults.PYBB_POST_LIST_SIZE
 
         return ctx
 
@@ -612,18 +592,7 @@ class PostCreateView(PostUpdateMixin, generic.CreateView):
 
         return self.object.get_anchor_url(self.request.user)
 
-    @method_decorator(csrf_protect)
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated():
-            self.user = request.user
-        else:
-            if not defaults.PYBB_ENABLE_ANONYMOUS_POST:
-                return redirect_to_login(request.get_full_path())
-
-            User = get_user_model()
-
-            self.user, new = User.objects.get_or_create(username=defaults.PYBB_ANONYMOUS_USERNAME)
-
+    def get_parents(self, request, *args, **kwargs):
         self.forum = None
         self.topic = None
 
@@ -644,6 +613,20 @@ class PostCreateView(PostUpdateMixin, generic.CreateView):
             if self.topic.closed:
                 raise PermissionDenied
 
+    @method_decorator(csrf_protect)
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated():
+            self.user = request.user
+        else:
+            if not defaults.PYBB_ENABLE_ANONYMOUS_POST:
+                return redirect_to_login(request.get_full_path())
+
+            User = get_user_model()
+
+            self.user, new = User.objects.get_or_create(username=defaults.PYBB_ANONYMOUS_USERNAME)
+
+        self.get_parents(request, *args, **kwargs)
+
         result = all([load_class(pre_post_create_filter)(
             topic=self.topic,
             request=request,
@@ -653,7 +636,32 @@ class PostCreateView(PostUpdateMixin, generic.CreateView):
         if not result:
             raise PermissionDenied
 
-        return super(PostCreateView, self).dispatch(request, *args, **kwargs)
+        return super(BasePostCreateView, self).dispatch(request, *args, **kwargs)
+
+
+class PostCreateView(BasePostCreateView):
+    def get_context_data(self, **kwargs):
+        ctx = super(PostCreateView, self).get_context_data(**kwargs)
+
+        ctx['post_list'] = []
+
+        if self.topic:
+            qs = (self.topic.posts.all()
+                  .select_related('user')
+                  .order_by('-created')
+                  .filter_by_user(self.topic, self.request.user))
+
+            ctx['post_count'] = qs.count()
+
+            posts = qs[:defaults.PYBB_POST_LIST_SIZE]
+
+            for post in posts:
+                post.topic = self.topic
+
+            ctx['post_list'] = posts
+            ctx['post_page_size'] = defaults.PYBB_POST_LIST_SIZE
+
+        return ctx
 
 
 class PostUpdateView(PostUpdateMixin, generic.UpdateView):
