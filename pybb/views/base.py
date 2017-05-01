@@ -292,7 +292,7 @@ class TopicsLatestView(ListView):
 class UserPostsView(ListView):
     paginate_by = defaults.PYBB_TOPIC_PAGE_SIZE
     paginator_class = Paginator
-    template_object_name = 'post_list'
+    context_object_name = 'post_list'
     template_name = 'pybb/user/post_list.html'
 
     def get_queryset(self):
@@ -314,10 +314,10 @@ class UserPostsView(ListView):
 
         ctx['post_user'] = self.user
 
-        lookup_post_topics(ctx[self.template_object_name])
-        load_user_posts(ctx[self.template_object_name], self.user)
-        lookup_post_attachments(ctx[self.template_object_name])
-        lookup_users([post.topic for post in ctx[self.template_object_name]])
+        lookup_post_topics(ctx[self.context_object_name])
+        load_user_posts(ctx[self.context_object_name], self.user)
+        lookup_post_attachments(ctx[self.context_object_name])
+        lookup_users([post.topic for post in ctx[self.context_object_name]])
 
         return ctx
 
@@ -375,7 +375,7 @@ class UserPostsDeleteView(generic.DeleteView):
 class TopicDetailView(ListView):
     paginate_by = defaults.PYBB_TOPIC_PAGE_SIZE
     paginator_class = Paginator
-    template_object_name = 'post_list'
+    context_object_name = 'post_list'
     template_name = 'pybb/topic/list.html'
     url = '^(?P<forum_slug>[\w\-\_]+)/(?P<pk>\d+)-(?P<slug>[\w\-\_]+)(?:\-(?P<page>\d+)/)?$'
 
@@ -458,7 +458,7 @@ class TopicDetailView(ListView):
         if page_number > 1:
             start = (start - 1) * ctx['paginator'].per_page + 1
 
-        for idx, post in enumerate(ctx[self.template_object_name], start):
+        for idx, post in enumerate(ctx[self.context_object_name], start):
             post.topic = self.topic
             post.index = idx
 
@@ -491,8 +491,8 @@ class TopicDetailView(ListView):
         else:
             ctx['first_post'] = None
 
-        lookup_users(ctx[self.template_object_name])
-        lookup_post_attachments(ctx[self.template_object_name])
+        lookup_users(ctx[self.context_object_name])
+        lookup_post_attachments(ctx[self.context_object_name])
 
         return ctx
 
