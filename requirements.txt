@@ -18,3 +18,4 @@ exam
 coverage
 six
 pytest
+pytest-django
