@@ -41,7 +41,7 @@ class ForumsTest(TestCase):
 
         self.assertEqual(Forum.objects.count(), 3)
 
-        forum = Forum.objects.get(pk=3)
+        forum = Forum.objects.get(name='My forum 2')
 
         self.assertRedirects(response,
                              forum.get_absolute_url())

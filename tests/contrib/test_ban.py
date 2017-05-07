@@ -62,7 +62,7 @@ class BanTest(TestCase):
 
         self.login_as(self.staff)
 
-        IPAddress.objects.bulk_create([
+        ip_addresses = IPAddress.objects.bulk_create([
             IPAddress(user=self.user, ip_address='199.59.149.230'),
             IPAddress(user=self.user, ip_address='66.220.152.16'),
             IPAddress(user=self.user, ip_address='74.125.230.201'),
@@ -74,9 +74,9 @@ class BanTest(TestCase):
 
         response = self.client.post(url, data={
             'reason': 'Because he is too small',
-            'ip_address_1': 1,
-            'ip_address_2': 0,
-            'ip_address_3': 1,
+            'ip_address_{}'.format(ip_addresses[0].id): 1,
+            'ip_address_{}'.format(ip_addresses[1].id): 0,
+            'ip_address_{}'.format(ip_addresses[2].id): 1,
         })
 
         self.assertRedirects(response,
