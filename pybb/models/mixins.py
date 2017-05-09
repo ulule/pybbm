@@ -4,7 +4,7 @@ from django.db import models, transaction
 from django.db.models import signals
 from django.utils.functional import cached_property
 
-from base import ModelBase
+from pybb.base import ModelBase
 
 
 class ParentForumQuerysetMixin(object):
@@ -82,7 +82,7 @@ class ParentForumBase(ModelBase):
         """
         Used in templates for breadcrumb building
         """
-        return self.forum.parents() + [self.forum, ] if self.forum_id else []
+        return self.forum.parents + [self.forum, ] if self.forum_id else []
 
     def rebuild_parents(self, commit=False):
         parent = self.forum

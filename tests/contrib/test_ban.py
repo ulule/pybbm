@@ -62,11 +62,13 @@ class BanTest(TestCase):
 
         self.login_as(self.staff)
 
-        ip_addresses = IPAddress.objects.bulk_create([
+        IPAddress.objects.bulk_create([
             IPAddress(user=self.user, ip_address='199.59.149.230'),
             IPAddress(user=self.user, ip_address='66.220.152.16'),
             IPAddress(user=self.user, ip_address='74.125.230.201'),
         ])
+
+        ip_addresses = IPAddress.objects.filter(user=self.user).all()
 
         response = self.client.get(url)
 
