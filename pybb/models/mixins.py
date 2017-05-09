@@ -40,13 +40,14 @@ class ParentForumManagerMixin(object):
         if not (sender == Forum and instance._has_moved):
             return
 
-        children = list(self.has_forum_parent(instance).all()) + list(Topic.objects.has_forum_parent(instance).all())
+        forums = [instance]
+        while forums:
+            for forum in forums:
+                forum_ids = [forum.id] + forum.forum_ids
+                self.filter(forum=forum).all().update(forum_ids=forum_ids)
+                Topic.objects.filter(forum=forum).all().update(forum_ids=forum_ids)
 
-        # Update forum_ids attribute of this instance's children
-        for child in children:
-            idx = child.forum_ids.index(instance.id)
-            child.forum_ids = child.forum_ids[:idx+1] + instance.forum_ids
-            child.save(_signal=False, update_fields=('forum_ids',))
+            forums = self.filter(forum__in=forums)
 
         instance._has_moved = False
 
