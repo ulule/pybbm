@@ -169,3 +169,45 @@ class ModelsTest(TestCase):
 
         self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 1)
         self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 1)
+
+    def test_move_forum(self):
+        # Initial state
+        topic = self.topic
+        forum = self.topic.forum
+        original_parent = self.topic.forum.forum
+
+        original_parent.refresh_from_db(fields=('parents', 'forum'))
+        forum.refresh_from_db(fields=('parents', 'forum'))
+        topic.refresh_from_db(fields=('parents', 'forum'))
+
+        assert original_parent.forum_id is None
+        assert original_parent.parents == []
+
+        assert forum.forum_id == original_parent.id
+        assert forum.parents == [original_parent.id]
+
+        assert topic.forum_id == forum.id
+        assert topic.parents == [forum.id, original_parent.id]
+
+        # move forum to new_parent
+        new_parent = Forum.objects.create(name='zfoo', description='bar', forum=self.parent_forum)
+
+        forum.forum = new_parent
+        forum.save(update_fields=('forum',))
+
+        original_parent.refresh_from_db(fields=('parents', 'forum'))
+        new_parent.refresh_from_db(fields=('parents', 'forum'))
+        forum.refresh_from_db(fields=('parents', 'forum'))
+        topic.refresh_from_db(fields=('parents', 'forum'))
+
+        assert original_parent.forum_id is None
+        assert original_parent.parents == []
+
+        assert new_parent.forum_id == original_parent.id
+        assert new_parent.parents == [original_parent.id]
+
+        assert forum.forum_id == new_parent.id
+        assert forum.parents == [new_parent.id, original_parent.id]
+
+        assert topic.forum_id == forum.id
+        assert topic.parents == [forum.id, new_parent.id, original_parent.id]

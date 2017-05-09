@@ -34,6 +34,7 @@ from django.conf import settings
 from pybb.compat import update_fields, AUTH_USER_MODEL, queryset
 from pybb.util import unescape, get_model_string, tznow
 from pybb.base import ModelBase, ManagerBase, QuerySetBase
+from pybb.models.mixins import ParentForumQuerysetMixin, ParentForumManagerMixin, ParentForumBase
 from pybb.subscription import notify_topic_subscribers
 from pybb import defaults
 from pybb.fields import ContentTypeRestrictedFileField, CAStorage
@@ -103,7 +104,7 @@ class BaseModerator(ModelBase):
         return permissions
 
 
-class ForumQuerySet(QuerySetBase):
+class ForumQuerySet(ParentForumQuerysetMixin, QuerySetBase):
     def filter_by_user(self, user, hidden=True):
         if user.is_staff or user.is_superuser:
             return self
@@ -118,7 +119,7 @@ class ForumQuerySet(QuerySetBase):
 
 
 @queryset
-class ForumManager(ManagerBase):
+class ForumManager(ParentForumManagerMixin, ManagerBase):
     def contribute_to_class(self, cls, name):
         signals.post_save.connect(self.post_save, sender=cls)
         signals.post_delete.connect(self.post_delete, sender=cls)
@@ -151,7 +152,7 @@ def get_moderator_ids_by_forum():
 
 
 @python_2_unicode_compatible
-class BaseForum(ModelBase):
+class BaseForum(ParentForumBase):
     forum = models.ForeignKey('Forum', related_name='forums',
                               verbose_name=_('Parent'), null=True, blank=True)
     name = models.CharField(_('Name'), max_length=80)
@@ -343,15 +344,8 @@ class BaseForum(ModelBase):
 
         return topic
 
-    def get_parents(self):
-        """
-        Used in templates for breadcrumb building
-        """
-        return self.forum.get_parents() + [self.forum, ] if self.forum_id else []
-
     @classmethod
-    def watch_forum(cls, old_attr={}, new_attr={},
-                    instance=None, sender=None, **kw):
+    def watch_forum(cls, old_attr={}, new_attr={}, instance=None, sender=None, **kw):
         from pybb.models import Forum
 
         if (old_attr.get('forum_id', None) and
@@ -434,12 +428,12 @@ class TopicQuerySetMixin(object):
                            redirect=False).exclude(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION)
 
 
-class TopicQuerySet(TopicQuerySetMixin, QuerySetBase):
+class TopicQuerySet(ParentForumQuerysetMixin, TopicQuerySetMixin, QuerySetBase):
     pass
 
 
 @queryset
-class TopicManager(ManagerBase):
+class TopicManager(ParentForumManagerMixin, ManagerBase):
     def get_queryset(self):
         return TopicQuerySet(self.model)
 
@@ -493,7 +487,7 @@ class BaseSubscription(ModelBase):
 
 
 @python_2_unicode_compatible
-class BaseTopic(ModelBase):
+class BaseTopic(ParentForumBase):
     MODERATION_IS_CLEAN = 0
     MODERATION_IS_IN_MODERATION = 1
     MODERATION_HAS_POSTS_IN_MODERATION = 2
