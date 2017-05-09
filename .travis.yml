@@ -6,3 +6,4 @@ script: tox
 services:
   - elasticsearch
   - rabbitmq
+  - postgresql

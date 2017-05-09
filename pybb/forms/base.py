@@ -166,7 +166,7 @@ class PostForm(forms.ModelForm):
 
         return self.cleaned_data
 
-    def get_topic(self, allow_post):
+    def get_or_create_topic(self, allow_post):
         if self._forum:
             topic = Topic(
                 forum=self._forum,
@@ -244,7 +244,7 @@ class PostForm(forms.ModelForm):
         if 'forum' in self.cleaned_data and not self._forum:
             self._forum = self.cleaned_data['forum']
 
-        topic = self.get_topic(allow_post)
+        topic = self.get_or_create_topic(allow_post)
 
         post = self.create_post(topic)
 
