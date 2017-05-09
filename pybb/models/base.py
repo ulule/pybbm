@@ -716,12 +716,6 @@ class BaseTopic(ParentForumBase):
 
         self.forum.update_counters()
 
-    def get_parents(self):
-        """
-        Used in templates for breadcrumb building
-        """
-        return self.forum.get_parents() + [self.forum, ]
-
     @property
     def poll_votes(self):
         return self.poll.poll_votes
@@ -1050,11 +1044,12 @@ class BasePost(RenderableItem):
             if self_id == head_post_id:
                 self.topic.mark_as_undeleted()
 
-    def get_parents(self):
+    @cached_property
+    def parents(self):
         """
         Used in templates for breadcrumb building
         """
-        return self.topic.get_parents() + [self.topic, ]
+        return self.topic.parents + [self.topic, ]
 
     def is_updatable(self):
         delta = (tznow() - self.created).seconds
