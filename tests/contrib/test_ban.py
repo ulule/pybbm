@@ -68,7 +68,7 @@ class BanTest(TestCase):
             IPAddress(user=self.user, ip_address='74.125.230.201'),
         ])
 
-        ip_addresses = IPAddress.objects.filter(user=self.user).all()
+        ip_addresses = list(IPAddress.objects.filter(user=self.user).all())
 
         response = self.client.get(url)
 
