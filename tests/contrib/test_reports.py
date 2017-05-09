@@ -1,10 +1,10 @@
 from django.core.urlresolvers import reverse
 from django.template import Context, Template
 
-from pybb.tests.base import TestCase
+from pybb.contrib.reports.forms import ReportMessageForm
+from pybb.contrib.reports.models import Report, ReportMessage
 
-from .forms import ReportMessageForm
-from .models import Report, ReportMessage
+from tests.base import TestCase
 
 
 class ReportsTest(TestCase):

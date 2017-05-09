@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from tests.base import TestCase
 from pybb.engines.bbcode import BBCodeMarkupEngine
 from pybb.engines.bbcode.formatters import FONT_FAMILIES, FONT_SIZES

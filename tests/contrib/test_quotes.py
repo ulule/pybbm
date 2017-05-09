@@ -2,13 +2,13 @@ from django.core.urlresolvers import reverse
 
 from django.utils.html import strip_spaces_between_tags as minify_html
 
-from pybb.tests.base import TestCase
-
-from .models import Quote
-from .processors import QuoteProcessor
-from . import settings as quotes_settings
+from pybb.contrib.quotes.models import Quote
+from pybb.contrib.quotes.processors import QuoteProcessor
+from pybb.contrib.quotes import settings as quotes_settings
 
 from pybb.models import Post
+
+from tests.base import TestCase
 
 
 class QuotesTest(TestCase):

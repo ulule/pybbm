@@ -1,12 +1,12 @@
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
 
-from .forms import BanForm
-from .models import BannedUser, IPAddress, handle_user_logged_in
-from . import settings
-from .middleware import PybbBanMiddleware
+from pybb.contrib.ban.forms import BanForm
+from pybb.contrib.ban.models import BannedUser, IPAddress, handle_user_logged_in
+from pybb.contrib.ban import settings
+from pybb.contrib.ban.middleware import PybbBanMiddleware
 
-from pybb.tests.base import TestCase
+from tests.base import TestCase
 
 from mock import patch
 
