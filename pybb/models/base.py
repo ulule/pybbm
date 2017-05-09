@@ -636,9 +636,14 @@ class BaseTopic(ModelBase):
                 TopicReadTracker.objects.create(topic=self, user=user)
 
             # Check, if there are any unread topics in forum
-            read = Topic.objects.filter(Q(forum=self.forum) & (Q(topicreadtracker__user=user, topicreadtracker__time_stamp__gt=F('updated'))) |
-                                        Q(forum__forumreadtracker__user=user, forum__forumreadtracker__time_stamp__gt=F('updated')))
-            unread = Topic.objects.filter(forum=self.forum).exclude(id__in=read)
+            read = Topic.objects.filter(
+                forum=self.forum, topicreadtracker__user=user, topicreadtracker__time_stamp__gt=F('updated'))
+
+            if forum_mark:
+                unread = Topic.objects.filter(forum=self.forum, updated__gt=forum_mark.time_stamp).exclude(id__in=read)
+            else:
+                unread = Topic.objects.filter(forum=self.forum).exclude(id__in=read)
+
             if not unread.exists():
                 # Clear all topic marks for this forum, mark forum as readed
                 TopicReadTracker.objects.filter(
