@@ -8,7 +8,7 @@ from pybb.base import ModelBase
 
 
 class ParentForumQuerysetMixin(object):
-    def has_forum_parent(self, forum):
+    def has_parent_forum(self, forum):
         return self.filter(forum_ids__contains=[forum.id])
 
 
@@ -16,15 +16,15 @@ class ParentForumManagerMixin(object):
     def get_queryset(self):
         return ParentForumQuerysetMixin(self.model)
 
-    def has_forum_parent(self, *args, **kwargs):
-        return self.get_queryset().has_forum_parent(*args, **kwargs)
+    def has_parent_forum(self, *args, **kwargs):
+        return self.get_queryset().has_parent_forum(*args, **kwargs)
 
     def contribute_to_class(self, cls, name):
-        signals.pre_save.connect(self.forum_parents_pre_save, sender=cls)
-        signals.post_save.connect(self.forum_parents_post_save, sender=cls)
+        signals.pre_save.connect(self.parent_forums_pre_save, sender=cls)
+        signals.post_save.connect(self.parent_forums_post_save, sender=cls)
         return super(ParentForumManagerMixin, self).contribute_to_class(cls, name)
 
-    def forum_parents_pre_save(self, sender, instance, **kwargs):
+    def parent_forums_pre_save(self, sender, instance, **kwargs):
         if ((instance.forum_ids and instance.forum_ids[0] == instance.forum_id) or
                 (not instance.forum_ids and not instance.forum_id)):
             instance._has_moved = False
@@ -34,7 +34,7 @@ class ParentForumManagerMixin(object):
         instance._has_moved = True
 
     @transaction.atomic
-    def forum_parents_post_save(self, sender, instance, **kwargs):
+    def parent_forums_post_save(self, sender, instance, **kwargs):
         from pybb.models import Forum, Topic
 
         if not (sender == Forum and instance._has_moved):
