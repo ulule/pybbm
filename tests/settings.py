@@ -14,13 +14,10 @@ sys.path[0:0] = [
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'pybb_test',
-        'TEST_NAME': 'pybb_test'
-    },
-    'slave': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'pybb_test',
-        'TEST_NAME': 'pybb_test'
+        'NAME': 'pybb',
+        'TEST': {
+            'NAME': 'pybb_test',
+        },
     }
 }
 
