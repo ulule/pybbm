@@ -162,11 +162,33 @@ class ForumUpdateView(generic.UpdateView):
         return self.object.get_absolute_url()
 
 
-class ForumDetailView(ListView):
-    paginate_by = defaults.PYBB_FORUM_PAGE_SIZE
-    context_object_name = 'topic_list'
-    template_name = 'pybb/forum/detail.html'
+class TopicListViewMixin(object):
     paginator_class = Paginator
+    context_object_name = 'topic_list'
+    model = Topic
+
+    def get_context_data(self, **kwargs):
+        ctx = super(TopicListViewMixin, self).get_context_data(**kwargs)
+        lookup_topic_lastposts(ctx[self.context_object_name])
+        lookup_users(ctx[self.context_object_name])
+
+        last_posts = []
+        for topic in ctx[self.context_object_name]:
+            if topic.last_post_id:
+                try:
+                    last_posts.append(topic.last_post)
+                    topic.last_post.topic = topic
+                except Post.DoesNotExist:
+                    pass
+
+        lookup_users(last_posts)
+
+        return ctx
+
+
+class ForumDetailView(TopicListViewMixin, ListView):
+    paginate_by = defaults.PYBB_FORUM_PAGE_SIZE
+    template_name = 'pybb/forum/detail.html'
     url = '^(?P<slug>[\w\-\_]+)/(?:(?P<page>\d+)/)?$'
 
     def get_context_data(self, **kwargs):
@@ -179,21 +201,8 @@ class ForumDetailView(ListView):
                                                             'last_post__user'))
         self.forum.forums_accessed = qs
 
-        lookup_topic_lastposts(ctx[self.context_object_name])
-        lookup_users(ctx[self.context_object_name])
-
-        last_posts = []
         for topic in ctx[self.context_object_name]:
             topic.forum = self.forum
-
-            if topic.last_post_id:
-                try:
-                    last_posts.append(topic.last_post)
-                    topic.last_post.topic = topic
-                except Post.DoesNotExist:
-                    pass
-
-        lookup_users(last_posts)
 
         return ctx
 
@@ -254,12 +263,9 @@ class LogModerationListView(ListView):
         return self.model.objects.select_related()
 
 
-class TopicsLatestView(ListView):
+class TopicsLatestView(TopicListViewMixin, ListView):
     paginate_by = defaults.PYBB_TOPIC_PAGE_SIZE
-    paginator_class = Paginator
-    context_object_name = 'topic_list'
     template_name = 'pybb/topic/latest.html'
-    model = Topic
 
     def get_queryset(self):
         return (self.model.objects.visible()
@@ -269,24 +275,6 @@ class TopicsLatestView(ListView):
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         return super(TopicsLatestView, self).dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        ctx = super(TopicsLatestView, self).get_context_data(**kwargs)
-
-        lookup_topic_lastposts(ctx[self.context_object_name])
-        lookup_users(ctx[self.context_object_name])
-
-        last_posts = []
-        for topic in ctx[self.context_object_name]:
-            if topic.last_post_id:
-                try:
-                    last_posts.append(topic.last_post)
-                except Post.DoesNotExist:
-                    pass
-
-        lookup_users(last_posts)
-
-        return ctx
 
 
 class UserPostsView(ListView):
