@@ -132,6 +132,7 @@ class ModelsTest(TestCase):
         self.assertEqual(self.forum.topic_count, 1)
         self.assertEqual(self.forum.post_count, 1)
 
+        # Add (forum --> topic --> post) in self.forum
         forum = Forum.objects.create(name='bar', description='bar', forum=self.forum)
 
         topic = Topic(name='bar', forum=forum, user=self.user)
@@ -140,35 +141,74 @@ class ModelsTest(TestCase):
         post = Post(topic=topic, user=self.user, body='my new post')
         post.save()
 
+        self.assertEquals(Topic.objects.get(pk=topic.pk).get_first_post(), post)
         self.assertEqual(topic.post_count, 1)
         self.assertEqual(forum.topic_count, 1)
 
+        self.assertEqual(Forum.objects.get(pk=self.forum.pk).post_count, 2)
         self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 2)
+        self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).post_count, 2)
         self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 2)
 
+        # Add (topic --> post) in self.forum
         new_topic = Topic(name='foo', forum=self.forum, user=self.user)
         new_topic.save()
 
-        new_post = Post(topic=topic, user=self.user, body='my new post')
+        new_post = Post(topic=new_topic, user=self.user, body='my new post')
         new_post.save()
+        self.assertEquals(Topic.objects.get(pk=new_topic.pk).get_first_post(), new_post)
 
+        self.assertEqual(Forum.objects.get(pk=self.forum.pk).post_count, 3)
         self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 3)
+        self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).post_count, 3)
         self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 3)
 
+        # delete post in (self.parent_forum --> self.forum --> forum --> topic)
         post.mark_as_deleted(commit=True)
 
-        self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 2)
-        self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 2)
-
         self.assertTrue(Topic.objects.get(pk=topic.pk).deleted)
+        self.assertEquals(Topic.objects.get(pk=topic.pk).get_first_post(), post)
+        self.assertTrue(Topic.objects.get(pk=topic.pk).get_first_post().deleted)
 
         self.assertEqual(Forum.objects.get(pk=forum.pk).topic_count, 0)
         self.assertEqual(Forum.objects.get(pk=forum.pk).post_count, 0)
 
+        self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 2)
+        self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 2)
+
+        # delete new_topic in (self.parent_forum --> self.forum)
         new_topic.mark_as_deleted()
+
+        self.assertTrue(Topic.objects.get(pk=new_topic.pk).deleted)
+        self.assertEquals(Topic.objects.get(pk=new_topic.pk).get_first_post(), new_post)
+        self.assertTrue(Topic.objects.get(pk=new_topic.pk).get_first_post().deleted)
 
         self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 1)
         self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 1)
+
+        # undelete new_topic in (self.parent_forum --> self.forum)
+        new_topic.mark_as_undeleted()
+
+        self.assertFalse(Topic.objects.get(pk=new_topic.pk).deleted)
+        self.assertEquals(Topic.objects.get(pk=new_topic.pk).get_first_post(), new_post)
+        self.assertFalse(Topic.objects.get(pk=new_topic.pk).get_first_post().deleted)
+
+        self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 2)
+        self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 2)
+
+        # undelete post in (self.parent_forum --> self.forum --> forum --> topic)
+        post.mark_as_undeleted(commit=True)
+
+        self.assertFalse(Topic.objects.get(pk=topic.pk).deleted)
+        self.assertEquals(Topic.objects.get(pk=topic.pk).get_first_post(), post)
+        self.assertFalse(Topic.objects.get(pk=topic.pk).get_first_post().deleted)
+
+        self.assertEqual(Forum.objects.get(pk=forum.pk).post_count, 1)
+        self.assertEqual(Forum.objects.get(pk=forum.pk).topic_count, 1)
+        self.assertEqual(Forum.objects.get(pk=self.forum.pk).post_count, 3)
+        self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 3)
+        self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).post_count, 3)
+        self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 3)
 
     def test_move_forum(self):
         # Initial state

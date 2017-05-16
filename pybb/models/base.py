@@ -590,27 +590,40 @@ class BaseTopic(ParentForumBase):
     def head(self):
         return self.get_first_post()
 
-    def get_first_post(self):
+    def get_first_post(self, force_refresh=False, select_related=None, prefetch_related=None):
         """
         Get first post and cache it for request
         """
-        if not getattr(self, '_head', None):
-            self._head = self.posts.visible().order_by('created')
-            self._head.topic = self
+        if self.first_post_id and not (force_refresh or select_related or prefetch_related):
+            self._head = self.first_post
 
-        if not len(self._head):
-            return None
+        if not getattr(self, '_head', None) or force_refresh:
+            qs = self.posts.order_by('created')[:1]
 
-        return self._head[0]
+            if select_related:
+                qs = qs.select_related(*select_related)
+            if prefetch_related:
+                qs = qs.prefetch_related(*prefetch_related)
+            try:
+                self._head = qs[0]
+            except IndexError:
+                return None
+            else:
+                self.first_post = self._head
+
+        self._head.topic = self
+
+        return self._head
 
     def get_last_post(self):
         try:
             last_post = self.posts.visible(join=False).order_by('-created').select_related('user')[0]
-            last_post.topic = self
-
-            return last_post
         except IndexError:
             return None
+        else:
+            last_post.topic = self
+            self.last_post = last_post
+            return last_post
 
     def mark_as_read(self, user):
         from pybb.models import TopicReadTracker, ForumReadTracker, Subscription, Topic
@@ -623,7 +636,7 @@ class BaseTopic(ParentForumBase):
             forum_mark = None
 
         if self.updated and ((forum_mark is None) or (forum_mark.time_stamp < self.updated)):
-            # Mark topic as readed
+            # Mark topic as read
             count = TopicReadTracker.objects.filter(topic=self, user=user).update(time_stamp=tznow())
 
             if not count:
@@ -634,7 +647,7 @@ class BaseTopic(ParentForumBase):
                                         Q(forum__forumreadtracker__user=user, forum__forumreadtracker__time_stamp__gt=F('updated')))
             unread = Topic.objects.filter(forum=self.forum).exclude(id__in=read)
             if not unread.exists():
-                # Clear all topic marks for this forum, mark forum as readed
+                # Clear all topic marks for this forum, mark forum as read
                 TopicReadTracker.objects.filter(
                     user=user,
                     topic__forum=self.forum
@@ -661,7 +674,10 @@ class BaseTopic(ParentForumBase):
     def mark_as_undeleted(self, commit=True, update=True):
         self.deleted = False
 
-        post_ids = PostDeletion.objects.filter(post__topic=self).values_list('post', flat=True)
+        post_ids = (PostDeletion.objects
+                    .filter(post__topic=self)
+                    .exclude(post_id=self.first_post_id)
+                    .values_list('post', flat=True))
 
         self.posts.exclude(pk__in=post_ids).update(deleted=False)
 
@@ -698,7 +714,7 @@ class BaseTopic(ParentForumBase):
             self.updated = last_post.updated or last_post.created
             self.last_post = last_post
 
-        first_post = self.get_first_post()
+        first_post = self.get_first_post(force_refresh=True)
 
         if first_post:
             self.first_post = first_post
@@ -1018,7 +1034,7 @@ class BasePost(RenderableItem):
         try:
             head_post_id = self.topic.posts.visible(join=False).order_by('created')[0].id
         except IndexError:
-            head_post_id = None
+            pass
         else:
             if self_id == head_post_id:
                 self.topic.mark_as_deleted()
@@ -1039,7 +1055,7 @@ class BasePost(RenderableItem):
         try:
             head_post_id = self.topic.posts.visible(join=False).order_by('created')[0].id
         except IndexError:
-            head_post_id = None
+            pass
         else:
             if self_id == head_post_id:
                 self.topic.mark_as_undeleted()
