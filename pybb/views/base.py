@@ -54,7 +54,9 @@ def filter_hidden(request, queryset_or_model):
 class ListView(generic.ListView):
     prefetch_fields = None
     prefetch_profiles = None
+    prefetch_parent_forums = False
     allow_empty_page = False
+    forum_cache = {}
 
     def paginate_queryset(self, queryset, page_size):
         try:
@@ -68,6 +70,8 @@ class ListView(generic.ListView):
                 queryset = queryset.prefetch_related(*self.prefetch_fields)
             if self.prefetch_profiles:
                 queryset = queryset.prefetch_profiles(*self.prefetch_profiles)
+            if self.prefetch_parent_forums:
+                queryset = queryset.prefetch_parent_forums(self.forum_cache)
 
             return paginator, page, queryset, is_paginated
 
@@ -181,6 +185,7 @@ class ForumDetailView(ListView):
     context_object_name = 'topic_list'
     prefetch_fields = ('user', 'last_post', 'last_post__user')
     prefetch_profiles = ('user', 'last_post__user')
+    prefetch_parent_forums = True
     template_name = 'pybb/forum/detail.html'
     url = '^(?P<slug>[\w\-\_]+)/(?:(?P<page>\d+)/)?$'
 
