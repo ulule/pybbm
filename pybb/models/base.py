@@ -400,7 +400,7 @@ class BaseTopicRedirection(ModelBase):
 
 
 class TopicQuerySetMixin(object):
-    def filter_by_user(self, user, forum=None):
+    def filter_by_user(self, user, forum=None, join=True):
         if forum is not None:
             if not forum.is_moderated_by(user):
                 if user.is_authenticated():
@@ -414,13 +414,16 @@ class TopicQuerySetMixin(object):
         if user.is_staff or user.is_superuser:
             return self
 
+        qs = self
         if user.is_authenticated():
-            return (self.filter(Q(user=user) | ~Q(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION))
-                    .filter(forum__staff=False)
+            if join:
+                qs = qs.filter(forum__staff=False)
+            return (qs.filter(Q(user=user) | ~Q(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION))
                     .exclude(deleted=True))
 
-        return (self.filter(forum__hidden=False, forum__staff=False)
-                .exclude(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION)
+        if join:
+            qs = qs.filter(forum__hidden=False, forum__staff=False)
+        return (qs.exclude(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION)
                 .exclude(deleted=True))
 
     def visible(self):
