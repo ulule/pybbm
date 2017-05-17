@@ -178,10 +178,39 @@ class ForumUpdateView(generic.UpdateView):
         return self.object.get_absolute_url()
 
 
-class ForumDetailView(ListView):
+class BaseForumDetailView(ListView):
     paginator_class = Paginator
     paginate_by = defaults.PYBB_FORUM_PAGE_SIZE
     model = Topic
+
+    def get(self, request, *args, **kwargs):
+        forum = self.get_forum()
+
+        if forum.is_hidden() and not self.request.user.is_authenticated():
+            return redirect_to_login(request.get_full_path())
+
+        if 'page' in kwargs:
+            page = kwargs.get('page', None)
+
+            if page:
+                page = int(page)
+
+                if page == 1:
+                    return redirect(forum.get_absolute_url(), permanent=True)
+
+        self.object_list = self.get_queryset()
+
+        allow_empty = self.get_allow_empty()
+
+        if not allow_empty and len(self.object_list) == 0:
+            raise Http404(_(u"Empty list and '%(class_name)s.allow_empty' is False.")
+                          % {'class_name': self.__class__.__name__})
+        context = self.get_context_data(object_list=self.object_list)
+
+        return self.render_to_response(context)
+
+
+class ForumDetailView(BaseForumDetailView):
     context_object_name = 'topic_list'
     prefetch_fields = ('user', 'last_post', 'last_post__user')
     prefetch_profiles = ('user', 'last_post__user')
@@ -217,33 +246,9 @@ class ForumDetailView(ListView):
         self.forum = get_object_or_404(Forum.objects.filter_by_user(self.request.user, hidden=False),
                                        slug=self.kwargs['slug'])
 
+        self.forum.prefetch_parent_forums()
+
         return self.forum
-
-    def get(self, request, *args, **kwargs):
-        forum = self.get_forum()
-
-        if forum.is_hidden() and not self.request.user.is_authenticated():
-            return redirect_to_login(request.get_full_path())
-
-        if 'page' in kwargs:
-            page = kwargs.get('page', None)
-
-            if page:
-                page = int(page)
-
-                if page == 1:
-                    return redirect(forum.get_absolute_url(), permanent=True)
-
-        self.object_list = self.get_queryset()
-
-        allow_empty = self.get_allow_empty()
-
-        if not allow_empty and len(self.object_list) == 0:
-            raise Http404(_(u"Empty list and '%(class_name)s.allow_empty' is False.")
-                          % {'class_name': self.__class__.__name__})
-        context = self.get_context_data(object_list=self.object_list)
-
-        return self.render_to_response(context)
 
 
 class LogModerationListView(ListView):
