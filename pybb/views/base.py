@@ -596,8 +596,10 @@ class BasePostCreateView(PostUpdateMixin, generic.CreateView):
 
         if forum_id:
             self.forum = get_object_or_404(filter_hidden(request, Forum), pk=forum_id)
+            self.forum.prefetch_parent_forums()
         elif topic_id:
             self.topic = get_object_or_404(Topic.objects.visible(), pk=topic_id)
+            self.topic.prefetch_parent_forums()
 
             if not self.topic.is_accessible_by(request.user):
                 raise Http404

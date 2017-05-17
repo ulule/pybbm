@@ -235,7 +235,7 @@ class BaseForum(ParentForumBase):
         self.forum_count = forum_count + (res['forum_count'] or 0)
 
         if commit:
-            self.save()
+            self.save(update_fields=['post_count', 'topic_count', 'forum_count'])
 
         if self.forum_id and self.forum_id != self.pk:
             self.forum.compute(commit=commit)
@@ -284,7 +284,7 @@ class BaseForum(ParentForumBase):
         self.compute(commit=commit)
 
         if commit:
-            self.save()
+            self.save(update_fields=['updated', 'last_post', 'last_topic'])
 
     def get_absolute_url(self):
         return reverse('pybb:forum_detail', kwargs={'slug': self.slug})
@@ -618,9 +618,16 @@ class BaseTopic(ParentForumBase):
 
         return self._head
 
-    def get_last_post(self):
+    def get_last_post(self, select_related=None, prefetch_related=None):
+        last_post = self.posts.visible(join=False).order_by('-created')
+        if select_related:
+            last_post = last_post.select_related(*select_related)
+
+        if prefetch_related:
+            last_post = last_post.prefetch_related(*prefetch_related)
+
         try:
-            last_post = self.posts.visible(join=False).order_by('-created').select_related('user')[0]
+            last_post = last_post[0]
         except IndexError:
             return None
         else:
@@ -731,7 +738,7 @@ class BaseTopic(ParentForumBase):
             self.on_moderation = self.MODERATION_IS_CLEAN
 
         if commit:
-            self.save()
+            self.save(update_fields=['poll_id', 'post_count', 'updated', 'last_post', 'on_moderation'])
 
         self.forum.update_counters()
 
