@@ -44,7 +44,7 @@ class ParentForumQuerysetMixin(object):
             forum_cache_by_id.update({forum.id: forum for forum in parent_forums})
 
         for obj in objects:
-            obj._populate_parent_forums(forum_cache_by_id)
+            obj.populate_parent_forums(forum_cache_by_id)
 
         return objects
 
@@ -128,7 +128,7 @@ class ParentForumBase(ModelBase):
         if commit:
             self.save()
 
-    def _populate_parent_forums(self, parent_forums_by_id):
+    def populate_parent_forums(self, parent_forums_by_id):
         child = self
 
         while child.forum_id:
@@ -148,4 +148,4 @@ class ParentForumBase(ModelBase):
         if forum_ids:
             forum_cache_by_id.update({forum.id: forum for forum in Forum.objects.filter(id__in=forum_ids).all()})
 
-        self._populate_parent_forums(forum_cache_by_id)
+        self.populate_parent_forums(forum_cache_by_id)
