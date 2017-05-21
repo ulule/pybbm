@@ -656,10 +656,9 @@ class BaseTopic(ParentForumBase):
             read = Topic.objects.filter(
                 forum=self.forum, topicreadtracker__user=user, topicreadtracker__time_stamp__gt=F('updated'))
 
+            unread = Topic.objects.filter(forum=self.forum).exclude(id__in=read)
             if forum_mark:
-                unread = Topic.objects.filter(forum=self.forum, updated__gt=forum_mark.time_stamp).exclude(id__in=read)
-            else:
-                unread = Topic.objects.filter(forum=self.forum).exclude(id__in=read)
+                unread = unread.filter(updated__gt=forum_mark.time_stamp)
 
             if not unread.exists():
                 # Clear all topic marks for this forum, mark forum as read
