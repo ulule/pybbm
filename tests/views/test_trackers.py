@@ -41,6 +41,7 @@ class TrackersTest(TestCase):
         self.assertEqual(TopicReadTracker.objects.all().count(), 2)
         self.assertEqual(TopicReadTracker.objects.filter(user=user_bob).count(), 1)
         self.assertEqual(TopicReadTracker.objects.filter(user=user_bob, topic=topic_1).count(), 1)
+        self.assertEqual(ForumReadTracker.objects.all().count(), 0)
 
         #  user_bob reads topic_2, he should get a forum read tracker,
         #  there should be no topic read trackers for user_bob
@@ -50,7 +51,7 @@ class TrackersTest(TestCase):
         self.assertEqual(ForumReadTracker.objects.filter(user=user_bob).count(), 1)
         self.assertEqual(ForumReadTracker.objects.filter(user=user_bob, forum=self.forum).count(), 1)
 
-        #  user_ann creates topic_3, they should get a new topic read tracker in the db
+        #  user_ann creates topic_3, there should be a new topic read tracker in the db
         topic_create_url = reverse('pybb:topic_create', kwargs={'forum_id': self.forum.id})
         response = client_ann.get(topic_create_url)
         values = self.get_form_values(response)
@@ -66,7 +67,7 @@ class TrackersTest(TestCase):
         topic_3 = Topic.objects.order_by('-updated')[0]
         self.assertEqual(topic_3.name, 'topic_3')
 
-        #  user_ann posts to topic_1, a topic they've already read, no new trackers should be created
+        #  user_ann posts to topic_1, a topic they've already read, no new trackers should be created (existing one is updated)
         post_create_url = reverse('pybb:post_create', kwargs={'topic_id': topic_1.id})
         response = client_ann.get(post_create_url)
         values = self.get_form_values(response)
@@ -79,6 +80,7 @@ class TrackersTest(TestCase):
         self.assertEqual(ForumReadTracker.objects.all().count(), 1)
         previous_time = ForumReadTracker.objects.all()[0].time_stamp
 
+        # user bob reads topic 1 which he already read, topic tracker recreated, forum tracker untouched (topic 3 still unread)
         client_bob.get(topic_1.get_absolute_url())
         self.assertEqual(ForumReadTracker.objects.all().count(), 1)
         self.assertEqual(ForumReadTracker.objects.all()[0].time_stamp, previous_time)
@@ -88,6 +90,7 @@ class TrackersTest(TestCase):
         self.assertEqual(ForumReadTracker.objects.all().count(), 1)
         previous_time = ForumReadTracker.objects.all()[0].time_stamp
 
+        # user bob reads topic 3, topic tracker purged, forum tracker updated
         client_bob.get(topic_3.get_absolute_url())
         self.assertEqual(ForumReadTracker.objects.all().count(), 1)
         self.assertGreater(ForumReadTracker.objects.all()[0].time_stamp, previous_time)
