@@ -7,6 +7,32 @@ from django.utils.functional import cached_property
 from pybb.base import ModelBase
 
 
+def prefetch_parent_forums(objects, forum_cache_by_id=None):
+    """
+    Warning: this method will evaluate your queryset, use it at the very end of your filtering chain
+    :return: an evaluated and populated queryset
+    """
+    from pybb.models import Forum
+
+    forum_cache_by_id = forum_cache_by_id or {}
+
+    for obj in objects:
+        if (obj.forum_ids and obj.forum_ids[0] != obj.forum_id) or (not obj.forum_ids and obj.forum_id):
+            obj.rebuild_parent_forum_ids(commit=True)
+
+    parent_forum_ids = set(chain(*[obj.forum_ids for obj in objects]))
+    parent_forum_ids = [id_ for id_ in parent_forum_ids if id_ not in forum_cache_by_id]
+
+    if parent_forum_ids:
+        parent_forums = Forum.objects.filter(id__in=parent_forum_ids).all()
+        forum_cache_by_id.update({forum.id: forum for forum in parent_forums})
+
+    for obj in objects:
+        obj.populate_parent_forums(forum_cache_by_id)
+
+    return objects
+
+
 class ParentForumQuerysetMixin(object):
     def children(self, forum):
         return self.filter(forum_ids__contains=[forum.id])
@@ -27,26 +53,7 @@ class ParentForumQuerysetMixin(object):
         Warning: this method will evaluate your queryset, use it at the very end of your filtering chain
         :return: an evaluated and populated queryset
         """
-        from pybb.models import Forum
-
-        objects = self.all()
-        forum_cache_by_id = forum_cache_by_id or {}
-
-        for obj in objects:
-            if (obj.forum_ids and obj.forum_ids[0] != obj.forum_id) or (not obj.forum_ids and obj.forum_id):
-                obj.rebuild_parent_forum_ids(commit=True)
-
-        parent_forum_ids = set(chain(*[obj.forum_ids for obj in objects]))
-        parent_forum_ids = [id_ for id_ in parent_forum_ids if id_ not in forum_cache_by_id]
-
-        if parent_forum_ids:
-            parent_forums = Forum.objects.filter(id__in=parent_forum_ids).all()
-            forum_cache_by_id.update({forum.id: forum for forum in parent_forums})
-
-        for obj in objects:
-            obj.populate_parent_forums(forum_cache_by_id)
-
-        return objects
+        return prefetch_parent_forums(self.all(), forum_cache_by_id=forum_cache_by_id)
 
 
 class ParentForumManagerMixin(object):
@@ -62,8 +69,10 @@ class ParentForumManagerMixin(object):
     def lineage(self, *args, **kwargs):
         return self.get_queryset().lineage(*args, **kwargs)
 
-    def prefetch_parent_forums(self, *args, **kwargs):
-        return self.get_queryset().prefetch_parent_forums(*args, **kwargs)
+    def prefetch_parent_forums(self, object_list=None, **kwargs):
+        if object_list:
+            return prefetch_parent_forums(object_list, **kwargs)
+        return self.get_queryset().prefetch_parent_forums(**kwargs)
 
     def contribute_to_class(self, cls, name):
         signals.pre_save.connect(self.parent_forums_pre_save, sender=cls)

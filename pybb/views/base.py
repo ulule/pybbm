@@ -71,7 +71,7 @@ class ListView(generic.ListView):
             if self.prefetch_profiles:
                 queryset = queryset.prefetch_profiles(*self.prefetch_profiles)
             if self.prefetch_parent_forums:
-                queryset = queryset.prefetch_parent_forums(self.forum_cache)
+                queryset = queryset.prefetch_parent_forums(forum_cache_by_id=self.forum_cache)
 
             return paginator, page, queryset, is_paginated
 
