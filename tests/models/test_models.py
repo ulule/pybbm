@@ -210,6 +210,36 @@ class ModelsTest(TestCase):
         self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).post_count, 3)
         self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 3)
 
+    def test_compute_active_members(self):
+        # Initials
+        self.assertEquals(self.topic.member_count, 0)
+
+        # Add first post by self.user (count += 1)
+        user_post_1 = self.post
+        self.assertEquals(self.topic.member_count, 1)
+
+        # Add first post by self.staff (count += 1)
+        staff_post_1 = Post(topic=self.topic, user=self.staff, body='my new post')
+        staff_post_1.save()
+        self.assertEquals(self.topic.member_count, 2)
+
+        # Add second post by self.user (count += 0)
+        user_post_2 = Post(topic=self.topic, user=self.user, body='my new post')
+        user_post_2.save()
+        self.assertEquals(self.topic.member_count, 2)
+
+        # Delete staff_post_1 (count -= 1)
+        staff_post_1.mark_as_deleted(commit=True)
+        self.assertEquals(self.topic.member_count, 1)
+
+        # Restore staff_post_1 (count += 1)
+        staff_post_1.mark_as_undeleted(commit=True)
+        self.assertEquals(self.topic.member_count, 2)
+
+        # Delete user_post_2 (count -= 0)
+        user_post_2.mark_as_deleted(commit=True)
+        self.assertEquals(self.topic.member_count, 2)
+
     def test_move_forum(self):
         # Initial state
         topic = self.topic

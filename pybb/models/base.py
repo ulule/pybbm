@@ -521,7 +521,8 @@ class BaseTopic(ParentForumBase):
                                          verbose_name=_('Subscribers'),
                                          blank=True,
                                          through=get_model_string('Subscription'))
-    post_count = models.IntegerField(_('Post count'), blank=True, default=0, db_index=True)
+    post_count = models.IntegerField(_('Post count'), blank=True, null=False, default=0, db_index=True)
+    member_count = models.IntegerField(_('Member count'), blank=True, null=False, default=0, db_index=True)
     readed_by = models.ManyToManyField(AUTH_USER_MODEL, through=get_model_string('TopicReadTracker'), related_name='readed_topics')
     on_moderation = models.IntegerField(_('On moderation'), default=MODERATION_IS_CLEAN, db_index=True)
     first_post = models.ForeignKey(get_model_string('Post'),
@@ -722,6 +723,10 @@ class BaseTopic(ParentForumBase):
     def update_counters(self, commit=True):
         self.post_count = self.posts.visible(join=False).count()
 
+        active_members = self.posts.visible(join=False).values('user_id').order_by()
+        active_members.query.group_by = ('user_id', )
+        self.member_count = len(active_members)
+
         last_post = self.get_last_post()
 
         if last_post:
@@ -742,7 +747,7 @@ class BaseTopic(ParentForumBase):
             self.on_moderation = self.MODERATION_IS_CLEAN
 
         if commit:
-            self.save(update_fields=['poll_id', 'post_count', 'updated', 'last_post', 'on_moderation'])
+            self.save(update_fields=['poll_id', 'post_count', 'member_count', 'updated', 'last_post', 'on_moderation'])
 
         self.forum.update_counters()
 
