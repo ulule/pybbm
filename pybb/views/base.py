@@ -187,7 +187,7 @@ class BaseForumDetailView(ListView):
         forum = self.get_forum()
 
         if forum.is_hidden() and not self.request.user.is_authenticated():
-            return redirect_to_login(request.get_full_path())
+            return redirect_to_login(request.build_absolute_uri())
 
         if 'page' in kwargs:
             page = kwargs.get('page', None)
@@ -378,7 +378,7 @@ class TopicDetailView(ListView):
         topic = self.get_topic()
 
         if topic.is_hidden() and not self.request.user.is_authenticated():
-            return redirect_to_login(request.get_full_path())
+            return redirect_to_login(request.build_absolute_uri())
 
         self.object_list = self.get_queryset()
 
@@ -613,7 +613,7 @@ class BasePostCreateView(PostUpdateMixin, generic.CreateView):
             self.user = request.user
         else:
             if not defaults.PYBB_ENABLE_ANONYMOUS_POST:
-                return redirect_to_login(request.get_full_path())
+                return redirect_to_login(request.build_absolute_uri())
 
             User = get_user_model()
 
