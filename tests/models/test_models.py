@@ -281,3 +281,7 @@ class ModelsTest(TestCase):
 
         assert topic.forum_id == forum.id
         assert topic.forum_ids == [forum.id, new_parent.id, original_parent.id]
+
+        # move forum to one of its sub_forums
+        new_parent.forum = forum
+        self.assertRaises(ValueError, new_parent.save)

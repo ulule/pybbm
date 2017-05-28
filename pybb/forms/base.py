@@ -315,6 +315,7 @@ class PollForm(forms.Form):
 class ForumForm(forms.ModelForm):
     error_messages = {
         'duplicate': _("A forum with that name already exists."),
+        'invalid_parent': _("A forum cannot be it's own parent")
     }
 
     class Meta:
@@ -326,17 +327,24 @@ class ForumForm(forms.ModelForm):
     def clean_name(self):
         name = self.cleaned_data['name']
 
-        try:
-            qs = self._meta.model.objects.filter(slug=slugify(name))
+        qs = self._meta.model.objects.filter(slug=slugify(name))
 
-            if self.instance.pk:
-                qs = qs.exclude(pk=self.instance.pk)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
 
-            qs.get()
+        if qs.exists():
+            raise forms.ValidationError(self.error_messages['duplicate'])
 
-        except self._meta.model.DoesNotExist:
-            return name
-        raise forms.ValidationError(self.error_messages['duplicate'])
+        return name
+
+    def clean_forum(self):
+        pk = self.instance.pk
+        parent = self.cleaned_data['forum']
+
+        if pk and (parent.id == pk or pk in parent.forum_ids):
+            raise forms.ValidationError(self.error_messages['invalid_parent'])
+
+        return parent
 
 
 class ModerationForm(forms.Form):
