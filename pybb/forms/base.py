@@ -3,6 +3,7 @@ import inspect
 import copy
 
 from django import forms
+from django.db.models import Q
 from django.forms.formsets import formset_factory
 from django.forms.models import inlineformset_factory, BaseInlineFormSet
 from django.contrib.contenttypes.models import ContentType
@@ -327,7 +328,7 @@ class ForumForm(forms.ModelForm):
     def clean_name(self):
         name = self.cleaned_data['name']
 
-        qs = self._meta.model.objects.filter(slug=slugify(name))
+        qs = self._meta.model.objects.filter(Q(slug=slugify(name)) | Q(name__iexact=name))
 
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
@@ -341,7 +342,7 @@ class ForumForm(forms.ModelForm):
         pk = self.instance.pk
         parent = self.cleaned_data['forum']
 
-        if pk and (parent.id == pk or pk in parent.forum_ids):
+        if pk and parent and (parent.id == pk or pk in parent.forum_ids):
             raise forms.ValidationError(self.error_messages['invalid_parent'])
 
         return parent

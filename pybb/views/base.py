@@ -108,55 +108,28 @@ class IndexView(ListView):
         return qs
 
 
-class ForumCreateView(generic.DetailView, FormMixin):
+class ForumCreateView(generic.CreateView):
     form_class = ForumForm
     template_name = 'pybb/forum/create.html'
-    pk_url_kwarg = 'forum_id'
     model = Forum
     context_object_name = 'forum'
 
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-
-        if form.is_valid():
-            return self.form_valid(form)
-
-        return self.form_invalid(form)
-
-    def get_object(self, queryset=None):
-        try:
-            self.object = super(ForumCreateView, self).get_object(queryset=queryset)
-        except AttributeError:
-            self.object = None
-
-        return self.object
-
-    def get_context_data(self, **kwargs):
-        data = super(ForumCreateView, self).get_context_data(**kwargs)
-
-        return dict(data, **{
-            'form': self.get_form(self.get_form_class()),
-        })
-
     def get_initial(self):
-        return {
-            'forum': getattr(self, 'object', None)
-        }.copy()
+        initial = super(ForumCreateView, self).get_initial()
 
-    def form_valid(self, form):
-        self.forum = form.save()
+        if hasattr(self, 'parent_forum'):
+            initial['forum'] = self.parent_forum
 
-        return redirect(self.get_success_url())
+        return initial
 
     @method_decorator(staff_member_required)
     def dispatch(self, request, *args, **kwargs):
-        return super(ForumCreateView, self).dispatch(request, *args, **kwargs)
 
-    def get_success_url(self):
-        return self.forum.get_absolute_url()
+        parent_forum_id = self.kwargs.pop('forum_id', None)
+        if parent_forum_id:
+            self.parent_forum = get_object_or_404(Forum.objects.all(), pk=parent_forum_id)
+
+        return super(ForumCreateView, self).dispatch(request, *args, **kwargs)
 
 
 class ForumUpdateView(generic.UpdateView):
@@ -165,17 +138,9 @@ class ForumUpdateView(generic.UpdateView):
     template_name = 'pybb/forum/update.html'
     pk_url_kwarg = 'pk'
 
-    def form_valid(self, form):
-        self.object = form.save()
-
-        return redirect(self.get_success_url())
-
     @method_decorator(staff_member_required)
     def dispatch(self, request, *args, **kwargs):
         return super(ForumUpdateView, self).dispatch(request, *args, **kwargs)
-
-    def get_success_url(self):
-        return self.object.get_absolute_url()
 
 
 class BaseForumDetailView(ListView):
