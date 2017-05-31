@@ -34,6 +34,7 @@ from django.conf import settings
 from pybb.compat import update_fields, AUTH_USER_MODEL, queryset
 from pybb.util import unescape, get_model_string, tznow
 from pybb.base import ModelBase, ManagerBase, QuerySetBase
+from pybb.models.mixins import ParentForumQuerysetMixin, ParentForumManagerMixin, ParentForumBase
 from pybb.subscription import notify_topic_subscribers
 from pybb import defaults
 from pybb.fields import ContentTypeRestrictedFileField, CAStorage
@@ -103,7 +104,7 @@ class BaseModerator(ModelBase):
         return permissions
 
 
-class ForumQuerySet(QuerySetBase):
+class ForumQuerySet(ParentForumQuerysetMixin, QuerySetBase):
     def filter_by_user(self, user, hidden=True):
         if user.is_staff or user.is_superuser:
             return self
@@ -118,7 +119,7 @@ class ForumQuerySet(QuerySetBase):
 
 
 @queryset
-class ForumManager(ManagerBase):
+class ForumManager(ParentForumManagerMixin, ManagerBase):
     def contribute_to_class(self, cls, name):
         signals.post_save.connect(self.post_save, sender=cls)
         signals.post_delete.connect(self.post_delete, sender=cls)
@@ -151,7 +152,7 @@ def get_moderator_ids_by_forum():
 
 
 @python_2_unicode_compatible
-class BaseForum(ModelBase):
+class BaseForum(ParentForumBase):
     forum = models.ForeignKey('Forum', related_name='forums',
                               verbose_name=_('Parent'), null=True, blank=True)
     name = models.CharField(_('Name'), max_length=80)
@@ -234,7 +235,7 @@ class BaseForum(ModelBase):
         self.forum_count = forum_count + (res['forum_count'] or 0)
 
         if commit:
-            self.save()
+            self.save(update_fields=['post_count', 'topic_count', 'forum_count'])
 
         if self.forum_id and self.forum_id != self.pk:
             self.forum.compute(commit=commit)
@@ -283,7 +284,7 @@ class BaseForum(ModelBase):
         self.compute(commit=commit)
 
         if commit:
-            self.save()
+            self.save(update_fields=['updated', 'last_post', 'last_topic'])
 
     def get_absolute_url(self):
         return reverse('pybb:forum_detail', kwargs={'slug': self.slug})
@@ -343,15 +344,8 @@ class BaseForum(ModelBase):
 
         return topic
 
-    def get_parents(self):
-        """
-        Used in templates for breadcrumb building
-        """
-        return self.forum.get_parents() + [self.forum, ] if self.forum_id else []
-
     @classmethod
-    def watch_forum(cls, old_attr={}, new_attr={},
-                    instance=None, sender=None, **kw):
+    def watch_forum(cls, old_attr={}, new_attr={}, instance=None, sender=None, **kw):
         from pybb.models import Forum
 
         if (old_attr.get('forum_id', None) and
@@ -406,7 +400,7 @@ class BaseTopicRedirection(ModelBase):
 
 
 class TopicQuerySetMixin(object):
-    def filter_by_user(self, user, forum=None):
+    def filter_by_user(self, user, forum=None, join=True):
         if forum is not None:
             if not forum.is_moderated_by(user):
                 if user.is_authenticated():
@@ -420,13 +414,16 @@ class TopicQuerySetMixin(object):
         if user.is_staff or user.is_superuser:
             return self
 
+        qs = self
         if user.is_authenticated():
-            return (self.filter(Q(user=user) | ~Q(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION))
-                    .filter(forum__staff=False)
+            if join:
+                qs = qs.filter(forum__staff=False)
+            return (qs.filter(Q(user=user) | ~Q(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION))
                     .exclude(deleted=True))
 
-        return (self.filter(forum__hidden=False, forum__staff=False)
-                .exclude(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION)
+        if join:
+            qs = qs.filter(forum__hidden=False, forum__staff=False)
+        return (qs.exclude(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION)
                 .exclude(deleted=True))
 
     def visible(self):
@@ -434,12 +431,12 @@ class TopicQuerySetMixin(object):
                            redirect=False).exclude(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION)
 
 
-class TopicQuerySet(TopicQuerySetMixin, QuerySetBase):
+class TopicQuerySet(ParentForumQuerysetMixin, TopicQuerySetMixin, QuerySetBase):
     pass
 
 
 @queryset
-class TopicManager(ManagerBase):
+class TopicManager(ParentForumManagerMixin, ManagerBase):
     def get_queryset(self):
         return TopicQuerySet(self.model)
 
@@ -493,7 +490,7 @@ class BaseSubscription(ModelBase):
 
 
 @python_2_unicode_compatible
-class BaseTopic(ModelBase):
+class BaseTopic(ParentForumBase):
     MODERATION_IS_CLEAN = 0
     MODERATION_IS_IN_MODERATION = 1
     MODERATION_HAS_POSTS_IN_MODERATION = 2
@@ -524,7 +521,8 @@ class BaseTopic(ModelBase):
                                          verbose_name=_('Subscribers'),
                                          blank=True,
                                          through=get_model_string('Subscription'))
-    post_count = models.IntegerField(_('Post count'), blank=True, default=0, db_index=True)
+    post_count = models.IntegerField(_('Post count'), blank=True, null=False, default=0, db_index=True)
+    member_count = models.IntegerField(_('Member count'), blank=True, null=False, default=0, db_index=True)
     readed_by = models.ManyToManyField(AUTH_USER_MODEL, through=get_model_string('TopicReadTracker'), related_name='readed_topics')
     on_moderation = models.IntegerField(_('On moderation'), default=MODERATION_IS_CLEAN, db_index=True)
     first_post = models.ForeignKey(get_model_string('Post'),
@@ -596,27 +594,47 @@ class BaseTopic(ModelBase):
     def head(self):
         return self.get_first_post()
 
-    def get_first_post(self):
+    def get_first_post(self, force_refresh=False, select_related=None, prefetch_related=None):
         """
         Get first post and cache it for request
         """
-        if not getattr(self, '_head', None):
-            self._head = self.posts.visible().order_by('created')
-            self._head.topic = self
+        if self.first_post_id and not (force_refresh or select_related or prefetch_related):
+            self._head = self.first_post
 
-        if not len(self._head):
-            return None
+        if not getattr(self, '_head', None) or force_refresh:
+            qs = self.posts.order_by('created')[:1]
 
-        return self._head[0]
+            if select_related:
+                qs = qs.select_related(*select_related)
+            if prefetch_related:
+                qs = qs.prefetch_related(*prefetch_related)
+            try:
+                self._head = qs[0]
+            except IndexError:
+                return None
+            else:
+                self.first_post = self._head
 
-    def get_last_post(self):
+        self._head.topic = self
+
+        return self._head
+
+    def get_last_post(self, select_related=None, prefetch_related=None):
+        last_post = self.posts.visible(join=False).order_by('-created')
+        if select_related:
+            last_post = last_post.select_related(*select_related)
+
+        if prefetch_related:
+            last_post = last_post.prefetch_related(*prefetch_related)
+
         try:
-            last_post = self.posts.visible(join=False).order_by('-created').select_related('user')[0]
-            last_post.topic = self
-
-            return last_post
+            last_post = last_post[0]
         except IndexError:
             return None
+        else:
+            last_post.topic = self
+            self.last_post = last_post
+            return last_post
 
     def mark_as_read(self, user):
         from pybb.models import TopicReadTracker, ForumReadTracker, Subscription, Topic
@@ -629,7 +647,7 @@ class BaseTopic(ModelBase):
             forum_mark = None
 
         if self.updated and ((forum_mark is None) or (forum_mark.time_stamp < self.updated)):
-            # Mark topic as readed
+            # Mark topic as read
             count = TopicReadTracker.objects.filter(topic=self, user=user).update(time_stamp=tznow())
 
             if not count:
@@ -639,13 +657,12 @@ class BaseTopic(ModelBase):
             read = Topic.objects.filter(
                 forum=self.forum, topicreadtracker__user=user, topicreadtracker__time_stamp__gt=F('updated'))
 
+            unread = Topic.objects.filter(forum=self.forum).exclude(id__in=read)
             if forum_mark:
-                unread = Topic.objects.filter(forum=self.forum, updated__gt=forum_mark.time_stamp).exclude(id__in=read)
-            else:
-                unread = Topic.objects.filter(forum=self.forum).exclude(id__in=read)
+                unread = unread.filter(updated__gt=forum_mark.time_stamp)
 
             if not unread.exists():
-                # Clear all topic marks for this forum, mark forum as readed
+                # Clear all topic marks for this forum, mark forum as read
                 TopicReadTracker.objects.filter(
                     user=user,
                     topic__forum=self.forum
@@ -672,7 +689,10 @@ class BaseTopic(ModelBase):
     def mark_as_undeleted(self, commit=True, update=True):
         self.deleted = False
 
-        post_ids = PostDeletion.objects.filter(post__topic=self).values_list('post', flat=True)
+        post_ids = (PostDeletion.objects
+                    .filter(post__topic=self)
+                    .exclude(post_id=self.first_post_id)
+                    .values_list('post', flat=True))
 
         self.posts.exclude(pk__in=post_ids).update(deleted=False)
 
@@ -703,13 +723,17 @@ class BaseTopic(ModelBase):
     def update_counters(self, commit=True):
         self.post_count = self.posts.visible(join=False).count()
 
+        active_members = self.posts.visible(join=False).values('user_id').order_by()
+        active_members.query.group_by = ('user_id', )
+        self.member_count = len(active_members)
+
         last_post = self.get_last_post()
 
         if last_post:
             self.updated = last_post.updated or last_post.created
             self.last_post = last_post
 
-        first_post = self.get_first_post()
+        first_post = self.get_first_post(force_refresh=True)
 
         if first_post:
             self.first_post = first_post
@@ -723,15 +747,9 @@ class BaseTopic(ModelBase):
             self.on_moderation = self.MODERATION_IS_CLEAN
 
         if commit:
-            self.save()
+            self.save(update_fields=['poll_id', 'post_count', 'member_count', 'updated', 'last_post', 'on_moderation'])
 
         self.forum.update_counters()
-
-    def get_parents(self):
-        """
-        Used in templates for breadcrumb building
-        """
-        return self.forum.get_parents() + [self.forum, ]
 
     @property
     def poll_votes(self):
@@ -1035,7 +1053,7 @@ class BasePost(RenderableItem):
         try:
             head_post_id = self.topic.posts.visible(join=False).order_by('created')[0].id
         except IndexError:
-            head_post_id = None
+            pass
         else:
             if self_id == head_post_id:
                 self.topic.mark_as_deleted()
@@ -1056,16 +1074,17 @@ class BasePost(RenderableItem):
         try:
             head_post_id = self.topic.posts.visible(join=False).order_by('created')[0].id
         except IndexError:
-            head_post_id = None
+            pass
         else:
             if self_id == head_post_id:
                 self.topic.mark_as_undeleted()
 
-    def get_parents(self):
+    @cached_property
+    def parents(self):
         """
         Used in templates for breadcrumb building
         """
-        return self.topic.get_parents() + [self.topic, ]
+        return self.topic.parents + [self.topic, ]
 
     def is_updatable(self):
         delta = (tznow() - self.created).seconds

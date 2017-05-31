@@ -16,25 +16,24 @@ class QuotesTest(TestCase):
         post = Post(user=self.staff, body='[quote="zeus;%d"]Super quote[/quote]' % self.post.pk, topic=self.topic)
         post.save()
 
-        self.assertHTMLEqual(minify_html(post.body_html), u'<blockquote><div class="quote-author">        Posted by <a class="quote-author-name" href="/users/zeus/">zeus</a><a rel="nofollow" class="quote-message-link" href="/xfoo/1-etopic#post1"></a></div><div class="quote-message">        Super quote    </div></blockquote>')
+        self.assertHTMLEqual(minify_html(post.body_html), u'<blockquote><div class="quote-author">        Posted by <a class="quote-author-name" href="/users/zeus/">zeus</a><a rel="nofollow" class="quote-message-link" href="/xfoo/{}-etopic#post{}"></a></div><div class="quote-message">        Super quote    </div></blockquote>'.format(self.post.topic_id, self.post.id))
 
         self.assertEqual(Quote.objects.filter(from_post=post).count(), 1)
 
     def test_double_quote(self):
-        post = Post(user=self.staff, body='[quote="%s;%d"]%s[/quote]' % (self.post.user.username,
+        post_1 = Post(user=self.staff, body='[quote="%s;%d"]%s[/quote]' % (self.post.user.username,
                                                                          self.post.pk,
                                                                          self.post.body),
                     topic=self.topic)
-        post.save()
+        post_1.save()
 
-        post = Post(user=self.superuser, body='[quote="%s;%d"]%s[/quote]' % (post.user.username,
-                                                                             post.pk,
-                                                                             post.body), topic=self.topic)
-        post.save()
+        post_2 = Post(user=self.superuser, body='[quote="%s;%d"]%s[/quote]' % (post_1.user.username,
+                                                                             post_1.pk,
+                                                                             post_1.body), topic=self.topic)
+        post_2.save()
+        self.assertHTMLEqual(minify_html(post_2.body_html), u'<blockquote><div class="quote-author">        Posted by <a class="quote-author-name" href="/users/thoas/">thoas</a><a rel="nofollow" class="quote-message-link" href="/xfoo/{}-etopic#post{}"></a></div><div class="quote-message"><blockquote><div class="quote-author">        Posted by <a class="quote-author-name" href="/users/zeus/">zeus</a><a rel="nofollow" class="quote-message-link" href="/xfoo/{}-etopic#post{}"></a></div><div class="quote-message">        bbcode <strong>test</strong></div></blockquote></div></blockquote>'.format(post_1.topic_id, post_1.id, self.post.topic_id, self.post.id))
 
-        self.assertHTMLEqual(minify_html(post.body_html), u'<blockquote><div class="quote-author">        Posted by <a class="quote-author-name" href="/users/thoas/">thoas</a><a rel="nofollow" class="quote-message-link" href="/xfoo/1-etopic#post2"></a></div><div class="quote-message"><blockquote><div class="quote-author">        Posted by <a class="quote-author-name" href="/users/zeus/">zeus</a><a rel="nofollow" class="quote-message-link" href="/xfoo/1-etopic#post1"></a></div><div class="quote-message">        bbcode <strong>test</strong></div></blockquote></div></blockquote>')
-
-        self.assertEqual(Quote.objects.filter(from_post=post).count(), 2)
+        self.assertEqual(Quote.objects.filter(from_post=post_2).count(), 2)
 
     def test_multiple_quote_add(self):
         self.user
@@ -55,7 +54,7 @@ class QuotesTest(TestCase):
         response = self.client.get(reverse('pybb:post_create',
                                            kwargs={'topic_id': self.topic.id}) + '?quote_id=%d' % self.post.id)
 
-        self.assertEqual(response.context['form'].initial['body'], u'[quote="zeus;1"]bbcode [b]test[/b][/quote]\n\n[quote="oleiade;2"][b]do you want my pere nowel?[/b][/quote]\n\n')
+        self.assertEqual(response.context['form'].initial['body'], u'[quote="zeus;{}"]bbcode [b]test[/b][/quote]\n\n[quote="oleiade;{}"][b]do you want my pere nowel?[/b][/quote]\n\n'.format(self.post.pk, post.pk))
 
         self.assertEqual(response.status_code, 200)
 

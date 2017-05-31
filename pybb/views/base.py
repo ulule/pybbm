@@ -35,9 +35,7 @@ from pybb.forms import (PostForm, AdminPostForm, PostsMoveExistingTopicForm,
                         get_topic_move_formset, get_topic_merge_formset,
                         get_topic_delete_formset, PostsMoveNewTopicForm)
 from pybb.templatetags.pybb_tags import pybb_topic_poll_not_voted
-from pybb.helpers import (lookup_users, lookup_post_attachments,
-                          lookup_post_topics, lookup_topic_lastposts,
-                          load_user_posts)
+from pybb.helpers import load_user_posts
 
 
 login_required = load_class(defaults.PYBB_LOGIN_REQUIRED_DECORATOR)
@@ -54,16 +52,34 @@ def filter_hidden(request, queryset_or_model):
 
 
 class ListView(generic.ListView):
+    prefetch_fields = None
+    prefetch_profiles = None
+    prefetch_parent_forums = False
+    allow_empty_page = False
+    forum_cache = {}
+
     def paginate_queryset(self, queryset, page_size):
         try:
-            return super(ListView, self).paginate_queryset(queryset, page_size)
+            paginator, page, queryset, is_paginated = super(ListView, self).paginate_queryset(queryset, page_size)
         except EmptyPage:
+            if self.allow_empty_page:
+                return None, None, None, False
             raise Http404(ugettext('Page is empty.'))
+        else:
+            if self.prefetch_fields:
+                queryset = queryset.prefetch_related(*self.prefetch_fields)
+            if self.prefetch_profiles:
+                queryset = queryset.prefetch_profiles(*self.prefetch_profiles)
+            if self.prefetch_parent_forums:
+                queryset = queryset.prefetch_parent_forums(forum_cache_by_id=self.forum_cache)
+
+            return paginator, page, queryset, is_paginated
 
 
-class IndexView(generic.ListView):
+class IndexView(ListView):
     template_name = 'pybb/index.html'
     context_object_name = 'forums'
+    allow_empty_page = True
 
     def get_context_data(self, **kwargs):
         ctx = super(IndexView, self).get_context_data(**kwargs)
@@ -92,55 +108,28 @@ class IndexView(generic.ListView):
         return qs
 
 
-class ForumCreateView(generic.DetailView, FormMixin):
+class ForumCreateView(generic.CreateView):
     form_class = ForumForm
     template_name = 'pybb/forum/create.html'
-    pk_url_kwarg = 'forum_id'
     model = Forum
     context_object_name = 'forum'
 
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-
-        if form.is_valid():
-            return self.form_valid(form)
-
-        return self.form_invalid(form)
-
-    def get_object(self, queryset=None):
-        try:
-            self.object = super(ForumCreateView, self).get_object(queryset=queryset)
-        except AttributeError:
-            self.object = None
-
-        return self.object
-
-    def get_context_data(self, **kwargs):
-        data = super(ForumCreateView, self).get_context_data(**kwargs)
-
-        return dict(data, **{
-            'form': self.get_form(self.get_form_class()),
-        })
-
     def get_initial(self):
-        return {
-            'forum': getattr(self, 'object', None)
-        }.copy()
+        initial = super(ForumCreateView, self).get_initial()
 
-    def form_valid(self, form):
-        self.forum = form.save()
+        if hasattr(self, 'parent_forum'):
+            initial['forum'] = self.parent_forum
 
-        return redirect(self.get_success_url())
+        return initial
 
     @method_decorator(staff_member_required)
     def dispatch(self, request, *args, **kwargs):
-        return super(ForumCreateView, self).dispatch(request, *args, **kwargs)
 
-    def get_success_url(self):
-        return self.forum.get_absolute_url()
+        parent_forum_id = self.kwargs.pop('forum_id', None)
+        if parent_forum_id:
+            self.parent_forum = get_object_or_404(Forum.objects.all(), pk=parent_forum_id)
+
+        return super(ForumCreateView, self).dispatch(request, *args, **kwargs)
 
 
 class ForumUpdateView(generic.UpdateView):
@@ -149,74 +138,21 @@ class ForumUpdateView(generic.UpdateView):
     template_name = 'pybb/forum/update.html'
     pk_url_kwarg = 'pk'
 
-    def form_valid(self, form):
-        self.object = form.save()
-
-        return redirect(self.get_success_url())
-
     @method_decorator(staff_member_required)
     def dispatch(self, request, *args, **kwargs):
         return super(ForumUpdateView, self).dispatch(request, *args, **kwargs)
 
-    def get_success_url(self):
-        return self.object.get_absolute_url()
 
-
-class ForumDetailView(ListView):
-    paginate_by = defaults.PYBB_FORUM_PAGE_SIZE
-    context_object_name = 'topic_list'
-    template_name = 'pybb/forum/detail.html'
+class BaseForumDetailView(ListView):
     paginator_class = Paginator
-    url = '^(?P<slug>[\w\-\_]+)/(?:(?P<page>\d+)/)?$'
-
-    def get_context_data(self, **kwargs):
-        ctx = super(ForumDetailView, self).get_context_data(**kwargs)
-
-        ctx['forum'] = self.forum
-
-        qs = filter_hidden(self.request,
-                           self.forum.forums.select_related('last_post__topic__forum',
-                                                            'last_post__user'))
-        self.forum.forums_accessed = qs
-
-        lookup_topic_lastposts(ctx[self.context_object_name])
-        lookup_users(ctx[self.context_object_name])
-
-        last_posts = []
-        for topic in ctx[self.context_object_name]:
-            topic.forum = self.forum
-
-            if topic.last_post_id:
-                try:
-                    last_posts.append(topic.last_post)
-                    topic.last_post.topic = topic
-                except Post.DoesNotExist:
-                    pass
-
-        lookup_users(last_posts)
-
-        return ctx
-
-    def get_queryset(self):
-        if not self.forum.is_accessible_by(self.request.user, hidden=False):
-            raise Http404
-
-        qs = (self.forum.topics.order_by('-sticky', '-updated')
-              .filter_by_user(self.request.user, forum=self.forum))
-
-        return qs
-
-    def get_forum(self):
-        self.forum = get_object_or_404(Forum.objects.filter_by_user(self.request.user, hidden=False),
-                                       slug=self.kwargs['slug'])
-
-        return self.forum
+    paginate_by = defaults.PYBB_FORUM_PAGE_SIZE
+    model = Topic
 
     def get(self, request, *args, **kwargs):
         forum = self.get_forum()
 
         if forum.is_hidden() and not self.request.user.is_authenticated():
-            return redirect_to_login(request.get_full_path())
+            return redirect_to_login(request.build_absolute_uri())
 
         if 'page' in kwargs:
             page = kwargs.get('page', None)
@@ -239,6 +175,47 @@ class ForumDetailView(ListView):
         return self.render_to_response(context)
 
 
+class ForumDetailView(BaseForumDetailView):
+    context_object_name = 'topic_list'
+    prefetch_fields = ('user', 'last_post', 'last_post__user')
+    prefetch_profiles = ('user', 'last_post__user')
+    prefetch_parent_forums = True
+    template_name = 'pybb/forum/detail.html'
+    url = '^(?P<slug>[\w\-\_]+)/(?:(?P<page>\d+)/)?$'
+
+    def get_context_data(self, **kwargs):
+        ctx = super(ForumDetailView, self).get_context_data(**kwargs)
+
+        ctx['forum'] = self.forum
+
+        qs = filter_hidden(self.request,
+                           self.forum.forums.select_related('last_post__topic__forum',
+                                                            'last_post__user'))
+        self.forum.forums_accessed = qs
+
+        for topic in ctx[self.context_object_name]:
+            topic.forum = self.forum
+
+        return ctx
+
+    def get_queryset(self):
+        if not self.forum.is_accessible_by(self.request.user, hidden=False):
+            raise Http404
+
+        qs = (self.forum.topics.order_by('-sticky', '-updated')
+              .filter_by_user(self.request.user, forum=self.forum))
+
+        return qs
+
+    def get_forum(self):
+        self.forum = get_object_or_404(Forum.objects.filter_by_user(self.request.user, hidden=False),
+                                       slug=self.kwargs['slug'])
+
+        self.forum.prefetch_parent_forums()
+
+        return self.forum
+
+
 class LogModerationListView(ListView):
     template_name = 'pybb/moderation/logs.html'
     paginate_by = defaults.PYBB_FORUM_PAGE_SIZE
@@ -255,11 +232,13 @@ class LogModerationListView(ListView):
 
 
 class TopicsLatestView(ListView):
-    paginate_by = defaults.PYBB_TOPIC_PAGE_SIZE
     paginator_class = Paginator
-    context_object_name = 'topic_list'
-    template_name = 'pybb/topic/latest.html'
+    paginate_by = defaults.PYBB_TOPIC_PAGE_SIZE
     model = Topic
+    context_object_name = 'topic_list'
+    prefetch_fields = ('user', 'last_post', 'last_post__user')
+    prefetch_profiles = ('user', 'last_post__user')
+    template_name = 'pybb/topic/latest.html'
 
     def get_queryset(self):
         return (self.model.objects.visible()
@@ -270,30 +249,14 @@ class TopicsLatestView(ListView):
     def dispatch(self, request, *args, **kwargs):
         return super(TopicsLatestView, self).dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        ctx = super(TopicsLatestView, self).get_context_data(**kwargs)
-
-        lookup_topic_lastposts(ctx[self.context_object_name])
-        lookup_users(ctx[self.context_object_name])
-
-        last_posts = []
-        for topic in ctx[self.context_object_name]:
-            if topic.last_post_id:
-                try:
-                    last_posts.append(topic.last_post)
-                except Post.DoesNotExist:
-                    pass
-
-        lookup_users(last_posts)
-
-        return ctx
-
 
 class UserPostsView(ListView):
     paginate_by = defaults.PYBB_TOPIC_PAGE_SIZE
     paginator_class = Paginator
-    template_object_name = 'post_list'
+    context_object_name = 'post_list'
     template_name = 'pybb/user/post_list.html'
+    prefetch_fields = ('topic', 'topic__user', 'attachments')
+    prefetch_profiles = ('topic__user',)
 
     def get_queryset(self):
         self.user = get_object_or_404(get_user_model(),
@@ -313,12 +276,7 @@ class UserPostsView(ListView):
         ctx = super(UserPostsView, self).get_context_data(**kwargs)
 
         ctx['post_user'] = self.user
-
-        lookup_post_topics(ctx[self.template_object_name])
-        load_user_posts(ctx[self.template_object_name], self.user)
-        lookup_post_attachments(ctx[self.template_object_name])
-        lookup_users([post.topic for post in ctx[self.template_object_name]])
-
+        load_user_posts(ctx[self.context_object_name], self.user)
         return ctx
 
 
@@ -327,6 +285,8 @@ class UserPostsDeleteView(generic.DeleteView):
     context_object_name = 'post_user'
     slug_url_kwarg = 'username'
     slug_field = 'username'
+    prefetch_fields = ('topic', 'topic__user', 'attachments')
+    prefetch_profiles = ('topic__user',)
 
     @method_decorator(staff_member_required)
     def dispatch(self, request, *args, **kwargs):
@@ -340,13 +300,11 @@ class UserPostsDeleteView(generic.DeleteView):
 
         posts = (self.object.posts
                  .visible(join=False)
-                 .order_by('-created')[:10])
+                 .order_by('-created')[:10]
+                 .prefetch_related(*self.prefetch_fields)
+                 .prefetch_profiles(*self.prefetch_profiles))
 
-        lookup_post_topics(posts)
         load_user_posts(posts, self.object)
-        lookup_post_attachments(posts)
-        lookup_users([post.topic for post in posts])
-
         context['post_list'] = posts
         context['count'] = self.object.posts.visible().count()
 
@@ -375,15 +333,17 @@ class UserPostsDeleteView(generic.DeleteView):
 class TopicDetailView(ListView):
     paginate_by = defaults.PYBB_TOPIC_PAGE_SIZE
     paginator_class = Paginator
-    template_object_name = 'post_list'
+    context_object_name = 'post_list'
     template_name = 'pybb/topic/list.html'
+    prefetch_fields = ('user', 'attachments')
+    prefetch_profiles = ('user',)
     url = '^(?P<forum_slug>[\w\-\_]+)/(?P<pk>\d+)-(?P<slug>[\w\-\_]+)(?:\-(?P<page>\d+)/)?$'
 
     def get(self, request, *args, **kwargs):
         topic = self.get_topic()
 
         if topic.is_hidden() and not self.request.user.is_authenticated():
-            return redirect_to_login(request.get_full_path())
+            return redirect_to_login(request.build_absolute_uri())
 
         self.object_list = self.get_queryset()
 
@@ -458,7 +418,7 @@ class TopicDetailView(ListView):
         if page_number > 1:
             start = (start - 1) * ctx['paginator'].per_page + 1
 
-        for idx, post in enumerate(ctx[self.template_object_name], start):
+        for idx, post in enumerate(ctx[self.context_object_name], start):
             post.topic = self.topic
             post.index = idx
 
@@ -490,9 +450,6 @@ class TopicDetailView(ListView):
             ctx['first_post'] = self.topic.head
         else:
             ctx['first_post'] = None
-
-        lookup_users(ctx[self.template_object_name])
-        lookup_post_attachments(ctx[self.template_object_name])
 
         return ctx
 
@@ -564,12 +521,12 @@ class PostUpdateMixin(object):
         return self.render_to_response(context)
 
 
-class PostCreateView(PostUpdateMixin, generic.CreateView):
+class BasePostCreateView(PostUpdateMixin, generic.CreateView):
     template_name = 'pybb/post/create.html'
 
     def get_form_kwargs(self):
         ip = self.request.META.get('REMOTE_ADDR', '')
-        form_kwargs = super(PostCreateView, self).get_form_kwargs()
+        form_kwargs = super(BasePostCreateView, self).get_form_kwargs()
         form_kwargs.update(dict(topic=self.topic, forum=self.forum, user=self.user,
                                 ip=ip, initial={}))
 
@@ -579,11 +536,71 @@ class PostCreateView(PostUpdateMixin, generic.CreateView):
         return form_kwargs
 
     def get_context_data(self, **kwargs):
-        ctx = super(PostCreateView, self).get_context_data(**kwargs)
-
+        ctx = super(BasePostCreateView, self).get_context_data(**kwargs)
         ctx['forum'] = self.forum
-
         ctx['topic'] = self.topic
+
+        return ctx
+
+    def get_success_url(self):
+        if (not self.request.user.is_authenticated() and
+                defaults.PYBB_PREMODERATION):
+            return reverse('pybb:index')
+
+        return self.object.get_anchor_url(self.request.user)
+
+    def get_parents(self, request, *args, **kwargs):
+        self.forum = None
+        self.topic = None
+
+        data = request.POST or {}
+
+        forum_id = kwargs.get('forum_id', None) or data.get('forum_id', None)
+
+        topic_id = kwargs.get('topic_id', None) or data.get('topic_id', None)
+
+        if forum_id:
+            self.forum = get_object_or_404(filter_hidden(request, Forum), pk=forum_id)
+            self.forum.prefetch_parent_forums()
+        elif topic_id:
+            self.topic = get_object_or_404(Topic.objects.visible(), pk=topic_id)
+            self.topic.prefetch_parent_forums()
+
+            if not self.topic.is_accessible_by(request.user):
+                raise Http404
+
+            if self.topic.closed:
+                raise PermissionDenied
+
+    @method_decorator(csrf_protect)
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated():
+            self.user = request.user
+        else:
+            if not defaults.PYBB_ENABLE_ANONYMOUS_POST:
+                return redirect_to_login(request.build_absolute_uri())
+
+            User = get_user_model()
+
+            self.user, new = User.objects.get_or_create(username=defaults.PYBB_ANONYMOUS_USERNAME)
+
+        self.get_parents(request, *args, **kwargs)
+
+        result = all([load_class(pre_post_create_filter)(
+            topic=self.topic,
+            request=request,
+            forum=self.forum,
+        ).is_allowed(request.user) for pre_post_create_filter in defaults.PYBB_PRE_POST_CREATE_FILTERS])
+
+        if not result:
+            raise PermissionDenied
+
+        return super(BasePostCreateView, self).dispatch(request, *args, **kwargs)
+
+
+class PostCreateView(BasePostCreateView):
+    def get_context_data(self, **kwargs):
+        ctx = super(PostCreateView, self).get_context_data(**kwargs)
 
         ctx['post_list'] = []
 
@@ -604,56 +621,6 @@ class PostCreateView(PostUpdateMixin, generic.CreateView):
             ctx['post_page_size'] = defaults.PYBB_POST_LIST_SIZE
 
         return ctx
-
-    def get_success_url(self):
-        if (not self.request.user.is_authenticated() and
-                defaults.PYBB_PREMODERATION):
-            return reverse('pybb:index')
-
-        return self.object.get_anchor_url(self.request.user)
-
-    @method_decorator(csrf_protect)
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated():
-            self.user = request.user
-        else:
-            if not defaults.PYBB_ENABLE_ANONYMOUS_POST:
-                return redirect_to_login(request.get_full_path())
-
-            User = get_user_model()
-
-            self.user, new = User.objects.get_or_create(username=defaults.PYBB_ANONYMOUS_USERNAME)
-
-        self.forum = None
-        self.topic = None
-
-        data = request.POST or {}
-
-        forum_id = kwargs.get('forum_id', None) or data.get('forum_id', None)
-
-        topic_id = kwargs.get('topic_id', None) or data.get('topic_id', None)
-
-        if forum_id:
-            self.forum = get_object_or_404(filter_hidden(request, Forum), pk=forum_id)
-        elif topic_id:
-            self.topic = get_object_or_404(Topic.objects.visible(), pk=topic_id)
-
-            if not self.topic.is_accessible_by(request.user):
-                raise Http404
-
-            if self.topic.closed:
-                raise PermissionDenied
-
-        result = all([load_class(pre_post_create_filter)(
-            topic=self.topic,
-            request=request,
-            forum=self.forum,
-        ).is_allowed(request.user) for pre_post_create_filter in defaults.PYBB_PRE_POST_CREATE_FILTERS])
-
-        if not result:
-            raise PermissionDenied
-
-        return super(PostCreateView, self).dispatch(request, *args, **kwargs)
 
 
 class PostUpdateView(PostUpdateMixin, generic.UpdateView):
@@ -1235,12 +1202,13 @@ class TopicPollVoteView(generic.UpdateView):
         return self.object.get_absolute_url()
 
 
-class ModeratorListView(generic.ListView):
+class ModeratorListView(ListView):
     paginate_by = defaults.PYBB_TOPIC_PAGE_SIZE
     paginator_class = Paginator
     template_name = 'pybb/moderation/moderator/list.html'
     context_object_name = 'moderator_list'
     model = Moderator
+    allow_empty_page = True
 
     @method_decorator(staff_member_required)
     def dispatch(self, request, *args, **kwargs):
@@ -1513,12 +1481,15 @@ class SubscriptionDeleteView(generic.RedirectView):
         return topic.get_absolute_url()
 
 
-class SubscriptionListView(generic.ListView):
+class SubscriptionListView(ListView):
     template_name = 'pybb/user/subscription_list.html'
     context_object_name = 'subscription_list'
     model = Subscription
     paginate_by = defaults.PYBB_FORUM_PAGE_SIZE
     paginator_class = Paginator
+    allow_empty_page = True
+    prefetch_fields = ('topic__user', 'topic__last_post', 'topic__last_post__user')
+    prefetch_profiles = ('topic__user', 'topic__last_post__user')
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
@@ -1527,28 +1498,7 @@ class SubscriptionListView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(SubscriptionListView, self).get_context_data(**kwargs)
 
-        topic_list = []
-        for subscription in context[self.context_object_name]:
-            topic = subscription.topic
-            topic.subscription = subscription
-
-            topic_list.append(topic)
-
-        context['topic_list'] = topic_list
-
-        lookup_topic_lastposts(topic_list)
-        lookup_users(topic_list)
-
-        last_posts = []
-        for topic in topic_list:
-            if topic.last_post_id:
-                try:
-                    last_posts.append(topic.last_post)
-                except Post.DoesNotExist:
-                    pass
-
-        lookup_users(last_posts)
-
+        context['topic_list'] = [subscription.topic for subscription in context[self.context_object_name]]
         context['subscription_types'] = Subscription.TYPE_CHOICES
 
         return context

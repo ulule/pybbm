@@ -132,6 +132,7 @@ class ModelsTest(TestCase):
         self.assertEqual(self.forum.topic_count, 1)
         self.assertEqual(self.forum.post_count, 1)
 
+        # Add (forum --> topic --> post) in self.forum
         forum = Forum.objects.create(name='bar', description='bar', forum=self.forum)
 
         topic = Topic(name='bar', forum=forum, user=self.user)
@@ -140,32 +141,147 @@ class ModelsTest(TestCase):
         post = Post(topic=topic, user=self.user, body='my new post')
         post.save()
 
+        self.assertEquals(Topic.objects.get(pk=topic.pk).get_first_post(), post)
         self.assertEqual(topic.post_count, 1)
         self.assertEqual(forum.topic_count, 1)
 
+        self.assertEqual(Forum.objects.get(pk=self.forum.pk).post_count, 2)
         self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 2)
+        self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).post_count, 2)
         self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 2)
 
+        # Add (topic --> post) in self.forum
         new_topic = Topic(name='foo', forum=self.forum, user=self.user)
         new_topic.save()
 
-        new_post = Post(topic=topic, user=self.user, body='my new post')
+        new_post = Post(topic=new_topic, user=self.user, body='my new post')
         new_post.save()
+        self.assertEquals(Topic.objects.get(pk=new_topic.pk).get_first_post(), new_post)
 
+        self.assertEqual(Forum.objects.get(pk=self.forum.pk).post_count, 3)
         self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 3)
+        self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).post_count, 3)
         self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 3)
 
+        # delete post in (self.parent_forum --> self.forum --> forum --> topic)
         post.mark_as_deleted(commit=True)
 
-        self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 2)
-        self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 2)
-
         self.assertTrue(Topic.objects.get(pk=topic.pk).deleted)
+        self.assertEquals(Topic.objects.get(pk=topic.pk).get_first_post(), post)
+        self.assertTrue(Topic.objects.get(pk=topic.pk).get_first_post().deleted)
 
         self.assertEqual(Forum.objects.get(pk=forum.pk).topic_count, 0)
         self.assertEqual(Forum.objects.get(pk=forum.pk).post_count, 0)
 
+        self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 2)
+        self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 2)
+
+        # delete new_topic in (self.parent_forum --> self.forum)
         new_topic.mark_as_deleted()
+
+        self.assertTrue(Topic.objects.get(pk=new_topic.pk).deleted)
+        self.assertEquals(Topic.objects.get(pk=new_topic.pk).get_first_post(), new_post)
+        self.assertTrue(Topic.objects.get(pk=new_topic.pk).get_first_post().deleted)
 
         self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 1)
         self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 1)
+
+        # undelete new_topic in (self.parent_forum --> self.forum)
+        new_topic.mark_as_undeleted()
+
+        self.assertFalse(Topic.objects.get(pk=new_topic.pk).deleted)
+        self.assertEquals(Topic.objects.get(pk=new_topic.pk).get_first_post(), new_post)
+        self.assertFalse(Topic.objects.get(pk=new_topic.pk).get_first_post().deleted)
+
+        self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 2)
+        self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 2)
+
+        # undelete post in (self.parent_forum --> self.forum --> forum --> topic)
+        post.mark_as_undeleted(commit=True)
+
+        self.assertFalse(Topic.objects.get(pk=topic.pk).deleted)
+        self.assertEquals(Topic.objects.get(pk=topic.pk).get_first_post(), post)
+        self.assertFalse(Topic.objects.get(pk=topic.pk).get_first_post().deleted)
+
+        self.assertEqual(Forum.objects.get(pk=forum.pk).post_count, 1)
+        self.assertEqual(Forum.objects.get(pk=forum.pk).topic_count, 1)
+        self.assertEqual(Forum.objects.get(pk=self.forum.pk).post_count, 3)
+        self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 3)
+        self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).post_count, 3)
+        self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 3)
+
+    def test_compute_active_members(self):
+        # Initials
+        self.assertEquals(self.topic.member_count, 0)
+
+        # Add first post by self.user (count += 1)
+        user_post_1 = self.post
+        self.assertEquals(self.topic.member_count, 1)
+
+        # Add first post by self.staff (count += 1)
+        staff_post_1 = Post(topic=self.topic, user=self.staff, body='my new post')
+        staff_post_1.save()
+        self.assertEquals(self.topic.member_count, 2)
+
+        # Add second post by self.user (count += 0)
+        user_post_2 = Post(topic=self.topic, user=self.user, body='my new post')
+        user_post_2.save()
+        self.assertEquals(self.topic.member_count, 2)
+
+        # Delete staff_post_1 (count -= 1)
+        staff_post_1.mark_as_deleted(commit=True)
+        self.assertEquals(self.topic.member_count, 1)
+
+        # Restore staff_post_1 (count += 1)
+        staff_post_1.mark_as_undeleted(commit=True)
+        self.assertEquals(self.topic.member_count, 2)
+
+        # Delete user_post_2 (count -= 0)
+        user_post_2.mark_as_deleted(commit=True)
+        self.assertEquals(self.topic.member_count, 2)
+
+    def test_move_forum(self):
+        # Initial state
+        topic = self.topic
+        forum = self.topic.forum
+        original_parent = self.topic.forum.forum
+
+        original_parent.refresh_from_db(fields=('forum_ids', 'forum'))
+        forum.refresh_from_db(fields=('forum_ids', 'forum'))
+        topic.refresh_from_db(fields=('forum_ids', 'forum'))
+
+        assert original_parent.forum_id is None
+        assert original_parent.forum_ids == []
+
+        assert forum.forum_id == original_parent.id
+        assert forum.forum_ids == [original_parent.id]
+
+        assert topic.forum_id == forum.id
+        assert topic.forum_ids == [forum.id, original_parent.id]
+
+        # move forum to new_parent
+        new_parent = Forum.objects.create(name='zfoo', description='bar', forum=self.parent_forum)
+
+        forum.forum = new_parent
+        forum.save(update_fields=('forum',))
+
+        original_parent.refresh_from_db(fields=('forum_ids', 'forum'))
+        new_parent.refresh_from_db(fields=('forum_ids', 'forum'))
+        forum.refresh_from_db(fields=('forum_ids', 'forum'))
+        topic.refresh_from_db(fields=('forum_ids', 'forum'))
+
+        assert original_parent.forum_id is None
+        assert original_parent.forum_ids == []
+
+        assert new_parent.forum_id == original_parent.id
+        assert new_parent.forum_ids == [original_parent.id]
+
+        assert forum.forum_id == new_parent.id
+        assert forum.forum_ids == [new_parent.id, original_parent.id]
+
+        assert topic.forum_id == forum.id
+        assert topic.forum_ids == [forum.id, new_parent.id, original_parent.id]
+
+        # move forum to one of its sub_forums
+        new_parent.forum = forum
+        self.assertRaises(ValueError, new_parent.save)

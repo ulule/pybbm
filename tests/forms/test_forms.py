@@ -101,6 +101,30 @@ class FormsTest(TestCase):
         self.failUnless('name' in form.errors)
         self.failUnless(form.errors['name'][0] == ForumForm.error_messages['duplicate'])
 
+    def test_forum_form_parents(self):
+        data = {
+            'name': 'my forum',
+            'position': 1,
+            'forum': self.forum.id
+        }
+
+        form = ForumForm(data=data)
+        self.assertTrue(form.is_valid())
+        sub_forum = form.save()
+
+        data = {
+            'id': self.forum.id,
+            'name': 'foo',
+            'position': 1,
+            'forum': sub_forum.id
+        }
+
+        form = ForumForm(data=data, instance=self.forum)
+
+        self.assertFalse(form.is_valid())
+        self.assertTrue('forum' in form.errors)
+        self.assertTrue(form.errors['forum'][0] == ForumForm.error_messages['invalid_parent'])
+
     def test_topic_merge_form(self):
         topic = Topic.objects.create(name='merged_topic', forum=self.forum, user=self.superuser)
 

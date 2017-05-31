@@ -3,6 +3,7 @@ import inspect
 import copy
 
 from django import forms
+from django.db.models import Q
 from django.forms.formsets import formset_factory
 from django.forms.models import inlineformset_factory, BaseInlineFormSet
 from django.contrib.contenttypes.models import ContentType
@@ -166,6 +167,36 @@ class PostForm(forms.ModelForm):
 
         return self.cleaned_data
 
+    def get_or_create_topic(self, allow_post):
+        if self._forum:
+            topic = Topic(
+                forum=self._forum,
+                user=self.user,
+                name=self.cleaned_data['name'],
+            )
+
+            if not allow_post:
+                topic.on_moderation = topic.MODERATION_IS_IN_MODERATION
+            topic.save()
+
+            if not defaults.PYBB_DISABLE_POLLS:
+                if 'poll_type' in self.cleaned_data and self.cleaned_data['poll_type'] != Poll.TYPE_NONE:
+                    poll = Poll(
+                        type=self.cleaned_data['poll_type'],
+                        question=self.cleaned_data['poll_question']
+                    )
+                    poll.save()
+
+                    topic.poll = poll
+        else:
+            topic = self._topic
+
+        return topic
+
+    def create_post(self, topic):
+        return Post(topic=topic, user=self.user, user_ip=self.ip,
+                    body=self.cleaned_data['body'], hash=self.cleaned_data['hash'])
+
     def save(self, commit=True):
         if self.instance.pk:
             post = super(PostForm, self).save(commit=False)
@@ -214,31 +245,9 @@ class PostForm(forms.ModelForm):
         if 'forum' in self.cleaned_data and not self._forum:
             self._forum = self.cleaned_data['forum']
 
-        if self._forum:
-            topic = Topic(
-                forum=self._forum,
-                user=self.user,
-                name=self.cleaned_data['name'],
-            )
+        topic = self.get_or_create_topic(allow_post)
 
-            if not allow_post:
-                topic.on_moderation = topic.MODERATION_IS_IN_MODERATION
-            topic.save()
-
-            if not defaults.PYBB_DISABLE_POLLS:
-                if 'poll_type' in self.cleaned_data and self.cleaned_data['poll_type'] != Poll.TYPE_NONE:
-                    poll = Poll(
-                        type=self.cleaned_data['poll_type'],
-                        question=self.cleaned_data['poll_question']
-                    )
-                    poll.save()
-
-                    topic.poll = poll
-        else:
-            topic = self._topic
-
-        post = Post(topic=topic, user=self.user, user_ip=self.ip,
-                    body=self.cleaned_data['body'], hash=self.cleaned_data['hash'])
+        post = self.create_post(topic)
 
         if not allow_post:
             post.on_moderation = True
@@ -307,6 +316,7 @@ class PollForm(forms.Form):
 class ForumForm(forms.ModelForm):
     error_messages = {
         'duplicate': _("A forum with that name already exists."),
+        'invalid_parent': _("A forum cannot be it's own parent")
     }
 
     class Meta:
@@ -318,17 +328,24 @@ class ForumForm(forms.ModelForm):
     def clean_name(self):
         name = self.cleaned_data['name']
 
-        try:
-            qs = self._meta.model.objects.filter(slug=slugify(name))
+        qs = self._meta.model.objects.filter(Q(slug=slugify(name)) | Q(name__iexact=name))
 
-            if self.instance.pk:
-                qs = qs.exclude(pk=self.instance.pk)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
 
-            qs.get()
+        if qs.exists():
+            raise forms.ValidationError(self.error_messages['duplicate'])
 
-        except self._meta.model.DoesNotExist:
-            return name
-        raise forms.ValidationError(self.error_messages['duplicate'])
+        return name
+
+    def clean_forum(self):
+        pk = self.instance.pk
+        parent = self.cleaned_data['forum']
+
+        if pk and parent and (parent.id == pk or pk in parent.forum_ids):
+            raise forms.ValidationError(self.error_messages['invalid_parent'])
+
+        return parent
 
 
 class ModerationForm(forms.Form):

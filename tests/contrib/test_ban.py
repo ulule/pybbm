@@ -68,15 +68,17 @@ class BanTest(TestCase):
             IPAddress(user=self.user, ip_address='74.125.230.201'),
         ])
 
+        ip_addresses = list(IPAddress.objects.filter(user=self.user).all())
+
         response = self.client.get(url)
 
         self.assertEqual(len(response.context['form'].ip_addresses), 3)
 
         response = self.client.post(url, data={
             'reason': 'Because he is too small',
-            'ip_address_1': 1,
-            'ip_address_2': 0,
-            'ip_address_3': 1,
+            'ip_address_{}'.format(ip_addresses[0].id): 1,
+            'ip_address_{}'.format(ip_addresses[1].id): 0,
+            'ip_address_{}'.format(ip_addresses[2].id): 1,
         })
 
         self.assertRedirects(response,

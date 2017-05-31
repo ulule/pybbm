@@ -19,3 +19,4 @@ coverage
 six
 pytest
 pytest-django
+psycopg2
