@@ -216,3 +216,5 @@ PYBB_FILE_SHARD_WIDTH = getattr(settings, 'PYBB_FILE_SHARD_WIDTH', 2)
 PYBB_FILE_SHARD_DEPTH = getattr(settings, 'PYBB_FILE_SHARD_DEPTH', 2)
 
 PYBB_STORAGE_CLASS = getattr(settings, 'PYBB_STORAGE_CLASS', settings.DEFAULT_FILE_STORAGE)
+
+PYBB_FORBIDDEN_SLUGS = getattr(settings, 'PYBB_FORBIDDEN_SLUGS', ['subscriptions'])

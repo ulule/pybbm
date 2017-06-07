@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
+from django.test.utils import override_settings
 
 from pybb.forms import (ModerationForm, SearchUserForm, ForumForm, TopicMoveForm,
                         TopicMergeForm, get_topic_merge_formset, PostsMoveNewTopicForm,
@@ -28,7 +29,7 @@ class FormsTest(TestCase):
 
         form = ModerationForm(permissions=self.permissions, data=data)
 
-        self.failUnless(form.is_valid())
+        self.assertTrue(form.is_valid())
 
         form.save(self.user, self.forum)
 
@@ -50,7 +51,7 @@ class FormsTest(TestCase):
 
         form = ModerationForm(permissions=permissions, data=data)
 
-        self.failUnless(form.is_valid())
+        self.assertTrue(form.is_valid())
 
         form.save(self.user)
 
@@ -76,7 +77,7 @@ class FormsTest(TestCase):
 
         form = SearchUserForm(data=data)
 
-        self.failUnless(form.is_valid())
+        self.assertTrue(form.is_valid())
 
     def test_forum_form(self):
         self.forum
@@ -88,7 +89,7 @@ class FormsTest(TestCase):
 
         form = ForumForm(data=data)
 
-        self.failUnless(form.is_valid())
+        self.assertTrue(form.is_valid())
 
         data = {
             'name': 'foo',
@@ -97,9 +98,30 @@ class FormsTest(TestCase):
 
         form = ForumForm(data=data)
 
-        self.failUnless(not form.is_valid())
-        self.failUnless('name' in form.errors)
-        self.failUnless(form.errors['name'][0] == ForumForm.error_messages['duplicate'])
+        self.assertFalse(form.is_valid())
+        self.assertTrue('name' in form.errors)
+        self.assertTrue(form.errors['name'][0] == ForumForm.error_messages['duplicate'])
+
+    def test_forum_form_forbidden_slugs(self):
+        data = {
+            'name': 'Subscriptions',
+            'position': 1
+        }
+
+        form = ForumForm(data=data)
+
+        self.assertFalse(form.is_valid())
+        self.assertTrue('name' in form.errors)
+        self.assertTrue(form.errors['name'][0] == ForumForm.error_messages['forbidden'])
+
+        data = {
+            'name': 'I am legend',
+            'position': 1
+        }
+
+        form = ForumForm(data=data)
+
+        self.assertTrue(form.is_valid())
 
     def test_forum_form_parents(self):
         data = {
@@ -247,7 +269,7 @@ class FormsTest(TestCase):
 
         self.assertTrue(topic.redirect)
 
-        self.failUnless(new_topic.slug is not None)
+        self.assertTrue(new_topic.slug is not None)
         self.assertEqual(new_topic.redirections.count(), 1)
         self.assertEqual(Post.objects.get(pk=post.pk).topic, new_topic)
         self.assertEqual(topic.posts.count(), 0)
@@ -276,7 +298,7 @@ class FormsTest(TestCase):
 
         self.assertTrue(topic.redirect)
 
-        self.failUnless(new_topic.slug is not None)
+        self.assertTrue(new_topic.slug is not None)
         self.assertEqual(new_topic.redirections.count(), 1)
         self.assertEqual(Post.objects.get(pk=post.pk).topic, new_topic)
         self.assertEqual(topic.posts.count(), 0)

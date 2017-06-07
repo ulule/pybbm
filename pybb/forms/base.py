@@ -316,6 +316,7 @@ class PollForm(forms.Form):
 class ForumForm(forms.ModelForm):
     error_messages = {
         'duplicate': _("A forum with that name already exists."),
+        'forbidden': _("This name is reserved."),
         'invalid_parent': _("A forum cannot be it's own parent")
     }
 
@@ -328,7 +329,12 @@ class ForumForm(forms.ModelForm):
     def clean_name(self):
         name = self.cleaned_data['name']
 
-        qs = self._meta.model.objects.filter(Q(slug=slugify(name)) | Q(name__iexact=name))
+        slug = slugify(name)
+
+        if slug in defaults.PYBB_FORBIDDEN_SLUGS:
+            raise forms.ValidationError(self.error_messages['forbidden'])
+
+        qs = self._meta.model.objects.filter(Q(slug=slug) | Q(name__iexact=name))
 
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
