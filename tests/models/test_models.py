@@ -141,7 +141,7 @@ class ModelsTest(TestCase):
         post = Post(topic=topic, user=self.user, body='my new post')
         post.save()
 
-        self.assertEquals(Topic.objects.get(pk=topic.pk).get_first_post(), post)
+        self.assertEquals(Topic.objects.get(pk=topic.pk).first_post, post)
         self.assertEqual(topic.post_count, 1)
         self.assertEqual(forum.topic_count, 1)
 
@@ -156,7 +156,7 @@ class ModelsTest(TestCase):
 
         new_post = Post(topic=new_topic, user=self.user, body='my new post')
         new_post.save()
-        self.assertEquals(Topic.objects.get(pk=new_topic.pk).get_first_post(), new_post)
+        self.assertEquals(Topic.objects.get(pk=new_topic.pk).first_post, new_post)
 
         self.assertEqual(Forum.objects.get(pk=self.forum.pk).post_count, 3)
         self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 3)
@@ -167,8 +167,8 @@ class ModelsTest(TestCase):
         post.mark_as_deleted(commit=True)
 
         self.assertTrue(Topic.objects.get(pk=topic.pk).deleted)
-        self.assertEquals(Topic.objects.get(pk=topic.pk).get_first_post(), post)
-        self.assertTrue(Topic.objects.get(pk=topic.pk).get_first_post().deleted)
+        self.assertEquals(Topic.objects.get(pk=topic.pk).first_post, post)
+        self.assertTrue(Topic.objects.get(pk=topic.pk).first_post.deleted)
 
         self.assertEqual(Forum.objects.get(pk=forum.pk).topic_count, 0)
         self.assertEqual(Forum.objects.get(pk=forum.pk).post_count, 0)
@@ -180,8 +180,8 @@ class ModelsTest(TestCase):
         new_topic.mark_as_deleted()
 
         self.assertTrue(Topic.objects.get(pk=new_topic.pk).deleted)
-        self.assertEquals(Topic.objects.get(pk=new_topic.pk).get_first_post(), new_post)
-        self.assertTrue(Topic.objects.get(pk=new_topic.pk).get_first_post().deleted)
+        self.assertEquals(Topic.objects.get(pk=new_topic.pk).first_post, new_post)
+        self.assertTrue(Topic.objects.get(pk=new_topic.pk).first_post.deleted)
 
         self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 1)
         self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 1)
@@ -190,8 +190,8 @@ class ModelsTest(TestCase):
         new_topic.mark_as_undeleted()
 
         self.assertFalse(Topic.objects.get(pk=new_topic.pk).deleted)
-        self.assertEquals(Topic.objects.get(pk=new_topic.pk).get_first_post(), new_post)
-        self.assertFalse(Topic.objects.get(pk=new_topic.pk).get_first_post().deleted)
+        self.assertEquals(Topic.objects.get(pk=new_topic.pk).first_post, new_post)
+        self.assertFalse(Topic.objects.get(pk=new_topic.pk).first_post.deleted)
 
         self.assertEqual(Forum.objects.get(pk=self.forum.pk).topic_count, 2)
         self.assertEqual(Forum.objects.get(pk=self.parent_forum.pk).topic_count, 2)
@@ -200,8 +200,8 @@ class ModelsTest(TestCase):
         post.mark_as_undeleted(commit=True)
 
         self.assertFalse(Topic.objects.get(pk=topic.pk).deleted)
-        self.assertEquals(Topic.objects.get(pk=topic.pk).get_first_post(), post)
-        self.assertFalse(Topic.objects.get(pk=topic.pk).get_first_post().deleted)
+        self.assertEquals(Topic.objects.get(pk=topic.pk).first_post, post)
+        self.assertFalse(Topic.objects.get(pk=topic.pk).first_post.deleted)
 
         self.assertEqual(Forum.objects.get(pk=forum.pk).post_count, 1)
         self.assertEqual(Forum.objects.get(pk=forum.pk).topic_count, 1)

@@ -747,7 +747,7 @@ class BaseTopic(ParentForumBase):
             self.on_moderation = self.MODERATION_IS_CLEAN
 
         if commit:
-            self.save(update_fields=['poll_id', 'post_count', 'member_count', 'updated', 'last_post', 'on_moderation'])
+            self.save(update_fields=['poll_id', 'post_count', 'member_count', 'updated', 'last_post', 'first_post', 'on_moderation'])
 
         self.forum.update_counters()
 
