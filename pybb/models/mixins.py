@@ -1,4 +1,10 @@
-from itertools import chain, ifilter, imap
+try:
+    from itertools import chain, ifilter, imap
+except ImportError:
+    from itertools import chain
+    ifilter = filter
+    imap = map
+
 from django.contrib.postgres.fields import ArrayField
 from django.db import models, transaction
 from django.db.models import signals, Q
