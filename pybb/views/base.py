@@ -27,6 +27,7 @@ from pybb import defaults
 from pybb.compat import get_user_model
 from pybb.models import (Forum, Topic, Post, Moderator, LogModeration, Attachment, Poll,
                          TopicReadTracker, ForumReadTracker, PollAnswerUser, Subscription)
+from pybb.models.mixins import prefetch_parent_forums
 from pybb.util import load_class, generic, queryset_to_dict, redirect_to_login
 from pybb.models.base import markup
 from pybb.forms import (PostForm, AdminPostForm, PostsMoveExistingTopicForm,
@@ -54,7 +55,7 @@ def filter_hidden(request, queryset_or_model):
 class ListView(generic.ListView):
     prefetch_fields = None
     prefetch_profiles = None
-    prefetch_parent_forums = False
+    prefetch_parent_forums = None
     allow_empty_page = False
     forum_cache = {}
 
@@ -70,8 +71,8 @@ class ListView(generic.ListView):
                 queryset = queryset.prefetch_related(*self.prefetch_fields)
             if self.prefetch_profiles:
                 queryset = queryset.prefetch_profiles(*self.prefetch_profiles)
-            if self.prefetch_parent_forums:
-                queryset = queryset.prefetch_parent_forums(forum_cache_by_id=self.forum_cache)
+            if self.prefetch_parent_forums is not None:
+                queryset = prefetch_parent_forums(queryset, forum_cache_by_id=self.forum_cache, through=self.prefetch_parent_forums)
 
             return paginator, page, queryset, is_paginated
 
@@ -179,7 +180,7 @@ class ForumDetailView(BaseForumDetailView):
     context_object_name = 'topic_list'
     prefetch_fields = ('user', 'last_post', 'last_post__user')
     prefetch_profiles = ('user', 'last_post__user')
-    prefetch_parent_forums = True
+    prefetch_parent_forums = ()
     template_name = 'pybb/forum/detail.html'
     url = '^(?P<slug>[\w\-\_]+)/(?:(?P<page>\d+)/)?$'
 
