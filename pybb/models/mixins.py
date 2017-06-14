@@ -1,4 +1,10 @@
-from itertools import chain
+try:
+    from itertools import chain, ifilter, imap
+except ImportError:
+    from itertools import chain
+    ifilter = filter
+    imap = map
+
 from django.contrib.postgres.fields import ArrayField
 from django.db import models, transaction
 from django.db.models import signals, Q
@@ -7,27 +13,41 @@ from django.utils.functional import cached_property
 from pybb.base import ModelBase
 
 
-def prefetch_parent_forums(objects, forum_cache_by_id=None):
+def get_attribute_deep(instance, path):
+    obj = instance
+    for attr in path:
+        obj = getattr(obj, attr, None)
+        if not obj:
+            return None
+    return obj
+
+
+def prefetch_parent_forums(objects, forum_cache_by_id=None, through=None):
     """
     Warning: this method will evaluate your queryset, use it at the very end of your filtering chain
     :return: an evaluated and populated queryset
     """
     from pybb.models import Forum
 
+    object_list = objects
+    if through:
+        object_list = list(ifilter(lambda x: x is not None,
+                           imap(lambda obj: get_attribute_deep(obj, through), objects)))
+
     forum_cache_by_id = forum_cache_by_id or {}
 
-    for obj in objects:
+    for obj in object_list:
         if (obj.forum_ids and obj.forum_ids[0] != obj.forum_id) or (not obj.forum_ids and obj.forum_id):
             obj.rebuild_parent_forum_ids(commit=True)
 
-    parent_forum_ids = set(chain(*[obj.forum_ids for obj in objects]))
+    parent_forum_ids = set(chain(*[obj.forum_ids for obj in object_list]))
     parent_forum_ids = [id_ for id_ in parent_forum_ids if id_ not in forum_cache_by_id]
 
     if parent_forum_ids:
         parent_forums = Forum.objects.filter(id__in=parent_forum_ids).all()
         forum_cache_by_id.update({forum.id: forum for forum in parent_forums})
 
-    for obj in objects:
+    for obj in object_list:
         obj.populate_parent_forums(forum_cache_by_id)
 
     return objects
