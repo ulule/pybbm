@@ -51,6 +51,7 @@ class UserObjectPermissionManager(BaseUserObjectPermissionManager):
         ctype = ContentType.objects.get_for_model(obj)
         perms = self.filter(
             content_type=ctype,
+            object_pk=obj.pk,
             user=user,
         )
         return perms
