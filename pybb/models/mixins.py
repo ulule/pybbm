@@ -146,12 +146,13 @@ class ParentForumBase(ModelBase):
         return self.forum.parents + [self.forum, ] if self.forum_id else []
 
     def rebuild_parent_forum_ids(self, commit=False):
+        from pybb.models import Forum
         parent_forum_ids = []
 
         parent_forum = self.forum
         while parent_forum:
             # Just in case a forum bypasses form validation
-            if parent_forum.id in parent_forum_ids or parent_forum.id == self.id:
+            if parent_forum.id in parent_forum_ids or (parent_forum.id == self.id and isinstance(self, Forum)):
                 raise ValueError("Infinite recursion: IDs in forum_ids must be unique and not be the object's own ID")
             parent_forum_ids.append(parent_forum.id)
             parent_forum = parent_forum.forum
