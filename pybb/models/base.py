@@ -162,6 +162,7 @@ class BaseForum(ParentForumBase):
     moderators = models.ManyToManyField(AUTH_USER_MODEL, blank=True, verbose_name=_('Moderators'), through=get_model_string('Moderator'))
     updated = models.DateTimeField(_('Updated'), blank=True, null=True)
     post_count = models.IntegerField(_('Post count'), blank=True, default=0, db_index=True)
+    member_count = models.IntegerField(_('Member count'), blank=True, default=0, db_index=True)
     topic_count = models.IntegerField(_('Topic count'), blank=True, default=0, db_index=True)
     forum_count = models.PositiveIntegerField(default=0, db_index=True)
     readed_by = models.ManyToManyField(AUTH_USER_MODEL, through=get_model_string('ForumReadTracker'), related_name='readed_forums')
@@ -218,24 +219,29 @@ class BaseForum(ParentForumBase):
 
         from pybb.models import Topic
 
-        res = Topic.objects.visible().filter(forum_id=self.pk).aggregate(post_count=models.Sum('post_count'))
+        res = Topic.objects.visible().filter(forum_id=self.pk).aggregate(post_count=models.Sum('post_count'),
+                                                                         member_count=models.Sum('member_count'))
 
         post_count = res['post_count'] or 0
+        member_count = res['member_count'] or 0
 
         topic_count = Topic.objects.filter(forum_id=self.pk).visible().count() or 0
 
         res = self.__class__.objects.filter(forum_id=self.pk).aggregate(post_count=models.Sum('post_count'),
+                                                                        member_count=models.Sum('member_count'),
                                                                         topic_count=models.Sum('topic_count'),
                                                                         forum_count=models.Sum('forum_count'))
 
         self.post_count = post_count + (res['post_count'] or 0)
+
+        self.member_count = member_count + (res['member_count'] or 0)
 
         self.topic_count = topic_count + (res['topic_count'] or 0)
 
         self.forum_count = forum_count + (res['forum_count'] or 0)
 
         if commit:
-            self.save(update_fields=['post_count', 'topic_count', 'forum_count'])
+            self.save(update_fields=['post_count', 'member_count', 'topic_count', 'forum_count'])
 
         if self.forum_id and self.forum_id != self.pk:
             self.forum.compute(commit=commit)
