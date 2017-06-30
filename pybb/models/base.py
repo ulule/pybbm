@@ -720,7 +720,7 @@ class BaseTopic(ParentForumBase):
 
         super(BaseTopic, self).save(*args, **kwargs)
 
-    def update_counters(self, commit=True):
+    def update_counters(self, commit=True, update_forum=True):
         self.post_count = self.posts.visible(join=False).count()
 
         active_members = self.posts.visible(join=False).values('user_id').order_by()
@@ -749,7 +749,8 @@ class BaseTopic(ParentForumBase):
         if commit:
             self.save(update_fields=['poll_id', 'post_count', 'member_count', 'updated', 'last_post', 'first_post', 'on_moderation'])
 
-        self.forum.update_counters()
+        if update_forum:
+            self.forum.update_counters(commit=commit)
 
     @property
     def poll_votes(self):
