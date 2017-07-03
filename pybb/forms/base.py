@@ -323,7 +323,7 @@ class ForumForm(forms.ModelForm):
     class Meta:
         model = Forum
         exclude = ('moderators', 'updated', 'post_count',
-                   'topic_count', 'readed_by', 'forum_count', 'last_topic',
+                   'topic_count', 'member_count', 'readed_by', 'forum_count', 'last_topic',
                    'last_post')
 
     def clean_name(self):
