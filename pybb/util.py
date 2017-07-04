@@ -191,21 +191,24 @@ def get_login_url():
     return login_url()
 
 
-def redirect_to_login(next, login_url=None,
-                      redirect_field_name=REDIRECT_FIELD_NAME):
-    """
-    Redirects the user to the login page, passing the given 'next' page
-    """
+def get_login_redirect_url(next_url, login_url=None, redirect_field_name=REDIRECT_FIELD_NAME):
     if not login_url:
         login_url = get_login_url()
 
     login_url_parts = list(urlparse(login_url))
     if redirect_field_name:
         querystring = QueryDict(login_url_parts[4], mutable=True)
-        querystring[redirect_field_name] = next
+        querystring[redirect_field_name] = next_url
         login_url_parts[4] = querystring.urlencode(safe='/')
 
-    return redirect(urlunparse(login_url_parts))
+    return urlunparse(login_url_parts)
+
+
+def redirect_to_login(next_url, login_url=None, redirect_field_name=REDIRECT_FIELD_NAME):
+    """
+    Redirects the user to the login page, passing the given 'next' page
+    """
+    return redirect(get_login_redirect_url(next_url, login_url=login_url, redirect_field_name=redirect_field_name))
 
 
 def hash_filename(filename, digestmod=hashlib.sha1,
