@@ -143,6 +143,9 @@ class TrackersTest(TestCase):
         self.assertEqual(ForumReadTracker.objects.filter(user=self.staff).count(), Forum.objects.count())
 
     def test_forum_mark_as_read_specific(self):
+        sub_forum = Forum.objects.create(name='sub_forum', forum=self.forum)
+        sub_sub_forum = Forum.objects.create(name='sub_sub_forum', forum=sub_forum)
+
         url = reverse('pybb:forum_mark_as_read')
 
         self.login_as(self.staff)
@@ -154,6 +157,8 @@ class TrackersTest(TestCase):
         self.assertRedirects(response, self.forum.get_absolute_url())
 
         self.assertEqual(ForumReadTracker.objects.filter(user=self.staff, forum=self.forum).count(), 1)
+        self.assertEqual(ForumReadTracker.objects.filter(user=self.staff, forum=sub_forum).count(), 1)
+        self.assertEqual(ForumReadTracker.objects.filter(user=self.staff, forum=sub_sub_forum).count(), 1)
 
     def test_topic_tracker_redirect_view(self):
         self.login_as(self.staff)

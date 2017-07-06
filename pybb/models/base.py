@@ -217,24 +217,26 @@ class BaseForum(ParentForumBase):
     def compute(self, commit=True):
         forum_count = self.forums.count()
 
-        from pybb.models import Topic
+        from pybb.models import Topic, Post
 
-        res = Topic.objects.visible().filter(forum_id=self.pk).aggregate(post_count=models.Sum('post_count'),
-                                                                         member_count=models.Sum('member_count'))
+        member_count_aggregate = (Post.objects
+                                  .visible(join=True)
+                                  .filter(topic__forum_ids__contains=[self.id])
+                                  .aggregate(models.Count('user_id', distinct=True)))
+
+        res = Topic.objects.visible().filter(forum_id=self.pk).aggregate(post_count=models.Sum('post_count'))
 
         post_count = res['post_count'] or 0
-        member_count = res['member_count'] or 0
 
         topic_count = Topic.objects.filter(forum_id=self.pk).visible().count() or 0
 
         res = self.__class__.objects.filter(forum_id=self.pk).aggregate(post_count=models.Sum('post_count'),
-                                                                        member_count=models.Sum('member_count'),
                                                                         topic_count=models.Sum('topic_count'),
                                                                         forum_count=models.Sum('forum_count'))
 
         self.post_count = post_count + (res['post_count'] or 0)
 
-        self.member_count = member_count + (res['member_count'] or 0)
+        self.member_count = member_count_aggregate['user_id__count']
 
         self.topic_count = topic_count + (res['topic_count'] or 0)
 

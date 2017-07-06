@@ -212,32 +212,56 @@ class ModelsTest(TestCase):
 
     def test_compute_active_members(self):
         # Initials
+        self.assertEquals(self.parent_forum.member_count, 0)
+        self.assertEquals(self.forum.member_count, 0)
         self.assertEquals(self.topic.member_count, 0)
 
         # Add first post by self.user (count += 1)
         user_post_1 = self.post
+        self.assertEquals(self.parent_forum.member_count, 1)
+        self.assertEquals(self.forum.member_count, 1)
         self.assertEquals(self.topic.member_count, 1)
 
         # Add first post by self.staff (count += 1)
         staff_post_1 = Post(topic=self.topic, user=self.staff, body='my new post')
         staff_post_1.save()
+        self.assertEquals(self.parent_forum.member_count, 2)
+        self.assertEquals(self.forum.member_count, 2)
         self.assertEquals(self.topic.member_count, 2)
 
         # Add second post by self.user (count += 0)
         user_post_2 = Post(topic=self.topic, user=self.user, body='my new post')
         user_post_2.save()
+        self.assertEquals(self.parent_forum.member_count, 2)
+        self.assertEquals(self.forum.member_count, 2)
         self.assertEquals(self.topic.member_count, 2)
 
         # Delete staff_post_1 (count -= 1)
         staff_post_1.mark_as_deleted(commit=True)
+        self.assertEquals(self.parent_forum.member_count, 1)
+        self.assertEquals(self.forum.member_count, 1)
         self.assertEquals(self.topic.member_count, 1)
 
         # Restore staff_post_1 (count += 1)
         staff_post_1.mark_as_undeleted(commit=True)
+        self.assertEquals(self.parent_forum.member_count, 2)
+        self.assertEquals(self.forum.member_count, 2)
         self.assertEquals(self.topic.member_count, 2)
 
         # Delete user_post_2 (count -= 0)
         user_post_2.mark_as_deleted(commit=True)
+        self.assertEquals(self.parent_forum.member_count, 2)
+        self.assertEquals(self.forum.member_count, 2)
+        self.assertEquals(self.topic.member_count, 2)
+
+        # Add third post by self.user in parent_forum (count += 0)
+        new_topic = Topic(name='foo2', forum=self.parent_forum, user=self.user)
+        new_topic.save()
+        user_post_3 = Post(topic=new_topic, user=self.user, body='my new post')
+        user_post_3.save()
+        self.assertEquals(self.parent_forum.member_count, 2)
+        self.assertEquals(new_topic.member_count, 1)
+        self.assertEquals(self.forum.member_count, 2)
         self.assertEquals(self.topic.member_count, 2)
 
     def test_move_forum(self):
