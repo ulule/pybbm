@@ -1589,7 +1589,7 @@ class ForumMarkAsReadView(generic.View):
         else:
             parent_forum = get_object_or_404(filter_hidden(request, Forum), pk=forum_id)
 
-            forums = [parent_forum, ] + list(parent_forum.forums.all())
+            forums = [parent_forum, ] + list(Forum.objects.children(parent_forum))
 
             self.model.objects.mark_as_read(request.user, forums)
 
