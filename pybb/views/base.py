@@ -129,6 +129,7 @@ class ForumCreateView(generic.CreateView):
         parent_forum_id = self.kwargs.pop('forum_id', None)
         if parent_forum_id:
             self.parent_forum = get_object_or_404(Forum.objects.all(), pk=parent_forum_id)
+            self.parent_forum.prefetch_parent_forums()
 
         return super(ForumCreateView, self).dispatch(request, *args, **kwargs)
 
@@ -138,6 +139,11 @@ class ForumUpdateView(generic.UpdateView):
     model = Forum
     template_name = 'pybb/forum/update.html'
     pk_url_kwarg = 'pk'
+
+    def get_object(self, queryset=None):
+        obj = super(ForumUpdateView, self).get_object(queryset=queryset)
+        obj.prefetch_parent_forums()
+        return obj
 
     @method_decorator(staff_member_required)
     def dispatch(self, request, *args, **kwargs):
