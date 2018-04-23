@@ -203,9 +203,8 @@ class PostForm(forms.ModelForm):
             if self.user:
                 post.user = self.user
 
-            if self.actor and post.user_id == self.actor.pk:
-                if post.is_updatable():
-                    post.updated = tznow()
+            if post.is_updatable():
+                post.updated = tznow()
 
             if post.topic.head == post:
                 topic = post.topic
