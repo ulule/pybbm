@@ -1,6 +1,8 @@
 import os
 import sys
 
+from django import VERSION
+
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -158,6 +160,8 @@ class DisableMigrations(object):
         return True
 
     def __getitem__(self, item):
+        if VERSION[0] > 1 or VERSION[1] >= 9:
+            return None
         return "notmigrations"
 
 
