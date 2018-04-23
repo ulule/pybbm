@@ -26,6 +26,7 @@ from django.core.files.base import ContentFile
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import Q, signals, F
+from django.db.models.functions import Greatest
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db.models import ObjectDoesNotExist
 from django.utils.functional import cached_property
@@ -628,7 +629,11 @@ class BaseTopic(ParentForumBase):
         return self._head
 
     def get_last_post(self, select_related=None, prefetch_related=None):
-        last_post = self.posts.visible(join=False).order_by('-created')
+        last_post = (self.posts
+                     .visible(join=False)
+                     .annotate(last_saved=Greatest('created', 'updated'))
+                     .order_by(F('last_saved').desc(nulls_last=True)))
+
         if select_related:
             last_post = last_post.select_related(*select_related)
 
