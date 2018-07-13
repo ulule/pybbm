@@ -3,7 +3,7 @@ import time
 from datetime import timedelta, date
 
 from django.core import mail
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test.client import Client
 
 from pybb import defaults

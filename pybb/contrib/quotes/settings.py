@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 PYBB_QUOTES_USER_URL = getattr(settings, 'PYBB_QUOTES_USER_URL',
                                lambda user: reverse('user_detail', args=[user.username]))

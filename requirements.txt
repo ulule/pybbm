@@ -7,7 +7,6 @@ bbcode
 django-pure-pagination
 requests
 lxml
-django-autoslug
 django-guardian
 celery
 mock
@@ -17,6 +16,11 @@ beautifulsoup4
 exam
 coverage
 six
-pytest
-pytest-django
+pytest==3.6.3
+pytest-django==3.3.2
 psycopg2
+
+-e git://github.com/ulule/django-autoslug.git@16f193d2ca3dd2c0f2e5cfe27121a5bc98309cc0#egg=django-autoslug
+
+
+

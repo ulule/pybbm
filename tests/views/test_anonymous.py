@@ -1,5 +1,5 @@
 from django.contrib.auth.models import Permission
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from pybb import defaults
 from pybb.compat import get_user_model

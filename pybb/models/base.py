@@ -21,7 +21,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import AnonymousUser
 from django.utils.encoding import smart_text
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.files.base import ContentFile
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
@@ -75,8 +75,8 @@ class ModeratorManager(ManagerBase):
 
 @python_2_unicode_compatible
 class BaseModerator(ModelBase):
-    forum = models.ForeignKey(get_model_string('Forum'))
-    user = models.ForeignKey(AUTH_USER_MODEL)
+    forum = models.ForeignKey(get_model_string('Forum'), on_delete=models.CASCADE)
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     objects = ModeratorManager()
 
@@ -110,7 +110,7 @@ class ForumQuerySet(ParentForumQuerysetMixin, QuerySetBase):
         if user.is_staff or user.is_superuser:
             return self
 
-        if user.is_authenticated():
+        if user.is_authenticated:
             return self.filter(staff=False)
 
         if hidden:
@@ -155,7 +155,7 @@ def get_moderator_ids_by_forum():
 @python_2_unicode_compatible
 class BaseForum(ParentForumBase):
     forum = models.ForeignKey('Forum', related_name='forums',
-                              verbose_name=_('Parent'), null=True, blank=True)
+                              verbose_name=_('Parent'), null=True, blank=True, on_delete=models.PROTECT)
     name = models.CharField(_('Name'), max_length=80)
     slug = AutoSlugField(populate_from='name', max_length=80)
     position = models.IntegerField(_('Position'), blank=True, default=0, db_index=True)
@@ -253,7 +253,7 @@ class BaseForum(ParentForumBase):
         if user.is_superuser or user.is_staff:
             return True
 
-        if (user.is_authenticated() and
+        if (user.is_authenticated and
                 user.pk in get_moderator_ids_by_forum()[self.pk]):
 
             if permission:
@@ -273,7 +273,7 @@ class BaseForum(ParentForumBase):
         if self.staff and not user.is_staff:
             return False
 
-        if hidden and self.is_hidden() and not user.is_authenticated():
+        if hidden and self.is_hidden() and not user.is_authenticated:
             return False
 
         return True
@@ -379,9 +379,9 @@ class BaseTopicRedirection(ModelBase):
     )
 
     from_topic = models.OneToOneField(get_model_string('Topic'),
-                                      related_name='redirection')
+                                      related_name='redirection', on_delete=models.CASCADE)
     to_topic = models.ForeignKey(get_model_string('Topic'),
-                                 related_name='redirections')
+                                 related_name='redirections', on_delete=models.CASCADE)
     created = models.DateTimeField(_('Created'), auto_now_add=True)
     type = models.PositiveSmallIntegerField(choices=TYPE_CHOICES,
                                             default=TYPE_PERMANENT_REDIRECT,
@@ -412,7 +412,7 @@ class TopicQuerySetMixin(object):
     def filter_by_user(self, user, forum=None, join=True):
         if forum is not None:
             if not forum.is_moderated_by(user):
-                if user.is_authenticated():
+                if user.is_authenticated:
                     return (self.filter(Q(user=user) | ~Q(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION))
                             .exclude(deleted=True))
             else:
@@ -424,7 +424,7 @@ class TopicQuerySetMixin(object):
             return self
 
         qs = self
-        if user.is_authenticated():
+        if user.is_authenticated:
             if join:
                 qs = qs.filter(forum__staff=False)
             return (qs.filter(Q(user=user) | ~Q(on_moderation=BaseTopic.MODERATION_IS_IN_MODERATION))
@@ -481,8 +481,8 @@ class BaseSubscription(ModelBase):
         (TYPE_DAILY_ALERT, _('Daily reports by email')),
     )
 
-    user = models.ForeignKey(AUTH_USER_MODEL)
-    topic = models.ForeignKey(get_model_string('Topic'))
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
+    topic = models.ForeignKey(get_model_string('Topic'), on_delete=models.CASCADE)
     type = models.PositiveSmallIntegerField(default=TYPE_NO_ALERT, db_index=True, choices=TYPE_CHOICES)
     created = models.DateTimeField(_('Created'), null=True, auto_now_add=True)
     updated = models.DateTimeField(_('Updated'), null=True, blank=True)
@@ -509,7 +509,7 @@ class BaseTopic(ParentForumBase):
         (MODERATION_HAS_POSTS_IN_MODERATION, _('Topic has posts in moderation')),
     )
 
-    forum = models.ForeignKey(get_model_string('Forum'), related_name='topics', verbose_name=_('Forum'))
+    forum = models.ForeignKey(get_model_string('Forum'), related_name='topics', verbose_name=_('Forum'), on_delete=models.PROTECT)
     name = models.CharField(_('Subject'), max_length=255)
     slug = AutoSlugField(populate_from='name', max_length=255)
 
@@ -519,7 +519,7 @@ class BaseTopic(ParentForumBase):
 
     created = models.DateTimeField(_('Created'), null=True)
     updated = models.DateTimeField(_('Updated'), null=True)
-    user = models.ForeignKey(AUTH_USER_MODEL, verbose_name=_('User'))
+    user = models.ForeignKey(AUTH_USER_MODEL, verbose_name=_('User'), on_delete=models.SET(AnonymousUser))
     views = models.IntegerField(_('Views count'), blank=True, default=0, db_index=True)
     sticky = models.BooleanField(_('Sticky'), blank=True, default=False, db_index=True)
     closed = models.BooleanField(_('Closed'), blank=True, default=False, db_index=True)
@@ -788,15 +788,15 @@ class BaseTopic(ParentForumBase):
     def is_accessible_by(self, user):
         if ((self.on_moderation == self.MODERATION_IS_IN_MODERATION or self.deleted) and
             not self.is_moderated_by(user) and
-                (not user.is_authenticated() or
-                 (user.is_authenticated() and
+                (not user.is_authenticated or
+                 (user.is_authenticated and
                   not user.pk == self.user_id))):
             return False
 
         return self.forum.is_accessible_by(user)
 
     def is_subscribed_by(self, user):
-        return (user.is_authenticated() and
+        return (user.is_authenticated and
                 user.pk in self.subscribers.values_list('id', flat=True))
 
     def is_hidden(self):
@@ -879,7 +879,7 @@ class RenderableItem(ModelBase):
 class PostQuerySetMixin(object):
     def filter_by_user(self, topic, user):
         if not topic.is_moderated_by(user):
-            if user.is_authenticated():
+            if user.is_authenticated:
                 return (self.filter(Q(user=user) | Q(on_moderation=False))
                         .exclude(deleted=True))
 
@@ -932,8 +932,8 @@ class PostManager(ManagerBase):
 
 
 class PostDeletion(ModelBase):
-    user = models.ForeignKey(AUTH_USER_MODEL, related_name='posts_deletion')
-    post = models.OneToOneField(get_model_string('Post'), related_name='deletion')
+    user = models.ForeignKey(AUTH_USER_MODEL, related_name='posts_deletion', on_delete=models.SET(AnonymousUser))
+    post = models.OneToOneField(get_model_string('Post'), related_name='deletion', on_delete=models.CASCADE)
     created = models.DateTimeField(_('Created'), auto_now_add=True)
 
     class Meta(object):
@@ -945,8 +945,9 @@ class PostDeletion(ModelBase):
 class BasePost(RenderableItem):
     topic = models.ForeignKey(get_model_string('Topic'),
                               related_name='posts',
-                              verbose_name=_('Topic'))
-    user = models.ForeignKey(AUTH_USER_MODEL, related_name='posts', verbose_name=_('User'))
+                              verbose_name=_('Topic'),
+                              on_delete=models.CASCADE)
+    user = models.ForeignKey(AUTH_USER_MODEL, related_name='posts', verbose_name=_('User'), on_delete=models.SET(AnonymousUser))
     created = models.DateTimeField(_('Created'), blank=True)
     updated = models.DateTimeField(_('Updated'), blank=True, null=True)
     user_ip = models.GenericIPAddressField(_('User IP'),
@@ -987,7 +988,7 @@ class BasePost(RenderableItem):
     def is_accessible_by(self, user):
         if (defaults.PYBB_PREMODERATION and self.on_moderation and
             (not self.topic.is_moderated_by(user)) and
-                (not user.is_authenticated() or not self.user_id == user.pk)):
+                (not user.is_authenticated or not self.user_id == user.pk)):
             return False
 
         return self.topic.is_accessible_by(user)
@@ -1167,7 +1168,7 @@ class BaseAttachment(ModelBase):
     post = models.ForeignKey(get_model_string('Post'),
                              verbose_name=_('Post'),
                              related_name='attachments',
-                             null=True, blank=True)
+                             null=True, blank=True, on_delete=models.CASCADE)
     size = models.IntegerField(_('Size'))
     file = ContentTypeRestrictedFileField(_('File'),
                                           upload_to=defaults.PYBB_ATTACHMENT_UPLOAD_TO,
@@ -1183,7 +1184,7 @@ class BaseAttachment(ModelBase):
     visible = models.BooleanField(default=True)
     counter = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(_('Created'), auto_now_add=True)
-    user = models.ForeignKey(AUTH_USER_MODEL)
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET(AnonymousUser))
 
     class Meta(object):
         verbose_name = _('Attachment')
@@ -1246,10 +1247,11 @@ class BaseTopicReadTracker(ModelBase):
         app_label = 'pybb'
         abstract = True
 
-    user = models.ForeignKey(AUTH_USER_MODEL, blank=False, null=False)
+    user = models.ForeignKey(AUTH_USER_MODEL, blank=False, null=False, on_delete=models.CASCADE)
     topic = models.ForeignKey(get_model_string('Topic'),
                               blank=True,
-                              null=True)
+                              null=True,
+                              on_delete=models.CASCADE)
     time_stamp = models.DateTimeField(auto_now=True)
 
 
@@ -1286,8 +1288,8 @@ class BaseForumReadTracker(ModelBase):
         app_label = 'pybb'
         abstract = True
 
-    user = models.ForeignKey(AUTH_USER_MODEL, blank=False, null=False)
-    forum = models.ForeignKey(get_model_string('Forum'), blank=True, null=True)
+    user = models.ForeignKey(AUTH_USER_MODEL, blank=False, null=False, on_delete=models.CASCADE)
+    forum = models.ForeignKey(get_model_string('Forum'), blank=True, null=True, on_delete=models.CASCADE)
     time_stamp = models.DateTimeField(auto_now=True)
 
     objects = ForumReadTrackerManager()
@@ -1344,7 +1346,8 @@ class BasePoll(ModelBase):
 class BasePollAnswer(ModelBase):
     poll = models.ForeignKey(get_model_string('Poll'),
                              related_name='answers',
-                             verbose_name=_('Poll'))
+                             verbose_name=_('Poll'),
+                             on_delete=models.CASCADE)
     text = models.CharField(max_length=255,
                             verbose_name=_('Text'))
 
@@ -1397,10 +1400,12 @@ class PollAnswerUserManager(ManagerBase):
 class BasePollAnswerUser(ModelBase):
     poll_answer = models.ForeignKey(get_model_string('PollAnswer'),
                                     related_name='users',
-                                    verbose_name=_('Poll answer'))
+                                    verbose_name=_('Poll answer'),
+                                    on_delete=models.CASCADE)
     user = models.ForeignKey(AUTH_USER_MODEL,
                              related_name='poll_answers',
-                             verbose_name=_('User'))
+                             verbose_name=_('User'),
+                             on_delete=models.SET(AnonymousUser))
     created = models.DateTimeField(auto_now_add=True)
 
     objects = PollAnswerUserManager()
@@ -1465,9 +1470,9 @@ class BaseLogModeration(ModelBase):
     )
 
     action_time = models.DateTimeField(_('action time'), auto_now=True)
-    user = models.ForeignKey(AUTH_USER_MODEL, related_name='logs')
-    target = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True, related_name='target_logs')
-    content_type = models.ForeignKey(ContentType)
+    user = models.ForeignKey(AUTH_USER_MODEL, related_name='logs', on_delete=models.SET(AnonymousUser))
+    target = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True, related_name='target_logs', on_delete=models.SET_NULL)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(_('object id'), db_index=True)
     content_object = GenericForeignKey(ct_field='content_type', fk_field='object_id')
     action_flag = models.PositiveSmallIntegerField(_('action flag'),

@@ -10,5 +10,5 @@ urlpatterns = [
     url(r'^', include('pybb.contrib.profiles.urls')),
     url(r'^', include('pybb.contrib.reports.urls')),
     url(r'^', include('pybb.contrib.ban.urls')),
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', include(admin.site.urls[:2])),
 ]

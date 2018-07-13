@@ -9,7 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import transaction
 from django.http import HttpResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, _get_queryset, render
@@ -158,7 +158,7 @@ class BaseForumDetailView(ListView):
     def get(self, request, *args, **kwargs):
         forum = self.get_forum()
 
-        if forum.is_hidden() and not self.request.user.is_authenticated():
+        if forum.is_hidden() and not self.request.user.is_authenticated:
             return redirect_to_login(request.build_absolute_uri())
 
         if 'page' in kwargs:
@@ -349,7 +349,7 @@ class TopicDetailView(ListView):
     def get(self, request, *args, **kwargs):
         topic = self.get_topic()
 
-        if topic.is_hidden() and not self.request.user.is_authenticated():
+        if topic.is_hidden() and not self.request.user.is_authenticated:
             return redirect_to_login(request.build_absolute_uri())
 
         self.object_list = self.get_queryset()
@@ -433,7 +433,7 @@ class TopicDetailView(ListView):
         ctx['subscription_types'] = Subscription.TYPE_CHOICES
         ctx['redirect'] = self.request.GET.get('redirect', False)
 
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             self.request.user.is_moderator = self.topic.is_moderated_by(self.request.user)
 
             self.request.user.is_subscribed = self.topic.is_subscribed_by(self.request.user)
@@ -550,7 +550,7 @@ class BasePostCreateView(PostUpdateMixin, generic.CreateView):
         return ctx
 
     def get_success_url(self):
-        if (not self.request.user.is_authenticated() and
+        if (not self.request.user.is_authenticated and
                 defaults.PYBB_PREMODERATION):
             return reverse('pybb:index')
 
@@ -581,7 +581,7 @@ class BasePostCreateView(PostUpdateMixin, generic.CreateView):
 
     @method_decorator(csrf_protect)
     def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             self.user = request.user
         else:
             if not defaults.PYBB_ENABLE_ANONYMOUS_POST:

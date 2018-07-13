@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from tests.base import TestCase, get_uploaded_file
 from pybb import defaults

@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from django.contrib.auth.models import AnonymousUser
 from django.utils.encoding import python_2_unicode_compatible
 
 import django
@@ -18,7 +19,7 @@ from pybb.compat import AUTH_USER_MODEL
 
 @python_2_unicode_compatible
 class BannedUser(ModelBase):
-    user = models.OneToOneField(AUTH_USER_MODEL, related_name='banned')
+    user = models.OneToOneField(AUTH_USER_MODEL, related_name='banned', on_delete=models.CASCADE)
     reason = models.TextField(_('Reason'), null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -53,7 +54,7 @@ class IPAddressManager(ManagerBase):
 class IPAddress(ModelBase):
     user = models.ForeignKey(AUTH_USER_MODEL,
                              related_name='ip_addresses',
-                             null=True, blank=True)
+                             null=True, blank=True, on_delete=models.SET(AnonymousUser))
     ip_address = models.IPAddressField(_('IP Address'),
                                        help_text=_('The IP address'))
 

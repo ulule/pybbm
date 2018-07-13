@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.core import mail
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from pybb.models.base import BaseTopic
 
 from tests.base import TestCase

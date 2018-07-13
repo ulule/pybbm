@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.http import HttpResponseForbidden
 from django.core.cache import cache
+from django.utils.deprecation import MiddlewareMixin
 
 from .models import IPAddress, BannedUser
 from . import settings
@@ -23,9 +24,13 @@ def forbid(request, context=None):
     return HttpResponseForbidden()
 
 
-class PybbBanMiddleware(object):
+class PybbBanMiddleware(MiddlewareMixin):
+    def __init__(self, get_response=None):
+        self.get_response = get_response
+        super().__init__(get_response=get_response)
+
     def process_request(self, request):
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             user = request.user
 
             if request.COOKIES.get(settings.PYBB_BAN_COOKIE_NAME, False):
