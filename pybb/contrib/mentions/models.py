@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from collections import defaultdict
 
+from django.contrib.auth.models import AnonymousUser
 from django.db import models
 from django.db.models import signals
 from django.utils.translation import ugettext_lazy as _
@@ -43,9 +44,9 @@ class MentionManager(ManagerBase):
 
 
 class Mention(ModelBase):
-    from_user = models.ForeignKey(AUTH_USER_MODEL, related_name='sent_mentions')
-    post = models.ForeignKey(Post, related_name='mentions')
-    to_user = models.ForeignKey(AUTH_USER_MODEL, related_name='received_mentions')
+    from_user = models.ForeignKey(AUTH_USER_MODEL, related_name='sent_mentions', on_delete=models.SET(AnonymousUser))
+    post = models.ForeignKey(Post, related_name='mentions', on_delete=models.CASCADE)
+    to_user = models.ForeignKey(AUTH_USER_MODEL, related_name='received_mentions', on_delete=models.SET(AnonymousUser))
     created = models.DateTimeField(auto_now_add=True)
 
     objects = MentionManager()

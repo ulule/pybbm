@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from django.utils.html import strip_spaces_between_tags as minify_html
 

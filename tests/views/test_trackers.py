@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test.client import Client
 
 from pybb.models import ForumReadTracker, TopicReadTracker, Topic, Post, Forum

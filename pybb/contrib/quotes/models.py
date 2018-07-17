@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from collections import defaultdict
 
+from django.contrib.auth.models import AnonymousUser
 from django.db import models
 from django.db.models import signals
 from django.utils.translation import ugettext_lazy as _
@@ -46,14 +47,15 @@ class QuoteManager(ManagerBase):
 
 class Quote(ModelBase):
     from_user = models.ForeignKey(AUTH_USER_MODEL, verbose_name=_('From user'),
-                                  related_name='quotes_sent')
+                                  related_name='quotes_sent', on_delete=models.SET(AnonymousUser))
     from_post = models.ForeignKey(Post,
-                                  related_name='quotes_sent')
+                                  related_name='quotes_sent', on_delete=models.CASCADE)
     to_post = models.ForeignKey(Post, related_name='quotes_received',
                                 null=True,
-                                blank=True)
+                                blank=True,
+                                on_delete=models.CASCADE)
     to_user = models.ForeignKey(AUTH_USER_MODEL, verbose_name=_('To user'),
-                                related_name='quoted_received')
+                                related_name='quoted_received', on_delete=models.SET(AnonymousUser))
     created = models.DateTimeField(auto_now_add=True)
 
     objects = QuoteManager()

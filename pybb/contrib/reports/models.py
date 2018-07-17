@@ -1,10 +1,11 @@
 from __future__ import unicode_literals
 
+from django.contrib.auth.models import AnonymousUser
 from django.utils.encoding import python_2_unicode_compatible
 from django.db import models
 from django.db.models import signals
 from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from pybb.util import tznow
 from pybb.compat import AUTH_USER_MODEL
@@ -41,7 +42,7 @@ class Report(ModelBase):
         (STATUS_CLOSED, _('Closed'))
     )
 
-    post = models.ForeignKey(Post, related_name='reports')
+    post = models.ForeignKey(Post, related_name='reports', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(null=True, blank=True)
     message_count = models.PositiveSmallIntegerField(default=0, db_index=True)
@@ -84,8 +85,8 @@ class Report(ModelBase):
 
 
 class ReportMessage(ModelBase):
-    report = models.ForeignKey(Report, related_name='reported_messages')
-    user = models.ForeignKey(AUTH_USER_MODEL, related_name='reported_messages')
+    report = models.ForeignKey(Report, related_name='reported_messages', on_delete=models.CASCADE)
+    user = models.ForeignKey(AUTH_USER_MODEL, related_name='reported_messages', on_delete=models.SET(AnonymousUser))
     message = models.TextField(blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
 

@@ -5,6 +5,9 @@ from django.conf.urls import url
 from pybb import defaults, views, feeds
 
 
+app_name = "pybb"
+
+
 urlpatterns = [
     # Syndication feeds
     url('^feeds/posts/$',

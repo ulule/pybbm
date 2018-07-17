@@ -2,7 +2,7 @@
 import os.path
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 import bleach
 

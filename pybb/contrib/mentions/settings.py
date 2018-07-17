@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 PYBB_MENTIONS_USER_URL = getattr(settings, 'PYBB_MENTIONS_USER_URL',
                                  lambda user: reverse('user_detail', args=[user.username]))

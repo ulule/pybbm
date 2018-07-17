@@ -5,7 +5,7 @@ from pybb.models import Moderator, Post, Forum, Topic
 from tests.base import TestCase
 from pybb.compat import get_user_model
 
-from mock import patch
+from mock import patch, PropertyMock
 
 from guardian.models import UserObjectPermission
 
@@ -47,9 +47,7 @@ class ModelsTest(TestCase):
         self.forum.hidden = True
         self.forum.save()
 
-        with patch.object(get_user_model(), 'is_authenticated') as is_authenticated:
-            is_authenticated.return_value = False
-
+        with patch.object(get_user_model(), 'is_authenticated', new_callable=PropertyMock, return_value=False):
             self.assertFalse(self.post.is_accessible_by(self.newbie))
 
         self.assertTrue(self.post.is_accessible_by(self.user))
@@ -60,14 +58,10 @@ class ModelsTest(TestCase):
         self.parent_forum.hidden = True
         self.parent_forum.save()
 
-        with patch.object(get_user_model(), 'is_authenticated') as is_authenticated:
-            is_authenticated.return_value = False
-
+        with patch.object(get_user_model(), 'is_authenticated', new_callable=PropertyMock, return_value=False):
             self.assertFalse(self.post.is_accessible_by(self.newbie))
 
-        with patch.object(get_user_model(), 'is_authenticated') as is_authenticated:
-            is_authenticated.return_value = True
-
+        with patch.object(get_user_model(), 'is_authenticated', new_callable=PropertyMock, return_value=True):
             self.assertTrue(self.post.is_accessible_by(self.user))
             self.assertTrue(self.post.is_accessible_by(self.staff))
             self.assertTrue(self.post.is_accessible_by(self.superuser))
@@ -89,9 +83,7 @@ class ModelsTest(TestCase):
 
         self.post = Post.objects.get(pk=self.post.pk)
 
-        with patch.object(get_user_model(), 'is_authenticated') as is_authenticated:
-            is_authenticated.return_value = True
-
+        with patch.object(get_user_model(), 'is_authenticated', new_callable=PropertyMock, return_value=True):
             self.assertTrue(self.post.is_editable_by(self.newbie))
 
     def test_is_posted_by(self):
@@ -104,9 +96,7 @@ class ModelsTest(TestCase):
         self.topic.on_moderation = True
         self.topic.save()
 
-        with patch.object(get_user_model(), 'is_authenticated') as is_authenticated:
-            is_authenticated.return_value = True
-
+        with patch.object(get_user_model(), 'is_authenticated', new_callable=PropertyMock, return_value=True):
             self.assertTrue(self.post.is_accessible_by(self.user))
             self.assertTrue(self.post.is_accessible_by(self.staff))
             self.assertTrue(self.post.is_accessible_by(self.superuser))

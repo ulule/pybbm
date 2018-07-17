@@ -2,13 +2,18 @@
 
 from django.utils import translation
 from django.db.models import ObjectDoesNotExist
+from django.utils.deprecation import MiddlewareMixin
 
 from .models import user_saved
 
 
-class PybbMiddleware(object):
+class PybbMiddleware(MiddlewareMixin):
+    def __init__(self, get_response=None):
+        self.get_response = get_response
+        super().__init__(get_response=get_response)
+
     def process_request(self, request):
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             try:
                 # Here we try to load profile, but can get error
                 # if user created during syncdb but profile model

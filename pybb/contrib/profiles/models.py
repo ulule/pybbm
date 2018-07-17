@@ -4,7 +4,7 @@ import django
 
 from django.db import models
 from django.contrib.auth.models import Permission
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
@@ -28,7 +28,7 @@ class Profile(ModelBase):
     Profile class that can be used if you doesn't have
     your site profile.
     """
-    user = models.OneToOneField(AUTH_USER_MODEL, related_name='pybb_profile', verbose_name=_('User'))
+    user = models.OneToOneField(AUTH_USER_MODEL, related_name='pybb_profile', verbose_name=_('User'), on_delete=models.CASCADE)
 
     signature = models.TextField(_('Signature'), blank=True,
                                  max_length=defaults.PYBB_SIGNATURE_MAX_LENGTH)
