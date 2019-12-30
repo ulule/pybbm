@@ -1,12 +1,7 @@
-from __future__ import unicode_literals
-
 from django.contrib.auth.models import AnonymousUser
-from django.utils.encoding import python_2_unicode_compatible
-
-import django
 
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import signals
 
 from pybb.base import ModelBase, ManagerBase
@@ -17,7 +12,6 @@ from . import settings
 from pybb.compat import AUTH_USER_MODEL
 
 
-@python_2_unicode_compatible
 class BannedUser(ModelBase):
     user = models.OneToOneField(AUTH_USER_MODEL, related_name='banned', on_delete=models.CASCADE)
     reason = models.TextField(_('Reason'), null=True, blank=True)
@@ -50,7 +44,6 @@ class IPAddressManager(ManagerBase):
         return ip
 
 
-@python_2_unicode_compatible
 class IPAddress(ModelBase):
     user = models.ForeignKey(AUTH_USER_MODEL,
                              related_name='ip_addresses',
@@ -105,14 +98,9 @@ def handle_user_logged_in(sender, request, user, **kwargs):
             banned_user.save()
 
 
-if django.VERSION < (1, 7):
+from django.apps import apps
+
+if apps.ready:
     from .compat import User
 
     signals.user_logged_in.connect(handle_user_logged_in, sender=User)
-else:
-    from django.apps import apps
-
-    if apps.ready:
-        from .compat import User
-
-        signals.user_logged_in.connect(handle_user_logged_in, sender=User)

@@ -1,11 +1,9 @@
-from __future__ import unicode_literals
-
 from collections import defaultdict
 
 from django.contrib.auth.models import AnonymousUser
 from django.db import models
 from django.db.models import signals
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from pybb.models import Post
 from pybb.compat import AUTH_USER_MODEL

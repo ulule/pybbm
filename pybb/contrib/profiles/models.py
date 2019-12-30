@@ -1,12 +1,10 @@
-from __future__ import unicode_literals
-
 import django
 
 from django.db import models
 from django.contrib.auth.models import Permission
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.db.models.signals import post_save
 
@@ -72,7 +70,7 @@ class Profile(ModelBase):
     def avatar_url(self):
         try:
             return self.avatar.url
-        except:
+        except Exception:
             return defaults.PYBB_DEFAULT_AVATAR_URL
 
     def get_absolute_url(self):
@@ -108,14 +106,9 @@ def get_profile(user):
         return Profile(user=user).save()
 
 
-if django.VERSION < (1, 7):
+from django.apps import apps
+
+if apps.ready:
     from pybb.compat import get_user_model
 
     post_save.connect(user_saved, sender=get_user_model())
-else:
-    from django.apps import apps
-
-    if apps.ready:
-        from pybb.compat import get_user_model
-
-        post_save.connect(user_saved, sender=get_user_model())

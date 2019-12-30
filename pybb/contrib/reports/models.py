@@ -1,10 +1,7 @@
-from __future__ import unicode_literals
-
 from django.contrib.auth.models import AnonymousUser
-from django.utils.encoding import python_2_unicode_compatible
 from django.db import models
 from django.db.models import signals
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
 
 from pybb.util import tznow
@@ -32,7 +29,6 @@ class ReportManager(ManagerBase):
         return self.get_query_set().filter(status=self.model.STATUS_NEW)
 
 
-@python_2_unicode_compatible
 class Report(ModelBase):
     STATUS_NEW = 0
     STATUS_CLOSED = 1

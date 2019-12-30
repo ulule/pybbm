@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import math
 import os.path
 import uuid
@@ -12,19 +9,19 @@ import requests
 from datetime import date
 
 from bs4 import BeautifulSoup
-from django.utils.lru_cache import lru_cache
 
-from six.moves.urllib.parse import urlparse, urlencode
+from functools import lru_cache
+
+from urllib.parse import urlparse, urlencode
 
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import AnonymousUser
 from django.utils.encoding import smart_text
 from django.urls import reverse
 from django.core.files.base import ContentFile
 from django.utils.html import strip_tags
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.db.models import Q, signals, F
 from django.db.models.functions import Greatest
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -50,14 +47,6 @@ else:
     from django.db.models import ImageField
 
 
-try:
-    from south.modelsinspector import add_introspection_rules
-    add_introspection_rules([], ["^annoying\.fields\.JSONField"])
-    add_introspection_rules([], ["^annoying\.fields\.AutoOneToOneField"])
-except ImportError:
-    pass
-
-
 class ModeratorManager(ManagerBase):
     def contribute_to_class(self, cls, name):
         signals.post_delete.connect(self.post_delete, sender=cls)
@@ -73,7 +62,6 @@ class ModeratorManager(ManagerBase):
          .delete())
 
 
-@python_2_unicode_compatible
 class BaseModerator(ModelBase):
     forum = models.ForeignKey(get_model_string('Forum'), on_delete=models.CASCADE)
     user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -152,7 +140,6 @@ def get_moderator_ids_by_forum():
     return result
 
 
-@python_2_unicode_compatible
 class BaseForum(ParentForumBase):
     forum = models.ForeignKey('Forum', related_name='forums',
                               verbose_name=_('Parent'), null=True, blank=True, on_delete=models.PROTECT)
@@ -498,7 +485,6 @@ class BaseSubscription(ModelBase):
         abstract = True
 
 
-@python_2_unicode_compatible
 class BaseTopic(ParentForumBase):
     MODERATION_IS_CLEAN = 0
     MODERATION_IS_IN_MODERATION = 1
@@ -941,7 +927,6 @@ class PostDeletion(ModelBase):
         app_label = 'pybb'
 
 
-@python_2_unicode_compatible
 class BasePost(RenderableItem):
     topic = models.ForeignKey(get_model_string('Topic'),
                               related_name='posts',
@@ -1342,7 +1327,6 @@ class BasePoll(ModelBase):
             update_fields(topic, fields=('updated', ))
 
 
-@python_2_unicode_compatible
 class BasePollAnswer(ModelBase):
     poll = models.ForeignKey(get_model_string('Poll'),
                              related_name='answers',
@@ -1396,7 +1380,6 @@ class PollAnswerUserManager(ManagerBase):
         instance.poll_answer.compute()
 
 
-@python_2_unicode_compatible
 class BasePollAnswerUser(ModelBase):
     poll_answer = models.ForeignKey(get_model_string('PollAnswer'),
                                     related_name='users',
@@ -1445,7 +1428,6 @@ class LogModerationManager(ManagerBase):
             e.save()
 
 
-@python_2_unicode_compatible
 class BaseLogModeration(ModelBase):
     ACTION_FLAG_ADDITION = 1
     ACTION_FLAG_CHANGE = 2
