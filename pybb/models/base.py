@@ -35,7 +35,7 @@ from pybb.base import ModelBase, ManagerBase, QuerySetBase
 from pybb.models.mixins import ParentForumQuerysetMixin, ParentForumManagerMixin, ParentForumBase
 from pybb.subscription import notify_topic_subscribers
 from pybb import defaults
-from pybb.fields import ContentTypeRestrictedFileField, CAStorage
+from pybb.fields import ContentTypeRestrictedFileField
 from pybb.tasks import generate_markup, sync_cover
 from pybb.processors import markup
 
@@ -500,7 +500,6 @@ class BaseTopic(ParentForumBase):
     slug = AutoSlugField(populate_from='name', max_length=255)
 
     cover = ImageField(_('Cover'), blank=True, null=True,
-                       storage=CAStorage(),
                        upload_to=defaults.PYBB_COVER_UPLOAD_TO)
 
     created = models.DateTimeField(_('Created'), null=True)
@@ -1157,7 +1156,6 @@ class BaseAttachment(ModelBase):
     size = models.IntegerField(_('Size'))
     file = ContentTypeRestrictedFileField(_('File'),
                                           upload_to=defaults.PYBB_ATTACHMENT_UPLOAD_TO,
-                                          storage=CAStorage(),
                                           content_types=MIMETYPES,
                                           max_upload_size=5242880,
                                           null=True, blank=True)
